@@ -1,0 +1,92 @@
+// Copyright (C) 2020 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this
+// file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+
+// Java targets can only use protoc-2.5 compiler, to keep them work, we use
+// proto2 here.
+syntax = "proto2";
+
+package flare;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "tencent.com/protobuf/flare/rpc/rpc_options_proto";
+
+extend google.protobuf.ServiceOptions {
+  // [10000, 11000) is reserved to GDT RPC.
+
+  // Several "legacy" protocol uses integral IDs to identify service being
+  // called. To associated services with their IDs, we provide these options.
+  optional int32 qzone_service_id = 11000;  // `version` in header.
+
+  // Per spec this should always be zero..
+  //
+  // `magic` in Svrkit message header.
+  optional int32 svrkit_service_id = 11001;
+
+  // Not implemented anyway.
+  //
+  //  bool qzone_enable_response_checksum = 11001;
+}
+
+extend google.protobuf.MethodOptions {
+  // [10000, 11000) is reserved to GDT RPC.
+
+  // Suppress warning about using `gdt.streaming_response`.
+  //
+  // This options is provided for testing purpose only. The "right" way to fix
+  // the warning would be marking the corresponding method with `stream`
+  // keyword, and (preferably) removing `gdt.streaming_response` option.
+  optional bool testing_only_no_warning_on_gdt_streaming_response = 10999;
+
+  // Several "legacy" protocol uses integral IDs to identify method being
+  // called. To associated methods with their IDs, we provide these options.
+  optional int32 qzone_method_id = 11000;   // `cmd` in header.
+  optional int32 svrkit_method_id = 11001;  // `cmd` in header.
+
+  // If set, the request is not parsed by the framework, instead, its serialized
+  // form is passed to the service implementation via `GetRequestRawBytes()` of
+  // `RpcServerController`. You normally shouldn't use this. However, in
+  // scenarios where performance really matters, and you simply forward the
+  // request to someone else, this can boost your performance.
+  //
+  // bool accept_request_raw_bytes = 10002;  // TODO(luobogao): Implement it.
+
+  // TODO(luobogao): Not implemented yet.
+  //
+  // @sa: `common/rpc/rpc_options.proto`.
+  //
+  // CompressionType request_compression_type = ...
+  // CompressionType response_compression_type = ...
+
+  // For methods decorated with this option, if the request has been queued for
+  // so many milliseconds before it has a chance to be processed, it's rejected
+  // with `STATUS_OVERLOADED`, without notifying the service implementation.
+  //
+  // CAUTION: THIS CHECK IS DONE **AFTER** REQUEST HAS BEEN FULLY PARSED. For
+  // methods with a large request, a significant time (and CPU cycles) may have
+  // already been used prior to this check.
+  //
+  // Note that requests can also be rejected if one of the following conditions
+  // holds:
+  //
+  // - `flare::Server::Options::max_queueing_delay` is specified and the request
+  //   has been delayed for that long.
+  //
+  // - Timeout specified by the client is passed to us and the request has
+  //   already timed out.
+  optional int32 max_queueing_delay_ms = 11003;
+
+  // Per method concurrent-request-count limit.
+  optional int32 max_ongoing_requests = 11004;
+}

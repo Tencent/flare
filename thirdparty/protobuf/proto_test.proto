@@ -1,0 +1,16 @@
+package gdt.protoc;
+
+message NestedMsg {
+  optional int32 id = 1;
+  optional string title = 2;
+}
+
+message TestMessage {
+  optional int32 msg_id = 1;
+  optional string msg = 2;
+  optional NestedMsg nest_msg = 3 [lazy = true];
+
+  repeated int32 msg_ids = 4;
+  repeated string msgs = 5;
+  repeated NestedMsg nest_msgs = 6;
+}

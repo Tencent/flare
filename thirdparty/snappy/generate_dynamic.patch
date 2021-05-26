@@ -1,0 +1,85 @@
+diff -uNr a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2021-03-25 17:37:44.217452843 +0800
++++ b/CMakeLists.txt	2021-03-25 17:39:11.965452843 +0800
+@@ -166,8 +166,11 @@
+   "snappy-stubs-public.h.in"
+   "${PROJECT_BINARY_DIR}/snappy-stubs-public.h")
+
+-add_library(snappy "")
+-target_sources(snappy
++add_library(snappy-static STATIC "")
++add_library(snappy-shared SHARED "")
++set_target_properties(snappy-static PROPERTIES OUTPUT_NAME snappy)
++set_target_properties(snappy-shared PROPERTIES OUTPUT_NAME snappy)
++target_sources(snappy-static
+   PRIVATE
+     "snappy-internal.h"
+     "snappy-stubs-internal.h"
+@@ -188,19 +191,46 @@
+     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/snappy-stubs-public.h>
+     $<INSTALL_INTERFACE:include/snappy-stubs-public.h>
+ )
+-target_include_directories(snappy
++target_sources(snappy-shared
++  PRIVATE
++    "snappy-internal.h"
++    "snappy-stubs-internal.h"
++    "snappy-c.cc"
++    "snappy-sinksource.cc"
++    "snappy-stubs-internal.cc"
++    "snappy.cc"
++    "${PROJECT_BINARY_DIR}/config.h"
++
++  # Only CMake 3.3+ supports PUBLIC sources in targets exported by "install".
++  $<$<VERSION_GREATER:CMAKE_VERSION,3.2>:PUBLIC>
++    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/snappy-c.h>
++    $<INSTALL_INTERFACE:include/snappy-c.h>
++    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/snappy-sinksource.h>
++    $<INSTALL_INTERFACE:include/snappy-sinksource.h>
++    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/snappy.h>
++    $<INSTALL_INTERFACE:include/snappy.h>
++    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/snappy-stubs-public.h>
++    $<INSTALL_INTERFACE:include/snappy-stubs-public.h>
++)
++target_include_directories(snappy-static
+   PUBLIC
+     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
+     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+     $<INSTALL_INTERFACE:include>
+ )
+-set_target_properties(snappy
++target_include_directories(snappy-shared
++  PUBLIC
++    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
++    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
++    $<INSTALL_INTERFACE:include>
++)
++set_target_properties(snappy-static
++  PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
++set_target_properties(snappy-shared
+   PROPERTIES VERSION ${PROJECT_VERSION} SOVERSION ${PROJECT_VERSION_MAJOR})
+
+-target_compile_definitions(snappy PRIVATE -DHAVE_CONFIG_H)
+-if(BUILD_SHARED_LIBS)
+-  set_target_properties(snappy PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+-endif(BUILD_SHARED_LIBS)
++target_compile_definitions(snappy-static PRIVATE -DHAVE_CONFIG_H)
++target_compile_definitions(snappy-shared PRIVATE -DHAVE_CONFIG_H)
+
+ if(SNAPPY_BUILD_TESTS)
+   enable_testing()
+@@ -258,7 +288,13 @@
+ include(GNUInstallDirs)
+
+ if(SNAPPY_INSTALL)
+-  install(TARGETS snappy
++  install(TARGETS snappy-static
++    EXPORT SnappyTargets
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  )
++  install(TARGETS snappy-shared
+     EXPORT SnappyTargets
+     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

@@ -1,0 +1,73 @@
+# Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+# Inspired by:
+#
+# - trpc-cpp/trpc/trpc.bzl
+# - https://github.com/grpc/grpc/blob/master/bazel/cc_grpc_library.bzl
+#
+# TODO(luobogao): Support multiple files in `srcs`.
+
+def _make_protoc_cmd(srcs, deps):
+    protoc = blade.config.get_item('proto_library_config', 'protoc')
+    protobuf_incs = blade.config.get_item('proto_library_config',
+                                          'protobuf_incs')
+    plugin = 'flare/rpc/protocol/protobuf/plugin/v2_plugin'
+    # FIXME: Use `direct_dependencies` to check missing deps.
+    cmd = ('%s --proto_path=. %s -I=`dirname $SRCS` '
+           '--plugin=protoc-gen-flare_rpc=$BUILD_DIR/%s '
+           '--flare_rpc_out=$BUILD_DIR $SRCS') % (protoc, ' '.join(
+               ['-I=%s' % x for x in protobuf_incs]), plugin)
+    return cmd
+
+
+def cc_flare_library(name, srcs, deps, visibility=None):
+    """This target generates `xxx.flare.pb.*`.
+
+    In order to access Protocol Buffers messages (`xxx.pb.*`), you should
+    specify the correpsonding `proto_library` target in `deps`."""
+
+    if deps is None:
+        deps = []
+    elif isinstance(deps, str):
+        deps = [deps]
+
+    src_prefix = ''
+    if isinstance(srcs, list):
+        assert len(
+            srcs
+        ) == 1, '`cc_flare_library` can only accept a single `.proto` file.'
+        src_prefix = srcs[0]
+    else:
+        src_prefix = srcs
+    src_prefix = src_prefix[:-len('.proto')]
+
+    native.gen_rule(
+        name='flare_gen_' + name,
+        srcs=srcs,
+        outs=[src_prefix + '.flare.pb.h', src_prefix + '.flare.pb.cc'],
+        cmd=_make_protoc_cmd(srcs, deps),
+        deps=[
+            '//flare/rpc/protocol/protobuf/plugin:v2_plugin',
+        ] + blade.config.get_item('proto_library_config', 'protobuf_libs'),
+        cmd_name='FLARE')
+
+    native.cc_library(name=name,
+                      hdrs=[
+                          src_prefix + '.flare.pb.h',
+                      ],
+                      srcs=src_prefix + '.flare.pb.cc',
+                      deps=[':flare_gen_' + name, '//flare/rpc:protobuf'] +
+                      deps,
+                      visibility=visibility)

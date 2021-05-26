@@ -1,0 +1,38 @@
+2016/09/02  Built from revision 100194
+
+    * Initial commit
+
+2016/09/26  Built from revision 101525
+
+    * Add version info into hip server and increase hipcc timeout
+    * Handle working cases for hip developers
+
+2016/10/09  Built from revision 102083
+
+    * Support multiple gcc version
+
+2016/10/25  Built from revision 103684
+
+    * Reset remote info in context before retry
+
+2017/09/06  Built from revision 130026
+
+    * Response compression in hip build
+    * Refine debug string in hipcc rpc call
+
+2019/09/20  Change scm to git
+    
+    * ad_network fe353c77b91628d2ca7769bfbee21782459cc285
+    * sunfish    2bb8b87132f970b4be0c33fbc84108eeb271e551
+    * ad_network_adid 4c33db89e5394a230ce9723de32b411cb2a43bdf
+
+2020/09/22 Built from current revision 
+
+    * use public ip if private ip is not found when getting session id
+    * please use TLINUX1.2 to compile hipcc
+  
+
+2020/10/30 Increase hipcc timeout to 3min
+
+
+2020/11/03 Add hipcc server and change timeout to 2min 

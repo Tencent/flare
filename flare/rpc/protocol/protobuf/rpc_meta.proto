@@ -1,0 +1,143 @@
+// Copyright (C) 2019 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this
+// file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+
+// We actually can use proto3 here..
+syntax = "proto2";
+
+package flare.rpc;
+
+option java_outer_classname = "RpcMetaProtos";
+option go_package = "tencent.com/protobuf/flare/rpc/protocol/protobuf/rpc_meta_proto";
+
+// KEEP IN SYNC WITH `common/rpc/rpc_error_code.proto`
+enum Status {  // Status codes here are business independent.
+  STATUS_SUCCESS = 0;
+
+  // Mostly not used by Flare.
+  STATUS_CHANNEL_SHUTDOWN = 1;
+  STATUS_FAIL_TO_CONNECT = 2;
+  STATUS_SERIALIZE_REQUEST = 4;
+  STATUS_PARSE_REQUEST = 5;
+  STATUS_SERIALIZE_RESPONSE = 6;
+  STATUS_PARSE_RESPONSE = 7;
+  STATUS_INVALID_METHOD_NAME = 8;
+  STATUS_INVALID_TRANSFER_MODE = 12;
+  STATUS_FROM_USER_FEEDBACK = 13;
+  STATUS_OUT_OF_SERVICE = 14;
+  STATUS_GET_ROUTE = 15;
+  STATUS_GET_ROUTE_ALL_DISABLED = 17;
+  STATUS_FROM_USER = 100;  // Why do we have this?
+
+  // Used by both framework.
+  STATUS_TIMEOUT = 3;
+  STATUS_OVERLOADED = 11;
+  STATUS_SERVICE_NOT_FOUND = 9;
+  STATUS_METHOD_NOT_FOUND = 10;
+  STATUS_NO_PEER = 16;  // Was `STATUS_GET_ROUTE_EMPTY`.
+  STATUS_FAILED = 99;   // Was `STATUS_UNKNOWN`
+
+  // Defined solely by Flare.
+  STATUS_NOT_SUPPORTED = 101;
+  STATUS_MALFORMED_DATA = 102;
+  STATUS_INVALID_CHANNEL = 103;
+  STATUS_IO_ERROR = 104;
+
+  // Values greater than 1000 (not 100) are reserved for end user's use.
+  STATUS_RESERVED_MAX = 1000;
+}
+
+// Method type expected by the sender.
+//
+// This can be inferred from `method_name` by the receiver. However, by
+// providing this by the sender, on receiver side we can dispatch the message
+// earlier without having to look into the method's descriptor, so as not to
+// block processing of other messages.
+enum MethodType {
+  METHOD_TYPE_UNKNOWN = 0;
+  METHOD_TYPE_SINGLE = 1;
+  METHOD_TYPE_STREAM = 2;
+}
+
+// Bit mask.
+enum MessageFlags {
+  MESSAGE_FLAGS_UNKNOWN = 0;
+  // Applicable if `method_type` is `METHOD_TYPE_STREAM`.
+  //
+  // FIXME(2020/06/02, luobogao): Does not make much sense, we might want to
+  // remove it sometime later.
+  MESSAGE_FLAGS_START_OF_STREAM = 1;
+  MESSAGE_FLAGS_END_OF_STREAM = 2;
+  // After serialization, both "no-payload" and empty message are 0 byte, so we
+  // need this flag to differentiate between them.
+  MESSAGE_FLAGS_NO_PAYLOAD = 4;
+}
+
+// Compresison algorithm, Offset of bit mask.
+enum CompressionAlgorithm {
+  COMPRESSION_ALGORITHM_UNKNOWN = 0;
+  COMPRESSION_ALGORITHM_NONE = 1;
+  COMPRESSION_ALGORITHM_GZIP = 2;
+  COMPRESSION_ALGORITHM_LZ4_FRAME = 3;
+  COMPRESSION_ALGORITHM_SNAPPY = 4;
+  COMPRESSION_ALGORITHM_ZSTD = 5;
+}
+
+message RpcRequestMeta {
+  required string method_name = 2;     // `MethodDescriptor::full_name()`.
+  optional uint32 request_id = 3;      // For logging purpose.
+  optional uint32 timeout = 4;         // Relative time. In milliseconds.
+  optional bytes tracing_context = 5;  // @sa: opentracing::Tracer::Inject(...)
+
+  // Bitwise or of `CompressionAlgorithms`, representing acceptable compression
+  // algorithms.
+  optional uint64 acceptable_compression_algorithms = 6;
+}
+
+message RpcResponseMeta {
+  required int32 status = 1;  // @sa: `Status`.
+  optional string description = 2;
+
+  // If set, the receiver should report the trace (if distributed tracing is
+  // enabled) corresponding to this RPC. What's more, the flag should be
+  // propagated backwards further.
+  optional bool trace_forcibly_sampled = 3;
+}
+
+message RpcMeta {
+  // Used for matching request / response if the connection is multiplexed.
+  required uint64 correlation_id = 1;
+  required MethodType method_type = 7;
+
+  // Bitwise or of `MessageFlags`.
+  //
+  // Protocol Buffers' enumeration does not allow bitmask, unfornatunately.
+  optional uint64 flags = 8;
+
+  // Message body used compression algorithm.
+  optional CompressionAlgorithm compression_algorithm = 9;
+
+  // If set, attachment will also be compressed by
+  // the same compression algorithm as the message body.
+  optional bool attachment_compressed = 10;
+
+  // Don't use `oneof` here, it does not get along well with object pooling.
+  //
+  // Protocol Buffer's own `Arena` is not a viable way either, as it cannot
+  // optimize allocation of `std::string`s.
+  //
+  // Note that this definition is wire-format compatible with `oneof` (given
+  // that at most one of them is present.)
+  optional RpcRequestMeta request_meta = 5;
+  optional RpcResponseMeta response_meta = 6;
+}

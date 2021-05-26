@@ -1,0 +1,72 @@
+diff -uNr a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2021-03-30 13:42:00.781175088 +0800
++++ b/CMakeLists.txt	2021-03-30 13:44:14.229175088 +0800
+@@ -191,36 +191,50 @@
+   set(FMT_SOURCES src/format.cc)
+ endif ()
+ 
+-add_library(fmt ${FMT_SOURCES} ${FMT_HEADERS} README.rst ChangeLog.rst)
+-add_library(fmt::fmt ALIAS fmt)
++add_library(fmt-static STATIC ${FMT_SOURCES} ${FMT_HEADERS} README.rst ChangeLog.rst)
++add_library(fmt-shared SHARED ${FMT_SOURCES} ${FMT_HEADERS} README.rst ChangeLog.rst)
++add_library(fmt::fmt ALIAS fmt-static)
++set_target_properties(fmt-static PROPERTIES OUTPUT_NAME fmt)
++set_target_properties(fmt-shared PROPERTIES OUTPUT_NAME fmt)
+ 
+ if (HAVE_STRTOD_L)
+-  target_compile_definitions(fmt PUBLIC FMT_LOCALE)
++target_compile_definitions(fmt-static PUBLIC FMT_LOCALE)
++target_compile_definitions(fmt-shared PUBLIC FMT_LOCALE)
+ endif ()
+ 
+ if (MINGW)
+   check_cxx_compiler_flag("Wa,-mbig-obj" FMT_HAS_MBIG_OBJ)
+   if (${FMT_HAS_MBIG_OBJ})
+-    target_compile_options(fmt PUBLIC "-Wa,-mbig-obj")
++    target_compile_options(fmt-static PUBLIC "-Wa,-mbig-obj")
++    target_compile_options(fmt-shared PUBLIC "-Wa,-mbig-obj")
+   endif()
+ endif ()
+ 
+ if (FMT_WERROR)
+-  target_compile_options(fmt PRIVATE ${WERROR_FLAG})
++  target_compile_options(fmt-static PRIVATE ${WERROR_FLAG})
++  target_compile_options(fmt-shared PRIVATE ${WERROR_FLAG})
+ endif ()
+ if (FMT_PEDANTIC)
+-  target_compile_options(fmt PRIVATE ${PEDANTIC_COMPILE_FLAGS})
++  target_compile_options(fmt-static PRIVATE ${PEDANTIC_COMPILE_FLAGS})
++  target_compile_options(fmt-shared PRIVATE ${PEDANTIC_COMPILE_FLAGS})
+ endif ()
+ 
+-target_compile_features(fmt INTERFACE ${FMT_REQUIRED_FEATURES})
++target_compile_features(fmt-static INTERFACE ${FMT_REQUIRED_FEATURES})
++target_compile_features(fmt-shared INTERFACE ${FMT_REQUIRED_FEATURES})
+ 
+-target_include_directories(fmt PUBLIC
++target_include_directories(fmt-static PUBLIC
++  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
++  $<INSTALL_INTERFACE:${FMT_INC_DIR}>)
++target_include_directories(fmt-shared PUBLIC
+   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+   $<INSTALL_INTERFACE:${FMT_INC_DIR}>)
+ 
+ set(FMT_DEBUG_POSTFIX d CACHE STRING "Debug library postfix.")
+ 
+-set_target_properties(fmt PROPERTIES
++set_target_properties(fmt-static PROPERTIES
++  VERSION ${FMT_VERSION} SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}
++  DEBUG_POSTFIX "${FMT_DEBUG_POSTFIX}")
++set_target_properties(fmt-shared PROPERTIES
+   VERSION ${FMT_VERSION} SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR}
+   DEBUG_POSTFIX "${FMT_DEBUG_POSTFIX}")
+ 
+@@ -293,7 +307,7 @@
+     ${project_config}
+     INSTALL_DESTINATION ${FMT_CMAKE_DIR})
+ 
+-  set(INSTALL_TARGETS fmt fmt-header-only)
++  set(INSTALL_TARGETS fmt-static fmt-shared fmt-header-only)
+   # Use a namespace because CMake provides better diagnostics for namespaced
+   # imported targets.
+   export(TARGETS ${INSTALL_TARGETS} NAMESPACE fmt::

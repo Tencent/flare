@@ -1,0 +1,478 @@
+syntax = "proto3";
+
+package trpc;
+
+option java_outer_classname = "TrpcProtos";
+option go_package = "tencent.com/protobuf/flare/rpc/protocol/protobuf/trpc_proto";
+
+// 框架协议头里的魔数
+enum TrpcMagic {
+  // trpc不用这个值，为了提供给pb工具生成代码
+  TRPC_DEFAULT_NONE = 0x00;
+
+  // trpc协议默认使用这个魔数
+  TRPC_MAGIC_VALUE = 0x930;
+}
+
+// trpc协议的二进制数据帧类型
+// 目前支持两种类型的二进制数据帧：
+// 1. 一应一答模式的二进制数据帧类型
+// 2. 流式模式的二进制数据帧类型
+enum TrpcDataFrameType {
+  // trpc一应一答模式的二进制数据帧类型
+  TRPC_UNARY_FRAME = 0x00;
+
+  // trpc流式模式的二进制数据帧类型
+  TRPC_STREAM_FRAME = 0x01;
+}
+
+// 此类型删掉，改成下面的TrpcStreamFrameType
+// trpc协议的二进制数据帧的状态
+// 目前支持流式模式的二进制数据帧结束状态
+// enum TrpcDataFrameState {
+//  // 不包括任何状态
+//  TRPC_NO_STATE = 0x00;
+//
+//  // trpc流式模式下的结束状态
+//  TRPC_STREAM_FINISH = 0x01;
+//}
+
+// trpc协议流式的二进制数据帧类型
+// 目前流式帧类型分4种：INIT/DATA/FEEDBACK/CLOSE，其中CLOSE帧不带业务数据
+// INIT帧：FIXHEADER + TrpcStreamInitMeta
+// DATA帧：FIXHEADER + body(业务序列化的数据)
+// FEEDBACK帧：FIXHEADER + TrpcStreamFeedBackMeta（触发策略，高低水位+定时）
+// CLOSE帧：FIXHEADER + TrpcStreamCloseMeta
+// 连接和流空闲超时的回收机制不考虑
+enum TrpcStreamFrameType {
+  // 一应一答的默认取值
+  TRPC_UNARY = 0x00;
+
+  // 流式INIT帧类型
+  TRPC_STREAM_FRAME_INIT = 0x01;
+
+  // 流式DATA帧类型
+  TRPC_STREAM_FRAME_DATA = 0x02;
+
+  // 流式FEEDBACK帧类型
+  TRPC_STREAM_FRAME_FEEDBACK = 0x03;
+
+  // 流式CLOSE帧类型
+  TRPC_STREAM_FRAME_CLOSE = 0x04;
+}
+
+// trpc流式的流控帧头消息定义
+message TrpcStreamInitMeta {
+  // init请求元信息
+  TrpcStreamInitRequestMeta request_meta = 1;
+
+  // init响应元信息
+  TrpcStreamInitResponseMeta response_meta = 2;
+
+  // 本端stream buff的大小
+  uint32 recv_buff_size = 3;
+
+  // 请求数据的序列化类型
+  // 比如: proto/jce/json, 默认proto
+  // 具体值与TrpcContentEncodeType对应
+  uint32 content_type = 4;
+
+  // 请求数据使用的压缩方式
+  // 比如: gzip/snappy/..., 默认不使用
+  // 具体值与TrpcCompressType对应
+  uint32 content_encoding = 5;
+}
+
+// trpc流式init头的请求元信息
+message TrpcStreamInitRequestMeta {
+  // 主调服务的名称
+  // trpc协议下的规范格式: trpc.应用名.服务名.pb的service名, 4段
+  bytes caller = 1;
+
+  // 被调服务的路由名称
+  // trpc协议下的规范格式，trpc.应用名.服务名.pb的service名[.接口名]
+  // 前4段是必须有，接口可选。
+  bytes callee = 2;
+
+  // 调用服务的接口名
+  // 规范格式: /package.Service名称/接口名
+  bytes func = 3;
+
+  // 框架信息透传的消息类型
+  // 比如调用链、染色key、灰度、鉴权、多环境、set名称等的标识
+  // 具体值与TrpcMessageType对应
+  uint32 message_type = 4;
+
+  // 框架透传的信息key-value对，目前分两部分
+  // 1是框架层要透传的信息，key的名字要以trpc-开头
+  // 2是业务层要透传的信息，业务可以自行设置
+  // 注意: trans_info中的key-value对会全链路透传，业务请谨慎使用！
+  map<string, bytes> trans_info = 5;
+};
+
+// trpc流式init头的响应元信息
+message TrpcStreamInitResponseMeta {
+  // 请求在框架层的错误返回码
+  // 具体值与TrpcRetCode对应
+  int32 ret = 1;
+
+  // 调用结果信息描述
+  // 失败的时候用
+  bytes error_msg = 2;
+};
+
+// trpc流式的流控帧头元信息定义
+message TrpcStreamFeedBackMeta {
+  // 本端生产值，传给对端
+  uint64 produce = 1;
+
+  // 本端消费值，传给对端
+  uint64 consume = 2;
+}
+
+// trpc流式关闭类型
+enum TrpcStreamCloseType {
+  // 正常单向流关闭
+  TRPC_STREAM_CLOSE = 0;
+
+  // 异常关闭双向流
+  TRPC_STREAM_RESET = 1;
+}
+
+// trpc流式的RESET帧头消息定义
+message TrpcStreamCloseMeta {
+  // 关闭的类型，关闭一端，还是全部关闭
+  int32 close_type = 1;
+
+  // close返回码
+  int32 ret = 2;
+
+  // close信息描述
+  bytes msg = 3;
+
+  // 框架信息透传的消息类型
+  // 比如调用链、染色key、灰度、鉴权、多环境、set名称等的标识
+  // 具体值与TrpcMessageType对应
+  uint32 message_type = 4;
+
+  // 框架透传的信息key-value对，目前分两部分
+  // 1是框架层要透传的信息，key的名字要以trpc-开头
+  // 2是业务层要透传的信息，业务可以自行设置
+  map<string, bytes> trans_info = 5;
+}
+
+// trpc协议版本
+enum TrpcProtoVersion {
+  // 默认版本
+  TRPC_PROTO_V1 = 0;
+}
+
+// trpc协议中的调用类型
+enum TrpcCallType {
+  // 一应一答调用，包括同步、异步
+  TRPC_UNARY_CALL = 0;
+
+  // 单向调用
+  TRPC_ONEWAY_CALL = 1;
+
+  // 客户端流式请求调用, 删除
+  // TRPC_CLIENT_STREAM_CALL = 2;
+
+  // 服务端流式回应，删除
+  // TRPC_SERVER_STREAM_CALL = 3;
+
+  // 客户端和服务端流式请求和回应，删除
+  // TRPC_BIDI_STREAM_CALL = 4;
+}
+
+// trpc协议中的消息透传支持的类型
+enum TrpcMessageType {
+  // trpc 不用这个值，为了提供给 pb 工具生成代码
+  TRPC_DEFAULT = 0x00;
+
+  // 染色
+  TRPC_DYEING_MESSAGE = 0x01;
+
+  // 调用链
+  TRPC_TRACE_MESSAGE = 0x02;
+
+  // 多环境
+  TRPC_MULTI_ENV_MESSAGE = 0x04;
+
+  // 灰度
+  TRPC_GRID_MESSAGE = 0x08;
+
+  // set名
+  TRPC_SETNAME_MESSAGE = 0x10;
+}
+
+// trpc协议中 data 内容的编码类型
+// 默认使用pb
+// 目前约定 0-127 范围的取值为框架规范的序列化方式,框架使用
+enum TrpcContentEncodeType {
+  // pb
+  TRPC_PROTO_ENCODE = 0;
+
+  // jce
+  TRPC_JCE_ENCODE = 1;
+
+  // json
+  TRPC_JSON_ENCODE = 2;
+
+  // flatbuffer
+  TRPC_FLATBUFFER_ENCODE = 3;
+
+  // 不序列化
+  TRPC_NOOP_ENCODE = 4;
+}
+
+// trpc协议中 data 内容的压缩类型
+// 默认使用不压缩
+enum TrpcCompressType {
+  // 默认不使用压缩
+  TRPC_DEFAULT_COMPRESS = 0;
+
+  // 使用gzip
+  TRPC_GZIP_COMPRESS = 1;
+
+  // 使用snappy
+  TRPC_SNAPPY_COMPRESS = 2;
+
+  // 使用zlib
+  TRPC_ZLIB_COMPRESS = 3;
+}
+
+// 框架层接口调用的返回码定义
+enum TrpcRetCode {
+  // 调用成功
+  TRPC_INVOKE_SUCCESS = 0;
+
+  // 服务端的错误码
+  // 主要分几类:
+  // 1.协议，2.service或者func路由，3.队列超时或过载
+  // 其它待补充
+
+  // 协议错误码
+  // 服务端解码错误
+  TRPC_SERVER_DECODE_ERR = 1;
+  // 服务端编码错误
+  TRPC_SERVER_ENCODE_ERR = 2;
+
+  // service或者func路由错误码
+  // 服务端没有调用相应的service实现
+  TRPC_SERVER_NOSERVICE_ERR = 11;
+  // 服务端没有调用相应的接口实现
+  TRPC_SERVER_NOFUNC_ERR = 12;
+
+  // 队列超时或过载错误码
+  // 请求在服务端超时
+  TRPC_SERVER_TIMEOUT_ERR = 21;
+  // 请求在服务端过载
+  TRPC_SERVER_OVERLOAD_ERR = 22;
+
+  // 服务端系统错误
+  TRPC_SERVER_SYSTEM_ERR = 31;
+
+  // 服务端鉴权失败错误
+  TRPC_SERVER_AUTH_ERR = 41;
+
+  // 服务端请求参数自动校验失败错误
+  TRPC_SERVER_VALIDATE_ERR = 51;
+
+  // 客户端的错误码
+  // 主要分几类:
+  // 1.超时，2.网络，3.协议，4.路由
+  // 其它待补充
+
+  // 超时错误码
+  // 请求在客户端调用超时
+  TRPC_CLIENT_INVOKE_TIMEOUT_ERR = 101;
+
+  // 网络相关错误码
+  // 客户端连接错误
+  TRPC_CLIENT_CONNECT_ERR = 111;
+
+  // 协议相关错误码
+  // 客户端编码错误
+  TRPC_CLIENT_ENCODE_ERR = 121;
+  // 客户端解码错误
+  TRPC_CLIENT_DECODE_ERR = 122;
+
+  // 路由相关错误码
+  // 客户端选ip路由错误
+  TRPC_CLIENT_ROUTER_ERR = 131;
+
+  // 客户端网络错误
+  TRPC_CLIENT_NETWORK_ERR = 141;
+
+  // 客户端响应参数自动校验失败错误
+  TRPC_CLIENT_VALIDATE_ERR = 151;
+
+  // 上游主动断开连接，提前取消请求错误
+  TRPC_CLIENT_CANCELED_ERR = 161;
+
+  // 服务端流式的错误码
+  // 主要分几类:
+  // 1.网络，2.编解码，3.写，4.读
+  // 其它待补充
+
+  // 服务端流式网络错误, 详细错误码需要在实现过程中再梳理
+  TRPC_STREAM_SERVER_NETWORK_ERR = 201;
+
+  // 服务端流式传输错误, 详细错误码需要在实现过程中再梳理
+  // 比如：流消息过大等
+  TRPC_STREAM_SERVER_MSG_EXCEED_LIMIT_ERR = 211;
+
+  // 服务端流式编码错误
+  TRPC_STREAM_SERVER_ENCODE_ERR = 221;
+  // 客户端流式编解码错误
+  TRPC_STREAM_SERVER_DECODE_ERR = 222;
+
+  // 服务端流式写错误, 详细错误码需要在实现过程中再梳理
+  TRPC_STREAM_SERVER_WRITE_END = 231;
+  TRPC_STREAM_SERVER_WRITE_OVERFLOW_ERR = 232;
+  TRPC_STREAM_SERVER_WRITE_CLOSE_ERR = 233;
+  TRPC_STREAM_SERVER_WRITE_TIMEOUT_ERR = 234;
+
+  // 服务端流式读错误, 详细错误码需要在实现过程中再梳理
+  TRPC_STREAM_SERVER_READ_END = 251;
+  TRPC_STREAM_SERVER_READ_CLOSE_ERR = 252;
+  TRPC_STREAM_SERVER_READ_EMPTY_ERR = 253;
+  TRPC_STREAM_SERVER_READ_TIMEOUT_ERR = 254;
+
+  // 客户端流式的错误码
+  // 主要分几类:
+  // 1.网络，2.编解码，3.写，4.读
+  // 其它待补充
+
+  // 客户端流式网络错误, 详细错误码需要在实现过程中再梳理
+  TRPC_STREAM_CLIENT_NETWORK_ERR = 301;
+
+  // 客户端流式传输错误, 详细错误码需要在实现过程中再梳理
+  // 比如：流消息过大等
+  TRPC_STREAM_CLIENT_MSG_EXCEED_LIMIT_ERR = 311;
+
+  // 客户端流式编码错误
+  TRPC_STREAM_CLIENT_ENCODE_ERR = 321;
+  // 客户端流式编解码错误
+  TRPC_STREAM_CLIENT_DECODE_ERR = 322;
+
+  // 客户端流式写错误, 详细错误码需要在实现过程中再梳理
+  TRPC_STREAM_CLIENT_WRITE_END = 331;
+  TRPC_STREAM_CLIENT_WRITE_OVERFLOW_ERR = 332;
+  TRPC_STREAM_CLIENT_WRITE_CLOSE_ERR = 333;
+  TRPC_STREAM_CLIENT_WRITE_TIMEOUT_ERR = 334;
+
+  // 客户端流式读错误, 详细错误码需要在实现过程中再梳理
+  TRPC_STREAM_CLIENT_READ_END = 351;
+  TRPC_STREAM_CLIENT_READ_CLOSE_ERR = 352;
+  TRPC_STREAM_CLIENT_READ_EMPTY_ERR = 353;
+  TRPC_STREAM_CLIENT_READ_TIMEOUT_ERR = 354;
+
+  // 未明确的错误
+  TRPC_INVOKE_UNKNOWN_ERR = 999;
+  // 未明确的错误
+  TRPC_STREAM_UNKNOWN_ERR = 1000;
+}
+
+// trans_info已使用的框架key，注意不要重复：
+// "trpc-dyeing-key"：染色key
+
+// 请求协议头
+message RequestProtocol {
+  // 协议版本
+  // 具体值与TrpcProtoVersion对应
+  uint32 version = 1;
+
+  // 请求的调用类型
+  // 比如: 普通调用，单向调用
+  // 具体值与TrpcCallType对应
+  uint32 call_type = 2;
+
+  // 请求唯一id
+  uint32 request_id = 3;
+
+  // 请求的超时时间，单位ms
+  uint32 timeout = 4;
+
+  // 主调服务的名称
+  // trpc协议下的规范格式: trpc.应用名.服务名.pb的service名, 4段
+  bytes caller = 5;
+
+  // 被调服务的路由名称
+  // trpc协议下的规范格式，trpc.应用名.服务名.pb的service名[.接口名]
+  // 前4段是必须有，接口可选。
+  bytes callee = 6;
+
+  // 调用服务的接口名
+  // 规范格式: /package.Service名称/接口名
+  bytes func = 7;
+
+  // 框架信息透传的消息类型
+  // 比如调用链、染色key、灰度、鉴权、多环境、set名称等的标识
+  // 具体值与TrpcMessageType对应
+  uint32 message_type = 8;
+
+  // 框架透传的信息key-value对，目前分两部分
+  // 1是框架层要透传的信息，key的名字要以trpc-开头
+  // 2是业务层要透传的信息，业务可以自行设置
+  map<string, bytes> trans_info = 9;
+
+  // 请求数据的序列化类型
+  // 比如: proto/jce/json, 默认proto
+  // 具体值与TrpcContentEncodeType对应
+  uint32 content_type = 10;
+
+  // 请求数据使用的压缩方式
+  // 比如: gzip/snappy/..., 默认不使用
+  // 具体值与TrpcCompressType对应
+  uint32 content_encoding = 11;
+}
+
+// 响应协议头
+message ResponseProtocol {
+  // 协议版本
+  // 具体值与TrpcProtoVersion对应
+  uint32 version = 1;
+
+  // 请求的调用类型
+  // 比如: 普通调用，单向调用
+  // 具体值与TrpcCallType对应
+  uint32 call_type = 2;
+
+  // 请求唯一id
+  uint32 request_id = 3;
+
+  // 请求在框架层的错误返回码
+  // 具体值与TrpcRetCode对应
+  int32 ret = 4;
+
+  // 接口的错误返回码
+  // 建议业务在使用时，标识成功和失败，0代表成功，其它代表失败
+  int32 func_ret = 5;
+
+  // 调用结果信息描述
+  // 失败的时候用
+  bytes error_msg = 6;
+
+  // 框架信息透传的消息类型
+  // 比如调用链、染色key、灰度、鉴权、多环境、set名称等的标识
+  // 具体值与TrpcMessageType对应
+  uint32 message_type = 7;
+
+  // 框架透传回来的信息key-value对，
+  // 目前分两部分
+  // 1是框架层透传回来的信息，key的名字要以trpc-开头
+  // 2是业务层透传回来的信息，业务可以自行设置
+  map<string, bytes> trans_info = 8;
+
+  // 响应数据的编码类型
+  // 比如: proto/jce/json, 默认proto
+  // 具体值与TrpcContentEncodeType对应
+  uint32 content_type = 9;
+
+  // 响应数据使用的压缩方式
+  // 比如: gzip/snappy/..., 默认不使用
+  // 具体值与TrpcCompressType对应
+  uint32 content_encoding = 10;
+}

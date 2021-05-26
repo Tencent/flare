@@ -1,0 +1,72 @@
+// Copyright (C) 2020 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this
+// file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+
+////////////////////////////////////////////////////
+// THIS IDL FILE IS NOT INTENDED FOR PUBLIC USE.  //
+////////////////////////////////////////////////////
+
+syntax = "proto3";
+
+package flare.binlog.proto;
+
+option go_package = "tencent.com/protobuf/flare/rpc/binlog/util/proto_binlog_proto";
+
+// A single message sent / received during the RPC.
+message Packet {
+  // How much time passed since start of this RPC (i.e., `Call`) when this
+  // packet is sent / received.
+  //
+  // In nanoseconds.
+  uint64 time_since_start = 1;
+
+  // Context captured by binlog provider.
+  bytes provider_context = 2;
+
+  // Context saved by the framework. This field is opaque to the implementation,
+  // and must be preserved as-is.
+  bytes system_context = 3;
+};
+
+// Describe an call (either incoming or outgoing).
+//
+// All requests (could be more than 1 for streaming RPC) and responses are given
+// by this structure.
+message Call {
+  string correlation_id = 1;
+
+  // Tags set by the framework.
+  map<string, string> system_tags = 2;
+
+  // Tags set by user, the framework treats it as opaque.
+  map<string, string> user_tags = 10;
+
+  // Logs written by user. These logs are not significant to the framework and
+  // can be safely dropped when duming the call.
+  repeated string logs = 11;
+
+  // Packets received / sent. For streaming RPCs there can be multiple packets
+  // (possibly in each side).
+  repeated Packet incoming_pkts = 12;
+  repeated Packet outgoing_pkts = 13;
+
+  // Whatever the framework associated with this call. Later when doing a dry
+  // run, the framework may need this data.
+  //
+
+  // If you're going to do a dry-run, the context must be preserved.
+  //
+  // This data is opaque to dumper implementation, you shouldn't try to parse
+  // it. Its format can change without further notice.
+  bytes system_context = 14;
+};

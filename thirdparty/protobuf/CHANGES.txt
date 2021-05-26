@@ -1,0 +1,8 @@
+* 用 GLOG 替换了 protobuf 自己定义的 GOOGLE_LOG
+
+2017/04/24 protoc-2.6.1 support 'move'
+2017/05/02 protoc-2.6.1 support 'lazy parsing'
+2017/05/15 protoc-2.6.1 fix reflection processing for lazy field
+2018/07/10 protoc-3.4.1 --direct_dependencies well known protos
+           http://code.oa.com/v2/user/request/1048792
+
