@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <title>RPC Form for {{METHOD_FULL_NAME}}</title>
+    <link rel="stylesheet" type="text/css" href="../static/antd-4.8.2.css" />
+    <script src="../static/jquery-1.11.2.min.js" type="text/javascript"> </script>
+    <script src="../static/jquery.json-2.2.min.js" type="text/javascript"> </script>
+    <script src="../static/forms.js" type="text/javascript"></script>
+    <script src="../static/codemirror/lib/codemirror.js"></script>
+    <script src="../static/codemirror/mode/javascript/javascript.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        createForm("{{METHOD_FULL_NAME}}");
+      });
+    </script>
+    <link rel="stylesheet" href="../static/codemirror/lib/codemirror.css">
+    <style type='text/css'>
+      .top-bar {
+        height: 35px;
+        overflow: hidden;
+        width: 35%;
+      }
+
+      .input-mode-selected {
+        color: black;
+        text-decoration: none;
+        font-size: 120%;
+        height: 25px;
+        padding: 5px;
+      }
+
+      .input-mode-not-selected {
+        color: blue;
+        text-decoration: underline;
+        font-size: 120%;
+        height: 25px;
+        padding: 5px;
+      }
+
+      .error-messages {
+        color: RED;
+      }
+    </style>
+  </head>
+  <body style="margin:16">
+    <a id="method-selection">&lt;&lt; Back to method selection</a>
+    <h2>RPC Form for {{METHOD_FULL_NAME}}</h2>
+
+    <div class="top-bar">
+      <a class="input-mode-selected" id="input-form">Form</a>
+      <a class="input-mode-not-selected" id="input-text">Text</a>
+    </div>
+
+    <button id="form-expander">Hide Form</button>
+
+    <div id="form-panel"></div>
+
+    <div class="error-messages" id="error-messages"></div>
+
+    <div id="form-response"></div>
+
+  </body>
+</html>

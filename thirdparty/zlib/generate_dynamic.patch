@@ -1,0 +1,11 @@
+diff -uNr a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2021-03-25 17:48:54.887069844 +0800
++++ b/CMakeLists.txt	2021-03-25 17:49:18.435069844 +0800
+@@ -187,6 +187,7 @@
+ add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+ set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+ set_target_properties(zlib PROPERTIES SOVERSION 1)
++set_target_properties(zlibstatic PROPERTIES OUTPUT_NAME zlib)
+ 
+ if(NOT CYGWIN)
+     # This property causes shared libraries on Linux to have the full version

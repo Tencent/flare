@@ -1,0 +1,113 @@
+#!/bin/bash
+#
+# SCRIPT: blade
+# AUTHOR: Michaelpeng <michaelpeng@tencent.com>
+#         Phongchen <phongchen@tencent.com>
+# DATE:   Dec 17 2011
+# REV:    1.0.P (Valid are A, B, D, T and P)
+#               (For Alpha, Beta, Dev, Test and Production)
+#
+# PLATFORM: Linux
+# PURPOSE : A bash wrapper for blade, always run blade of
+#           corresponding version in for given source dir
+#           tree.
+# REV LIST:
+#        DATE:    Dec 17 2011
+#        BY  :    Michaelpeng
+#        MODIFICATION: Created
+
+function _info()
+{
+    if [ -t 1 ]; then
+        echo -e "\033[1;36mBlade(info): $@\033[m" >&2
+    else
+        echo -e "Blade(info): $@" >&2
+    fi
+}
+
+function _warning()
+{
+    if [ -t 2 ]; then
+        echo -e "\033[1;33mBlade(warning): $@\033[m" >&2
+    else
+        echo -e "Blade(warning): $@" >&2
+    fi
+}
+
+function _error_exit()
+{
+    if [ -t 2 ]; then
+        echo -e "\033[1;31mBlade(error): $@\nBlade(error): Blade will exit...\033[m" >&2
+    else
+        echo -e "Blade(error): $@\nBlade(error): Blade will exit..." >&2
+    fi
+    exit 1
+}
+
+function _full_real_path()
+{
+    local o
+    local f
+    f="$1"
+
+    if [ ! -L "$0" ]; then
+        echo $f
+        return 0
+    fi
+
+    if o=`readlink -f $f 2>/dev/null`; then
+        echo "$o";
+        return 0
+    fi
+
+    # BSD readlink doesn't support -f
+    if o=`readlink $f`; then
+        f="$o"
+    fi
+
+    echo $(cd $(dirname $f) && pwd)/$(basename $f)
+    return 0
+}
+
+blade_path=`_full_real_path $0`
+blade_dir=$(cd $(dirname $blade_path) && pwd)
+
+# if [[ -d "$blade_dir/src/blade" ]]; then
+#     blade_file="$blade_dir/src"
+# else
+blade_file="$blade_dir/blade.zip"
+# fi
+
+if [[ -e $blade_dir/blade_init ]]; then
+    source $blade_dir/blade_init
+fi
+
+# Check the python version at first, exit blade when python
+# version is under 2.7
+no_python=$(which python 2>&1 | grep 'which: no')
+if [[ -n "$no_python" ]]; then
+    _error_exit "Please install python 2.7 or above in your system"
+fi
+
+python_ver=$(python -V 2>&1 | sed 's/Python //g')
+if [[ "$python_ver" < "2.7" ]]; then
+    _info "Python version in your machine: $python_ver"
+    _error_exit "Please upgrade your python version to 2.7 or above"
+fi
+
+# Check ninja
+no_ninja=$(which ninja 2>&1 | grep 'which: no ninja in')
+if [[ -n "$no_ninja" ]]; then
+    _error_exit "Please install ninja v1.8 or above on your machine"
+fi
+
+# Check blade file
+if [[ ! -e "$blade_file" ]]; then
+    _error_exit "Cannot find the core file $blade_file"
+fi
+
+if [[ $@ == *'--cloud'* ]]; then
+    python $blade_dir/../yadcc/blade-yadcc "$@"
+else
+    python $blade_file "$@"
+fi

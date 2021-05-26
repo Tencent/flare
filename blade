@@ -1,0 +1,7 @@
+#!/bin/bash
+# Copyright (C), 1998-2013, Tencent
+# Author: jefftang@tencent.com
+# Date: 2013-1-29
+
+self_dir=$(dirname $(readlink -f $0))
+exec $self_dir/thirdparty/blade/blade $@

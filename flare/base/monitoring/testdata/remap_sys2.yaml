@@ -1,0 +1,5 @@
+passthrough-on-missing: yes  # If set, keys not found in `keys` section are
+                             # reported as-is. Otherwise they're silently
+                             # ignored (possibly leave a warning.).
+keys:
+  # List key remapping here as a collection.

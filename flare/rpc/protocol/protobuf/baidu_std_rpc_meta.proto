@@ -1,0 +1,57 @@
+// @sa:
+// https://github.com/apache/incubator-brpc/blob/master/src/brpc/policy/baidu_rpc_meta.proto
+
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+syntax = "proto2";
+
+package brpc;
+option java_outer_classname = "BaiduStdRpcMetaProtos";
+option go_package = "tencent.com/protobuf/flare/rpc/protocol/protobuf/baidu_std_rpc_meta_proto";
+
+// https://github.com/apache/incubator-brpc/blob/master/docs/cn/baidu_std.md#compress_algorithm
+enum CompressType {
+  COMPRESS_TYPE_NO_COMPRESSION = 0;
+  COMPRESS_TYPE_SNAPPY = 1;
+  COMPRESS_TYPE_GZIP = 2;
+}
+
+message RpcMeta {
+  optional RpcRequestMeta request = 1;
+  optional RpcResponseMeta response = 2;
+  optional int32 compress_type = 3;
+  optional int64 correlation_id = 4;
+  optional int32 attachment_size = 5;
+  // optional ChunkInfo chunk_info = 6;  // Not implemented yet.
+  optional bytes authentication_data = 7;
+  // optional StreamSettings stream_settings = 8;  // Not implemented yet.
+}
+
+message RpcRequestMeta {
+  required string service_name = 1;
+  required string method_name = 2;
+  optional int64 log_id = 3;
+  optional int64 trace_id = 4;
+  optional int64 span_id = 5;
+  optional int64 parent_span_id = 6;
+}
+
+message RpcResponseMeta {
+  optional int32 error_code = 1;
+  optional string error_text = 2;
+}

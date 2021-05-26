@@ -1,0 +1,9 @@
+2017/01/19  Built from revision 111325
+
+    * Initial commit, built with --no-debug-info
+
+2017/05/08  Built from revision 118666
+
+    * lz4 compress/decompress object file
+    * Remove snappy compress/decompress in build.proto
+

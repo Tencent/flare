@@ -1,0 +1,3 @@
+passthrough-on-missing: no
+keys:
+  fancy-counter: not-so-fancy-counter

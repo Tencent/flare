@@ -1,0 +1,4 @@
+keys:
+  counter_builtin: my-builtin-counter
+  gauge_builtin: my-builtin-gauge
+  timer_builtin: my-builtin-timer

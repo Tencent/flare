@@ -1,0 +1,9 @@
+* navywu: 日志输出到终端时，增加了颜色。
+* happyluo: add error message hooker for user
+* chen3feng: 支持 bool 类型参数 --strip_source_path，log 里输出完整的原文件路径，默认为
+false
+* chen3feng: 没有设置 log_dir 时，优先使用当前目录，原来输出到 /tmp，很容易造成磁盘满告警。
+* chen3feng: RAW_LOG(FATAL) 在开启 Strip 时，调用 exit，如果本身是在 exit中，就会造成 exit
+			递归调用，应该跟不 strip 一样调 abort()
+* chen3feng: 避免在 FlushLogFilesUnsafe 里分配内存，否则在信号处理或者 tcmalloc
+abort 时会死锁。

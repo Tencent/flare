@@ -1,0 +1,58 @@
+// Copyright (C) 2011 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this
+// file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+// License for the specific language governing permissions and limitations under
+// the License.
+
+// Copied from `poppy/rpc_meta_info.proto`, with minor modifications.
+
+syntax = "proto2";
+
+option java_outer_classname = "PoppyRpcMetaProtos";
+option go_package = "tencent.com/protobuf/flare/rpc/protocol/protobuf/poppy_rpc_meta";
+
+package poppy;
+
+enum CompressType {
+  // COMPRESS_TYPE_AUTO = -1;  // for internal use only
+  COMPRESS_TYPE_NONE = 0;
+  COMPRESS_TYPE_SNAPPY = 1;
+}
+
+message RpcMeta {
+  enum Type {
+    REQUEST = 0;
+    RESPONSE = 1;
+  };
+
+  optional Type type = 1;
+  required int64 sequence_id = 2;
+
+  // Field for request type, tag starts from 100.
+  // The fully-qualified name of the method, scope delimited by periods.
+  // It includes the full name of service.
+  optional string method = 100;
+  optional int64 timeout = 101;
+
+  // Field for response type, tag starts from 200.
+  // If the request failed.
+  optional bool failed = 200;
+  // If the request is canceled by client. If it's set, failed must be set too.
+  optional bool canceled = 201;
+  // Set the error code if failed.
+  optional int32 error_code = 202;
+  // Set the reason if failed.
+  optional string reason = 203;
+  // Set the compress request/response compress type.
+  optional CompressType compress_type = 204;
+  // Set the response compress type of user expected.
+  optional CompressType expected_response_compress_type = 205;
+}

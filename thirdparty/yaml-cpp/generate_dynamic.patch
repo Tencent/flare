@@ -1,0 +1,131 @@
+diff -uNr a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2021-03-25 17:41:41.427069844 +0800
++++ b/CMakeLists.txt	2021-03-25 17:46:27.423069844 +0800
+@@ -252,54 +252,52 @@
+ ###
+ ### Library
+ ###
+-if(YAML_BUILD_SHARED_LIBS)
+-    add_library(yaml-cpp SHARED ${library_sources})
+-else()
+-    add_library(yaml-cpp STATIC ${library_sources})
+-endif()
++add_library(yaml-cpp-shared SHARED ${library_sources})
++add_library(yaml-cpp-static STATIC ${library_sources})
++set_target_properties(yaml-cpp-static PROPERTIES OUTPUT_NAME yaml-cpp)
++set_target_properties(yaml-cpp-shared PROPERTIES OUTPUT_NAME yaml-cpp)
+ 
+ if (NOT CMAKE_VERSION VERSION_LESS 2.8.12)
+-    target_include_directories(yaml-cpp
++    target_include_directories(yaml-cpp-shared
+         PUBLIC $<BUILD_INTERFACE:${YAML_CPP_SOURCE_DIR}/include>
+                $<INSTALL_INTERFACE:${INCLUDE_INSTALL_ROOT_DIR}>
+         PRIVATE $<BUILD_INTERFACE:${YAML_CPP_SOURCE_DIR}/src>)
++		target_include_directories(yaml-cpp-static
++				PUBLIC $<BUILD_INTERFACE:${YAML_CPP_SOURCE_DIR}/include>
++								$<INSTALL_INTERFACE:${INCLUDE_INSTALL_ROOT_DIR}>
++				PRIVATE $<BUILD_INTERFACE:${YAML_CPP_SOURCE_DIR}/src>)
+ endif()
+ 
+-set_target_properties(yaml-cpp PROPERTIES
++set_target_properties(yaml-cpp-shared PROPERTIES
++    CXX_STANDARD 11
++    CXX_STANDARD_REQUIRED ON
++)
++set_target_properties(yaml-cpp-static PROPERTIES
+     CXX_STANDARD 11
+     CXX_STANDARD_REQUIRED ON
+ )
+ 
+-set_target_properties(yaml-cpp PROPERTIES
++set_target_properties(yaml-cpp-shared PROPERTIES
++  COMPILE_FLAGS "${yaml_c_flags} ${yaml_cxx_flags}"
++)
++set_target_properties(yaml-cpp-static PROPERTIES
+   COMPILE_FLAGS "${yaml_c_flags} ${yaml_cxx_flags}"
+ )
+ 
+-set_target_properties(yaml-cpp PROPERTIES
++set_target_properties(yaml-cpp-shared PROPERTIES
++	VERSION "${YAML_CPP_VERSION}"
++	SOVERSION "${YAML_CPP_VERSION_MAJOR}.${YAML_CPP_VERSION_MINOR}"
++	PROJECT_LABEL "yaml-cpp ${LABEL_SUFFIX}"
++)
++set_target_properties(yaml-cpp-static PROPERTIES
+ 	VERSION "${YAML_CPP_VERSION}"
+ 	SOVERSION "${YAML_CPP_VERSION_MAJOR}.${YAML_CPP_VERSION_MINOR}"
+ 	PROJECT_LABEL "yaml-cpp ${LABEL_SUFFIX}"
+ )
+-
+-if(IPHONE)
+-	set_target_properties(yaml-cpp PROPERTIES
+-		XCODE_ATTRIBUTE_IPHONEOS_DEPLOYMENT_TARGET "3.0"
+-	)
+-endif()
+-
+-if(MSVC)
+-	if(NOT YAML_BUILD_SHARED_LIBS)
+-		# correct library names
+-		set_target_properties(yaml-cpp PROPERTIES
+-			DEBUG_POSTFIX "${LIB_TARGET_SUFFIX}d"
+-			RELEASE_POSTFIX "${LIB_TARGET_SUFFIX}"
+-			MINSIZEREL_POSTFIX "${LIB_TARGET_SUFFIX}"
+-			RELWITHDEBINFO_POSTFIX "${LIB_TARGET_SUFFIX}"
+-		)
+-	endif()
+-endif()
+ 
+ if (YAML_CPP_INSTALL)
+-	install(TARGETS yaml-cpp EXPORT yaml-cpp-targets ${_INSTALL_DESTINATIONS})
++	install(TARGETS yaml-cpp-shared EXPORT yaml-cpp-targets ${_INSTALL_DESTINATIONS})
++	install(TARGETS yaml-cpp-static EXPORT yaml-cpp-targets ${_INSTALL_DESTINATIONS})
+ 	install(
+ 		DIRECTORY ${header_directory}
+ 		DESTINATION ${INCLUDE_INSTALL_DIR}
+@@ -308,10 +306,15 @@
+ endif()
+ 
+ export(
+-    TARGETS yaml-cpp
++    TARGETS yaml-cpp-shared
++    FILE "${PROJECT_BINARY_DIR}/yaml-cpp-targets.cmake")
++export(PACKAGE yaml-cpp-shared)
++set(EXPORT_TARGETS yaml-cpp-shared CACHE INTERNAL "export targets")
++export(
++    TARGETS yaml-cpp-static
+     FILE "${PROJECT_BINARY_DIR}/yaml-cpp-targets.cmake")
+-export(PACKAGE yaml-cpp)
+-set(EXPORT_TARGETS yaml-cpp CACHE INTERNAL "export targets")
++export(PACKAGE yaml-cpp-static)
++set(EXPORT_TARGETS yaml-cpp-static CACHE INTERNAL "export targets")
+ 
+ set(CONFIG_INCLUDE_DIRS "${YAML_CPP_SOURCE_DIR}/include")
+ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/yaml-cpp-config.cmake.in
+diff -uNr a/util/CMakeLists.txt b/util/CMakeLists.txt
+--- a/util/CMakeLists.txt	2021-03-25 17:41:41.427069844 +0800
++++ b/util/CMakeLists.txt	2021-03-25 17:47:39.263069844 +0800
+@@ -6,7 +6,7 @@
+     CXX_STANDARD 11
+     CXX_STANDARD_REQUIRED ON
+ )
+-target_link_libraries(parse yaml-cpp)
++target_link_libraries(parse yaml-cpp-static)
+ 
+ add_sources(sandbox.cpp)
+ add_executable(sandbox sandbox.cpp)
+@@ -14,7 +14,7 @@
+     CXX_STANDARD 11
+     CXX_STANDARD_REQUIRED ON
+ )
+-target_link_libraries(sandbox yaml-cpp)
++target_link_libraries(sandbox yaml-cpp-static)
+ 
+ add_sources(read.cpp)
+ add_executable(read read.cpp)
+@@ -22,5 +22,4 @@
+     CXX_STANDARD 11
+     CXX_STANDARD_REQUIRED ON
+ )
+-target_link_libraries(read yaml-cpp)
+-
++target_link_libraries(read yaml-cpp-static)

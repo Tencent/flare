@@ -1,0 +1,93 @@
+/*
+    A slightly modified version of boost.context 1.74.
+
+    // DO NOT RETURN FROM `start_proc`, THIS LEADS TO CRASH (IN AN UNFRIENDLY
+    // WAY.).
+    //
+    // Returns: Jump target (same as `sp`) for **first** call to `jump_context`.
+    //
+    // X0: sp
+    // X1: size (not used)
+    // X2: start_proc (jump target is passed as parameter)
+    void* make_context(void* sp, std::size_t size, void (*start_proc)(void*));
+*/
+
+/*
+            Copyright Edward Nevill + Oliver Kowalke 2015
+   Distributed under the Boost Software License, Version 1.0.
+      (See accompanying file LICENSE_1_0.txt or copy at
+          http://www.boost.org/LICENSE_1_0.txt)
+*/
+/*******************************************************
+ *                                                     *
+ *  -------------------------------------------------  *
+ *  |  0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  *
+ *  -------------------------------------------------  *
+ *  | 0x0 | 0x4 | 0x8 | 0xc | 0x10| 0x14| 0x18| 0x1c|  *
+ *  -------------------------------------------------  *
+ *  |    d8     |    d9     |    d10    |    d11    |  *
+ *  -------------------------------------------------  *
+ *  -------------------------------------------------  *
+ *  |  8  |  9  |  10 |  11 |  12 |  13 |  14 |  15 |  *
+ *  -------------------------------------------------  *
+ *  | 0x20| 0x24| 0x28| 0x2c| 0x30| 0x34| 0x38| 0x3c|  *
+ *  -------------------------------------------------  *
+ *  |    d12    |    d13    |    d14    |    d15    |  *
+ *  -------------------------------------------------  *
+ *  -------------------------------------------------  *
+ *  |  16 |  17 |  18 |  19 |  20 |  21 |  22 |  23 |  *
+ *  -------------------------------------------------  *
+ *  | 0x40| 0x44| 0x48| 0x4c| 0x50| 0x54| 0x58| 0x5c|  *
+ *  -------------------------------------------------  *
+ *  |    x19    |    x20    |    x21    |    x22    |  *
+ *  -------------------------------------------------  *
+ *  -------------------------------------------------  *
+ *  |  24 |  25 |  26 |  27 |  28 |  29 |  30 |  31 |  *
+ *  -------------------------------------------------  *
+ *  | 0x60| 0x64| 0x68| 0x6c| 0x70| 0x74| 0x78| 0x7c|  *
+ *  -------------------------------------------------  *
+ *  |    x23    |    x24    |    x25    |    x26    |  *
+ *  -------------------------------------------------  *
+ *  -------------------------------------------------  *
+ *  |  32 |  33 |  34 |  35 |  36 |  37 |  38 |  39 |  *
+ *  -------------------------------------------------  *
+ *  | 0x80| 0x84| 0x88| 0x8c| 0x90| 0x94| 0x98| 0x9c|  *
+ *  -------------------------------------------------  *
+ *  |    x27    |    x28    |    FP     |     LR    |  *
+ *  -------------------------------------------------  *
+ *  -------------------------------------------------  *
+ *  |  40 |  41 |  42 | 43  |           |           |  *
+ *  -------------------------------------------------  *
+ *  | 0xa0| 0xa4| 0xa8| 0xac|           |           |  *
+ *  -------------------------------------------------  *
+ *  |     PC    |   align   |           |           |  *
+ *  -------------------------------------------------  *
+ *                                                     *
+ *******************************************************/
+
+.file "make_context.S"
+.text
+.align  2
+.global make_context
+.type   make_context, %function
+make_context:
+    # shift address in x0 (allocated stack) to lower 16 byte boundary
+    and x0, x0, ~0xF
+
+    # reserve space for context-data on context-stack
+    sub  x0, x0, #0xb0
+
+    # third arg of make_context() == address of context-function
+    # store address as a PC to jump in
+    str  x2, [x0, #0xa0]
+
+    # Fake a null stack frame (SP and LR)
+    str  xzr, [x0, #0x90]
+    str  xzr, [x0, #0x98]
+
+    # No need to fill something into `x0`, it's already what we should return.
+    ret
+
+.size   make_context,.-make_context
+# Mark that we don't need executable stack.
+.section .note.GNU-stack,"",%progbits

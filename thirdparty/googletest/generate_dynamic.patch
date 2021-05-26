@@ -1,0 +1,134 @@
+diff -uNr a/googlemock/CMakeLists.txt b/googlemock/CMakeLists.txt
+--- a/googlemock/CMakeLists.txt	2021-03-25 14:33:28.854567400 +0800
++++ b/googlemock/CMakeLists.txt	2021-03-25 15:02:26.367424950 +0800
+@@ -99,18 +99,26 @@
+               src/gmock_main.cc)
+ else()
+   cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
+-  target_link_libraries(gmock PUBLIC gtest)
++  target_link_libraries(gmock-static PUBLIC gtest-static)
++  target_link_libraries(gmock-shared PUBLIC gtest-shared)
+   cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
+-  target_link_libraries(gmock_main PUBLIC gmock)
++  target_link_libraries(gmock_main-static PUBLIC gmock-static)
++  target_link_libraries(gmock_main-shared PUBLIC gmock-shared)
+ endif()
+ # If the CMake version supports it, attach header directory information
+ # to the targets for when we are part of a parent build (ie being pulled
+ # in via add_subdirectory() rather than being a standalone build).
+ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+-  target_include_directories(gmock SYSTEM INTERFACE
++  target_include_directories(gmock-static SYSTEM INTERFACE
+     "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
+     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+-  target_include_directories(gmock_main SYSTEM INTERFACE
++  target_include_directories(gmock_main-shared SYSTEM INTERFACE
++    "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
++    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
++  target_include_directories(gmock-static SYSTEM INTERFACE
++    "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
++    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
++  target_include_directories(gmock_main-shared SYSTEM INTERFACE
+     "$<BUILD_INTERFACE:${gmock_build_include_dirs}>"
+     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+ endif()
+diff -uNr a/googletest/cmake/internal_utils.cmake b/googletest/cmake/internal_utils.cmake
+--- a/googletest/cmake/internal_utils.cmake	2021-03-25 14:33:28.850567400 +0800
++++ b/googletest/cmake/internal_utils.cmake	2021-03-25 15:03:46.454104157 +0800
+@@ -198,10 +198,17 @@
+   cxx_library_with_type(${name} SHARED "${cxx_flags}" ${ARGN})
+ endfunction()
+ 
+-function(cxx_library name cxx_flags)
++function(cxx_static_library name cxx_flags)
+   cxx_library_with_type(${name} "" "${cxx_flags}" ${ARGN})
+ endfunction()
+ 
++function(cxx_library name cxx_flags)
++  cxx_shared_library(${name}-static ${cxx_flags} ${ARGN})
++  cxx_static_library(${name}-shared ${cxx_flags} ${ARGN})
++  set_target_properties(${name}-static PROPERTIES OUTPUT_NAME ${name})
++  set_target_properties(${name}-shared PROPERTIES OUTPUT_NAME ${name})
++endfunction()
++
+ # cxx_executable_with_flags(name cxx_flags libs srcs...)
+ #
+ # creates a named C++ executable that depends on the given libraries and
+@@ -324,35 +331,28 @@
+ # install_project(targets...)
+ #
+ # Installs the specified targets and configures the associated pkgconfig files.
+-function(install_project)
++function(install_project_with_name target name)
+   if(INSTALL_GTEST)
+     install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+       DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+     # Install the project targets.
+-    install(TARGETS ${ARGN}
++    install(TARGETS ${target}
+       EXPORT ${targets_export_name}
+       RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+       ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+       LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+-    if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+-      # Install PDBs
+-      foreach(t ${ARGN})
+-        get_target_property(t_pdb_name ${t} COMPILE_PDB_NAME)
+-        get_target_property(t_pdb_name_debug ${t} COMPILE_PDB_NAME_DEBUG)
+-        get_target_property(t_pdb_output_directory ${t} PDB_OUTPUT_DIRECTORY)
+-        install(FILES
+-          "${t_pdb_output_directory}/\${CMAKE_INSTALL_CONFIG_NAME}/$<$<CONFIG:Debug>:${t_pdb_name_debug}>$<$<NOT:$<CONFIG:Debug>>:${t_pdb_name}>.pdb"
+-          DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-          OPTIONAL)
+-      endforeach()
+-    endif()
+     # Configure and install pkgconfig files.
+-    foreach(t ${ARGN})
+-      set(configured_pc "${generated_dir}/${t}.pc")
+-      configure_file("${PROJECT_SOURCE_DIR}/cmake/${t}.pc.in"
+-        "${configured_pc}" @ONLY)
+-      install(FILES "${configured_pc}"
+-        DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+-    endforeach()
++    set(configured_pc "${generated_dir}/${name}.pc")
++    configure_file("${PROJECT_SOURCE_DIR}/cmake/${name}.pc.in"
++      "${configured_pc}" @ONLY)
++    install(FILES "${configured_pc}"
++      DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+   endif()
+ endfunction()
++
++function(install_project)
++  foreach(t ${ARGN})
++    install_project_with_name(${t}-static ${t})
++    install_project_with_name(${t}-shared ${t})
++  endforeach()
++endfunction()
+diff -uNr a/googletest/CMakeLists.txt b/googletest/CMakeLists.txt
+--- a/googletest/CMakeLists.txt	2021-03-25 14:33:28.850567400 +0800
++++ b/googletest/CMakeLists.txt	2021-03-25 14:54:41.335715758 +0800
+@@ -131,14 +131,21 @@
+ # to the targets for when we are part of a parent build (ie being pulled
+ # in via add_subdirectory() rather than being a standalone build).
+ if (DEFINED CMAKE_VERSION AND NOT "${CMAKE_VERSION}" VERSION_LESS "2.8.11")
+-  target_include_directories(gtest SYSTEM INTERFACE
++  target_include_directories(gtest-static SYSTEM INTERFACE
+     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
+     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+-  target_include_directories(gtest_main SYSTEM INTERFACE
++  target_include_directories(gtest_main-static SYSTEM INTERFACE
++    "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
++    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
++  target_include_directories(gtest-shared SYSTEM INTERFACE
++    "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
++    "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
++  target_include_directories(gtest_main-shared SYSTEM INTERFACE
+     "$<BUILD_INTERFACE:${gtest_build_include_dirs}>"
+     "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
+ endif()
+-target_link_libraries(gtest_main PUBLIC gtest)
++target_link_libraries(gtest_main-static PUBLIC gtest-static)
++target_link_libraries(gtest_main-shared PUBLIC gtest-shared)
+ 
+ ########################################################################
+ #

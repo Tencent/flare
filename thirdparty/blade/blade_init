@@ -1,0 +1,85 @@
+#!/bin/bash
+# Copyright (C), 1998-2013, Tencent
+# Author: jefftang@tencent.com
+# Date: 2013-1-29
+
+OLD_PWD=`pwd`
+BLADE_DIR="$blade_dir"
+BLADE_BOOST_DIR=~/.blade_boost
+PYTHON_BIN=$BLADE_BOOST_DIR/bin/python2.7
+MOTD=/etc/motd
+
+is_git_lfs_pulled() {
+  local zipfile="$BLADE_DIR/blade.zip"
+  local filesize
+  filesize=$(stat --format=%s $zipfile)
+  if [[ $filesize -gt 1024 ]]; then  # Unpulled LFS file is a small txt file
+    return 0
+  fi
+  return 1
+}
+
+if ! is_git_lfs_pulled; then
+  _error_exit "This repository need GIT LFS, see README.md"
+fi
+
+if [ ! -f $PYTHON_BIN ]; then
+  mkdir -p $BLADE_BOOST_DIR
+  cd $BLADE_BOOST_DIR
+  if [ ! -d Python-2.7.3 ]; then
+    cp $BLADE_DIR/Python-2.7.3.tgz .
+    tar -xf Python-2.7.3.tgz
+  fi
+
+  cd Python-2.7.3
+  echo 'Boosting Python, please wait...'
+  CC=/usr/bin/gcc CXX=/usr/bin/g++ CFLAGS=-w ./configure --prefix=$BLADE_BOOST_DIR > $BLADE_BOOST_DIR/boosting.log
+  make  >> $BLADE_BOOST_DIR/boosting.log
+  make install >> $BLADE_BOOST_DIR/boosting.log
+  cd $OLD_PWD
+fi
+
+# Copy ninja
+if [[ ! -f $BLADE_BOOST_DIR/bin/ninja ]]; then
+  cp $BLADE_DIR/ninja $BLADE_BOOST_DIR/bin
+fi
+
+# Copy cmake
+if [[ ! -L $BLADE_BOOST_DIR/bin/cmake ]]; then
+  tar zxf $BLADE_DIR/cmake-3.17.2-Linux-x86_64.tar.gz -C $BLADE_BOOST_DIR/
+  ln -s $BLADE_BOOST_DIR/cmake-3.17.2-Linux-x86_64/bin/cmake $BLADE_BOOST_DIR/bin/cmake
+fi
+
+# Copy nsam
+if [[ ! -f $BLADE_BOOST_DIR/bin/nasm ]]; then
+  cp $BLADE_DIR/nasm $BLADE_BOOST_DIR/bin
+  cp $BLADE_DIR/ndisasm $BLADE_BOOST_DIR/bin
+fi
+
+PrepareDistBuild() {
+  if [ ! -f $MOTD ]; then
+    return
+  fi
+  tlinux=`cat $MOTD | grep 'tlinux 1.2 64bit'`
+  if [ -z "$tlinux" ]; then
+    return
+  fi
+  if [ -z "$TOOLCHAIN_DIR" ] && ! hash ccache 2>/dev/null; then
+    if [ -z "$CC" ] && [ -z "$CXX" ]; then
+      export GCCVERSION=`gcc -dumpversion`
+      if [ "$GCCVERSION" == "4.9.4" ]; then
+        export CC="python thirdparty/blade/dist/cxx.py gcc"
+        export CXX="python thirdparty/blade/dist/cxx.py g++"
+        return
+      fi
+    fi
+  fi
+}
+
+# PrepareDistBuild
+
+export PATH=$BLADE_BOOST_DIR/bin:$PATH
+export CMAKE_ROOT=$BLADE_BOOST_DIR/cmake-3.17.2-Linux-x86_64/
+
+export GO111MODULE=on
+export go_module_relpath=go/src/tencent.com
