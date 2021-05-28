@@ -21,8 +21,8 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 - 除了 RPC 外，还提供了一系列便利的[基础库](flare/base)，比如字符串、时间日期、编码处理、压缩、加密解密、配置、HTTP 客户端等，方便快速上手开发业务代码
 - 提供了灵活的扩充机制。方便支持多种协议、服务发现、负载均衡、监控告警、[调用追踪](flare/doc/)等
 - 针对现代体系结构做了大量的优化。比如 [NUMA 感知](https://en.wikipedia.org/wiki/Non-uniform_memory_access)的[调度组](flare/)和[对象池](flare/doc/object-pool.md)、[零拷贝缓冲区](flare/doc/buffer.md)等
-- 高质量的代码。严格遵守 [Google C++ 代码规范](https://google.github.io/styleguide/cppguide.html)，测试覆盖率达 80%。
-- 完善的[文档](flare/doc)和[示例](flare/example)以及[调试支持](flare/doc/debugging.md)，方便快速上手。
+- 高质量的代码。严格遵守 [Google C++ 代码规范](https://google.github.io/styleguide/cppguide.html)，测试覆盖率达 80%
+- 完善的[文档](flare/doc)和[示例](flare/example)以及[调试支持](flare/doc/debugging.md)，方便快速上手
 
 ## 系统要求
 
@@ -33,8 +33,7 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 ## 开始使用
 
 Flare 是开箱即用的，已经自带了所需的[第三方库](thirdparty/)，因此通常不需要额外安装依赖库。
-
-为了编译 Flare，需要GCC 8或更新版本的支持。
+只需要在 Linux 下，拉取代码，即可使用。
 
 ### 构建
 
@@ -44,7 +43,6 @@ Flare 是开箱即用的，已经自带了所需的[第三方库](thirdparty/)�
 - 测试：`./blade test ...`。
 
 之后就可以参考[入门导引](flare/doc/intro-rpc.md)中的介绍，搭建一个简单的RPC服务了。
-我们还提供了[示例](flare/example)。
 
 ### 调试
 
