@@ -50,7 +50,7 @@
 
 需要注意的是，`TryCutMessage`只负责将消息切割下来。由于这时候我们尚处在进行[IO](io.md)的fiber之中，通常我们会避免在此时进行解析以提高并行度。考虑到我们使用[**复制成本较低**的非连续缓冲区](io.md)，因此这儿切割的成本通常不高。
 
-之后框架会根据请求是否属于[流式RPC](streaming-rpc.md)类的接口，（普通RPC）创建独立的[fiber](fiber.md)进行解析（`StreamProtocol::TryParse）处理，或（流式RPC）将之传递给这个流所关联的fiber进行解析和处理。
+之后框架会根据请求是否属于[流式RPC](streaming-rpc.md)类的接口，（普通RPC）创建独立的[fiber](fiber.md)进行解析（`StreamProtocol::TryParse`）处理，或（流式RPC）将之传递给这个流所关联的fiber进行解析和处理。
 
 *我们的协议解析是在新创建的fiber进行的，因此不会阻塞其余请求的解析与处理。*
 
