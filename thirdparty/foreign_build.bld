@@ -225,6 +225,8 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
     log_file = '$OUT_DIR/%s.log' % name
     cmake_options = ' '.join([
         '-DCMAKE_INSTALL_PREFIX=%s' % install_dir, '-DCMAKE_INSTALL_LIBDIR=lib',
+        '-DCMAKE_LIBRARY_ARCHITECTURE=',
+        '-DCMAKE_C_LIBRARY_ARCHITECTURE=',
         '-DCMAKE_CXX_LIBRARY_ARCHITECTURE='
     ])
     if options:
