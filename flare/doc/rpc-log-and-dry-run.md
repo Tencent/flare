@@ -70,7 +70,7 @@
 
 目前我们服务端支持如下协议：
 
-- 各类基于Protocol Buffers的协议，包括但不限于`flare://`、`http://`（仅支持HTTP承载的pb）、`qzone://`（QZone承载的pb）、`trpc://`、`baidu-std://`等。
+- 各类基于Protocol Buffers的协议，包括但不限于`flare://`、`http://`（仅支持HTTP承载的pb）、`qzone://`（QZone承载的pb）、`baidu-std://`等。
 
   *我们目前不支持流式RPC、不支持不解析消息（`RpcXxxController::Xxx[Request|Response]Bytes*`）的用法。*
 

@@ -59,17 +59,6 @@ std::optional<int> TryGetQZoneServiceId(
   return std::nullopt;
 }
 
-std::optional<int> TryGetSvrkitServiceId(
-    const google::protobuf::ServiceDescriptor* service) {
-  auto&& opts = service->options();
-  if (opts.HasExtension(detail::wechat_protocol_magic)) {
-    return opts.GetExtension(detail::wechat_protocol_magic);
-  } else if (opts.HasExtension(svrkit_service_id)) {
-    return opts.GetExtension(svrkit_service_id);
-  }
-  return std::nullopt;
-}
-
 std::optional<int> TryGetQZoneMethodId(
     const google::protobuf::MethodDescriptor* method) {
   auto&& opts = method->options();
@@ -77,17 +66,6 @@ std::optional<int> TryGetQZoneMethodId(
     return opts.GetExtension(detail::qzone_protocol_cmd);
   } else if (opts.HasExtension(qzone_method_id)) {
     return opts.GetExtension(qzone_method_id);
-  }
-  return std::nullopt;
-}
-
-std::optional<int> TryGetSvrkitMethodId(
-    const google::protobuf::MethodDescriptor* method) {
-  auto&& opts = method->options();
-  if (opts.HasExtension(detail::wechat_protocol_cmd)) {
-    return opts.GetExtension(detail::wechat_protocol_cmd);
-  } else if (opts.GetExtension(svrkit_method_id)) {
-    return opts.GetExtension(svrkit_method_id);
   }
   return std::nullopt;
 }

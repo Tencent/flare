@@ -58,7 +58,7 @@ int Entry(int argc, char** argv) {
       flare::Server::Options{.service_name = "example_echo_server"}};
 
   server.AddProtocols({"flare", "http+gdt-json", "http+pb", "http+proto3-json",
-                       "qzone-pb", "trpc", "baidu-std", "poppy"});
+                       "qzone-pb", "baidu-std", "poppy"});
   server.AddService(std::make_unique<EchoServiceImpl>());
   server.ListenOn(flare::EndpointFromIpv4(FLAGS_ip, FLAGS_port));
   FLARE_CHECK(server.Start());

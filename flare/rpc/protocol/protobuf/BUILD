@@ -33,8 +33,6 @@ cc_library(
     ':service_method_locator',
     ':service',
     ':std_protocol',
-    ':svrkit_protocol',
-    ':trpc_protocol',
   ],
   visibility = [
     '//flare/rpc:rpc',
@@ -580,46 +578,6 @@ for block_size in ['4K', '64K', '1M']:
   )
 
 cc_library(
-  name = 'svrkit_protocol',
-  hdrs = 'svrkit_protocol.h',
-  srcs = 'svrkit_protocol.cc',
-  deps = [
-    ':call_context_factory',
-    ':call_context',
-    ':compression',
-    ':message',
-    ':rpc_meta_proto',
-    ':rpc_options',
-    ':service_method_locator',
-    '//flare/base:buffer',
-    '//flare/base:down_cast',
-    '//flare/base:endian',
-    '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
-    '//flare/rpc/protocol:stream_protocol',
-    '//thirdparty/protobuf:protobuf',
-  ],
-  link_all_symbols = True
-)
-
-cc_test(
-  name = 'svrkit_protocol_test',
-  srcs = 'svrkit_protocol_test.cc',
-  deps = [
-    ':call_context',
-    ':message',
-    ':service_method_locator',
-    ':svrkit_protocol',
-    '//flare/base:encoding',
-    '//flare/base:endian',
-    '//flare/init:on_init',
-    '//flare/testing:echo_service_proto_flare',
-    '//flare/testing:main',
-  ],
-)
-
-cc_library(
   name = 'rpc_options',
   hdrs = 'rpc_options.h',
   srcs = 'rpc_options.cc',
@@ -630,53 +588,6 @@ cc_library(
   visibility = [
     '//flare/rpc/protocol/protobuf/plugin:*',
   ]
-)
-
-proto_library(
-  name = 'trpc_proto',
-  srcs = 'trpc.proto',
-)
-
-cc_library(
-  name = 'trpc_protocol',
-  hdrs = 'trpc_protocol.h',
-  srcs = 'trpc_protocol.cc',
-  deps = [
-    ':call_context_factory',
-    ':call_context',
-    ':compression',
-    ':message',
-    ':rpc_meta_proto',
-    ':rpc_options',
-    ':service_method_locator',
-    ':trpc_proto',
-    '//flare/base:buffer',
-    '//flare/base:endian',
-    '//flare/base:string',
-    '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:message',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:stream_protocol',
-    '//thirdparty/protobuf:protobuf',
-  ],
-  link_all_symbols = True
-)
-
-cc_test(
-  name = 'trpc_protocol_test',
-  srcs = 'trpc_protocol_test.cc',
-  deps = [
-    ':call_context',
-    ':message',
-    ':service_method_locator',
-    ':trpc_proto',
-    ':trpc_protocol',
-    '//flare/base:buffer',
-    '//flare/base:endian',
-    '//flare/init:on_init',
-    '//flare/testing:echo_service_proto_flare',
-    '//flare/testing:main',
-  ],
 )
 
 proto_library(

@@ -191,14 +191,12 @@ const std::string& DetermineNSLB(const std::string& scheme,
                                   std::vector<const Determiner*>>
       kDeterminers{
           {"flare", {&kPolarisPreferred, &kPolarisStrict, &kListRR}},
-          {"trpc", {&kPolarisPreferred, &kPolarisStrict, &kListRR}},
           {"baidu-std", {&kPolarisPreferred, &kPolarisStrict, &kListRR}},
           {"qzone-pb", {&kPolarisStrict, &kCl5, &kListRR}},
           {"http+pb", {&kPolarisStrict, &kCl5, &kListRR}},
           {"http+gdt-json", {&kPolarisStrict, &kCl5, &kListRR}},
           {"http+pb-text", {&kPolarisStrict, &kCl5, &kListRR}},
           {"http+proto3-json", {&kPolarisStrict, &kCl5, &kListRR}},
-          {"svrkit", {&kListRR}},  // Do WXG uses CL5?
       };
   static const std::vector<const Determiner*> kNonBuiltinSchemeDeterminers{
       &kListRR};  // Be conservative.

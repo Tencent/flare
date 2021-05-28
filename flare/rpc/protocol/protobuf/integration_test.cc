@@ -38,28 +38,26 @@ namespace flare::protobuf {
 static const auto kEchoPrefix = "I'd like to have a prefix. You sent: "s;
 
 static const auto kServerProtocols = {
-    "flare",        "qzone-pb", "svrkit", "http+gdt-json", "http+proto3-json",
-    "http+pb-text", "http+pb",  "trpc",   "baidu-std",     "poppy",
+    "flare",        "qzone-pb", "http+gdt-json", "http+proto3-json",
+    "http+pb-text", "http+pb",  "baidu-std",     "poppy",
 };
 
 static const auto kProtocolsForBasic = {
-    "flare",        "qzone",   "svrkit", "http+gdt-json", "http+proto3-json",
-    "http+pb-text", "http+pb", "trpc",   "baidu-std",     "poppy"};
+    "flare",        "qzone",   "http+gdt-json", "http+proto3-json",
+    "http+pb-text", "http+pb", "baidu-std",     "poppy"};
 static const auto kProtocolsForStreamingResponse = {"flare", "qzone"};
 static const auto kProtocolsForStreamingRpc = {"flare"};
-static const auto kProtocolsForBytes = {"flare",   "qzone", "svrkit",
-                                        "http+pb", "trpc",  "baidu-std"};
+static const auto kProtocolsForBytes = {"flare", "qzone", "http+pb",
+                                        "baidu-std"};
 // `COMPRESSION_ALGORITHM_NONE` is implied.
 static const std::pair<const char*, std::vector<rpc::CompressionAlgorithm>>
     kProtocolsForCompression[] = {
         {"flare",
          {rpc::COMPRESSION_ALGORITHM_GZIP, rpc::COMPRESSION_ALGORITHM_LZ4_FRAME,
           rpc::COMPRESSION_ALGORITHM_SNAPPY}},
-        {"trpc",
-         {rpc::COMPRESSION_ALGORITHM_SNAPPY, rpc::COMPRESSION_ALGORITHM_GZIP}},
         {"baidu-std",
          {rpc::COMPRESSION_ALGORITHM_SNAPPY, rpc::COMPRESSION_ALGORITHM_GZIP}},
-        {"svrkit", {rpc::COMPRESSION_ALGORITHM_SNAPPY}}};
+};
 
 static constexpr auto kUserErrorStatus = 12345;
 static const auto kUserErrorDesc = "a great failure."s;
@@ -182,8 +180,8 @@ TEST_F(IntegrationTest, BasicError) {
     EXPECT_FALSE(result);
     EXPECT_EQ(kUserErrorStatus, result.error().code());
 
-    // These two protocols does not support passing error message around.
-    if (prot != "qzone"s && prot != "svrkit"s) {
+    // This protocol does not support passing error message around.
+    if (prot != "qzone"s) {
       EXPECT_EQ(kUserErrorDesc, result.error().message());
     }
   }
@@ -331,7 +329,7 @@ TEST_F(IntegrationTest, NotSupportedCompression) {
 
   static const auto kBody = "this is my body.";
   RpcChannel channel;
-  CHECK(channel.Open("svrkit://"s + endpoint_.ToString()));
+  CHECK(channel.Open("poppy://"s + endpoint_.ToString()));
 
   testing::EchoService_Stub stub(&channel);
   testing::EchoRequest req;

@@ -31,16 +31,6 @@
 |延迟(us, avg)  |147  |145  |165  |200  |
 |延迟(us, p999) |300  |550  |500 |3K    |
 
-### qzone协议
-
-|线程数         |10   |20   |30   |40   |
-|---------------|-----|-----|-----|-----|
-|CPU（服务端）% |880  |1800 |2600 |3100 |
-|CPU（客户端）% |920  |1820 |2700 |3200 |
-|QPS            |690K |1.4M|1.75M |1.9M |
-|延迟(us, avg)  |143  |138  |170  |200  |
-|延迟(us, p999) |290  |550  |600  |3K   |
-
 ### http协议
 
 |线程数         |10   |20   |30   |40   |
@@ -50,46 +40,6 @@
 |QPS            |550K |1M   |1.45M|1.5M |
 |延迟(us, avg)  |170  |180  |200  |270  |
 |延迟(us, p999) |310  |500  |1K   |4K   |
-
-### trpc协议
-
-|线程数         |10   |20   |30   |40   |
-|---------------|-----|-----|-----|-----|
-|CPU（服务端）% |900  |1800 |2600 |3000 |
-|CPU（客户端）% |930  |1860 |2800 |3200 |
-|QPS            |600K |1.25M|1.6M |1.7M |
-|延迟(us, avg)  |162  |150  |186  |240  |
-|延迟(us, p999) |320  |330  |600  |4K   |
-
-## 2020-04-14（版本`e1fa9b7e`）
-
-由于广告线业务进行跨部门、跨BG的RPC请求非常普遍，我们于近期支持了trpc协议（包括[服务端及客户端（见“trpc”节）](protocol/protocol-buffers.md)）以期改善与不同组织的RPC互操作性。
-
-此处使用trpc的`benchmark`工具测试（`benchmark`工具通过`-c opt`参数编译。），版本`75f0b330`。
-
-测试环境：
-
-- CPU：Xeon Gold 6133 @ KVM (76 vCPU, Hyper-threaded, 2 NUMA Node)
-- RAM：251G
-- 服务端：`./build64_release/flare/example/rpc/trpc/server --flare_concurrency_hint=40 --flare_scheduling_group_size=10 --flare_numa_aware --logtostderr`（40线程，调度组大小10，numa-aware）
-- 客户端：`./benchmark -s 127.0.0.1:5568 -t20 -n 100000000`（20线程，发送100M个请求）
-- 同机压测
-
-测试结果取第二次结果（第一次测试结果包含了部分服务“预热”的影响，不代表实际性能。）。
-
-```text
-====== trpc benchmark ======
-
-total requests: 99999445
-  0.28 milliseconds average latency
-  0.35 milliseconds [90%] latency
-  0.45 milliseconds [99%] latency
-  0.50 milliseconds [99.9%] latency
-  161 bytes payload
-  100000000 request completed in 48.53 seconds
-  1000 parallel clients in 20 threads
-  2060709.53 requests per second
-```
 
 ## 2020-01-09（版本`b45ce61c`）
 

@@ -21,7 +21,4 @@
 
 - [mixed_echo](mixed_echo) 混合 PB-RPC/HTTP 协议
 - [brpc](brpc) 百度 BRPC 协议服务
-- [gdt-rpc](gdt-rpc) GDT-RPC 协议服务
 - [hbase](hbase) HBASE RPC 协议
-- [qzone_streaming](qzone_streaming) Qzone 协议流式 RPC
-- [trpc](trpc) tRPC 协议服务
