@@ -34,6 +34,8 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 
 Flare 是开箱即用的，已经自带了所需的[第三方库](thirdparty/)，因此通常不需要额外安装依赖库。只需要在 Linux 下，拉取代码，即可使用。
 
+`thirdparty/`下面的压缩包我们通过[Git LFS](https://git-lfs.github.com/)存储，因此在拉取代码之前您需要确保`git-lfs`已经正确的安装了。
+
 ### 构建
 
 我们使用[`blade`](https://github.com/chen3feng/blade-build)进行日常开发。
