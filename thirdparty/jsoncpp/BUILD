@@ -13,6 +13,7 @@ cmake_build(
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
     ],
     strip_include_prefix='jsoncpp/json',
+    patches=['no_multi_arch_libdir.patch'],
     generate_dynamic=True,
 )
 
