@@ -146,7 +146,7 @@ void FancyServiceImpl::FancyJob(const FancyJobRequest& request,
 
 这个示例中，我们：
 
-- 通过三种不同的客户端（HTTP、COS、RPC）发起了三个异步请求；
+- 通过三种不同的客户端（[HTTP](flare/net/http/http_client.h)、[腾讯云COS](flare/net/cos/cos_client.h)、RPC）发起了三个异步请求；
 - 通过`flare::fiber::BlockingGet`同步等待所有请求完成。这儿我们只会阻塞用户态线程，不会存在性能问题；
 - 打印日志输出各个服务的响应。
 
