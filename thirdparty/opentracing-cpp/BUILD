@@ -13,16 +13,11 @@ cmake_build(
         '-DCMAKE_BUILD_TYPE=Release',
     ],
     strip_include_prefix='opentracing',
-    install_dir='',
-    include_dir='include',
-    lib_dir='lib',
     generate_dynamic=True,
 )
 
 foreign_cc_library(
     name='opentracing',
-    install_dir='',
-    lib_dir='lib',
     deps=[
         ':opentracing-cpp_build',
     ],
@@ -32,8 +27,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='opentracing_mocktracer',
-    install_dir='',
-    lib_dir='lib',
     deps=[
         ':opentracing-cpp_build',
     ],

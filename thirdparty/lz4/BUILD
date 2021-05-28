@@ -16,8 +16,6 @@ cmake_build(
 
 foreign_cc_library(
     name = 'lz4',
-    install_dir = '',
-    lib_dir='lib64',
     deps = [
       ':lz4_build',
     ],

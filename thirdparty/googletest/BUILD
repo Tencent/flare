@@ -15,8 +15,6 @@ cmake_build(
 
 foreign_cc_library(
     name='gmock',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':gtest',
         ':googletest_build',
@@ -27,8 +25,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='gmock_main',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':gmock',
         ':googletest_build',
@@ -39,8 +35,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='gtest',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':googletest_build',
     ],
@@ -50,8 +44,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='gtest_main',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':gtest',
         ':googletest_build',

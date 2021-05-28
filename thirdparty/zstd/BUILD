@@ -16,8 +16,6 @@ cmake_build(
 
 foreign_cc_library(
     name = 'zstd',
-    install_dir = '',
-    lib_dir='lib64',
     deps = [
       ':zstd_build',
     ],

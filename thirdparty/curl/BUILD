@@ -21,7 +21,6 @@ autotools_build(
 
 foreign_cc_library(
     name = 'curl',
-    install_dir = '',
     deps=[
       ':curl_build',
       '#pthread',

@@ -17,8 +17,6 @@ cmake_build(
 
 foreign_cc_library(
     name='fmt',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':fmt_build',
     ],

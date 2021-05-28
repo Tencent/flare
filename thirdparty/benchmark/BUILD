@@ -15,8 +15,6 @@ cmake_build(
 
 foreign_cc_library(
     name='benchmark',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':benchmark_build',
         '#pthread',
@@ -26,8 +24,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='benchmark_main',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':benchmark_build',
         '#pthread',

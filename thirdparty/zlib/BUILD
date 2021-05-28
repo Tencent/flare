@@ -13,8 +13,6 @@ cmake_build(name='zlib_build',
 
 foreign_cc_library(
     name='z',
-    install_dir='',
-    lib_dir='lib',
     deps=[
         ':zlib_build',
     ],

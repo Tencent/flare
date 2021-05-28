@@ -18,8 +18,6 @@ cmake_build(
 
 foreign_cc_library(
     name='jsoncpp',
-    install_dir='',
-    lib_dir='lib',
     deps=[
         ':jsoncpp_build',
         '#pthread',

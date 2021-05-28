@@ -17,8 +17,6 @@ cmake_build(
 
 foreign_cc_library(
     name='yaml-cpp',
-    install_dir='',
-    lib_dir='lib',
     deps=[
         ':yaml-cpp_build',
     ],

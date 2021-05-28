@@ -16,7 +16,6 @@ autotools_build(
 
 foreign_cc_library(
     name='jemalloc',
-    install_dir='',
     deps=[
         ':jemalloc_build',
         '#pthread',

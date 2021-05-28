@@ -12,7 +12,6 @@ autotools_build(
 
 foreign_cc_library(
     name = 'nghttp2',
-    install_dir = '',
     deps = [
       ':nghttp2_build',
     ],
