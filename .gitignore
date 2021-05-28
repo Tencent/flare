@@ -1,0 +1,37 @@
+# Blade
+/blade-bin
+/build32_debug/
+/build32_release/
+/build64_debug/
+/build64_release/
+/build.ninja
+/.Building.lock
+/.blade.test.stamp
+/BLADE_ROOT.local
+
+# Vim
+.*.swp
+.*.swo
+
+# Python
+*.py[cod]
+
+GPATH
+GRTAGS
+GTAGS
+
+# Mac OS
+.DS_Store
+
+# vscode
+.vscode/
+
+# Eclipse Core
+.project
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# IntelliJ IDEA
+*.iml
+.idea
