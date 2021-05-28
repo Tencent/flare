@@ -32,10 +32,11 @@ Flare 已经自带了所需的[第三方库](thirdparty/)，因此通常不需�
 
 这包括但不限于：
 
-- RPC Mock
-- CKV Mock
-- HTTP Mock
-- 非虚函数Mock
+- [RPC Mock](flare/testing/rpc_mock.h)
+- [Redis Mock](flare/testing/redis_mock.h)
+- [COS Mock](flare/testing/cos_mock.h)
+- [HTTP Mock](flare/testing/http_mock.h)
+- [非虚函数Mock](flare/testing/hooking_mock.h)
 - 部分工具方法等
 
 ### 示例
