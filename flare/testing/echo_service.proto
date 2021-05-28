@@ -31,14 +31,11 @@ message EchoResponse {
 
 service EchoService {
   option (flare.qzone_service_id) = 2;
-  option (flare.svrkit_service_id) = 12345;
   rpc Echo(EchoRequest) returns (EchoResponse) {
     option (flare.qzone_method_id) = 1001;
-    option (flare.svrkit_method_id) = 1001;
   }
   rpc EchoWithMaxQueueingDelay(EchoRequest) returns (EchoResponse) {
     option (flare.qzone_method_id) = 1005;
-    option (flare.svrkit_method_id) = 1006;
     option (flare.max_queueing_delay_ms) = 1;  // In milliseconds.
   }
   rpc EchoWithMaxOngoingRequests(EchoRequest) returns (EchoResponse) {

@@ -60,20 +60,10 @@ inline constexpr struct QZone {
   using MethodKey = std::tuple<std::int32_t, std::int32_t>;  // (version, cmd)
 } qzone;
 
-// Link with `svrkit_protocol` to use this one.
-inline constexpr struct Svrkit {
-  using MethodKey = std::tuple<std::int16_t, std::int16_t>;  // (magic, cmd)
-} svrkit;
-
-// Link with `trpc_protocol` to use this one.
-inline constexpr struct Trpc {
-  using MethodKey = std::string;  // "/{service}/{method}".
-} trpc;
-
 }  // namespace protocol_ids
 
 // This class maps various IDs (or keys) used in a given protocol (FlareStd,
-// QZone, Svrkit, ...) to its detailed information.
+// QZone, ...) to its detailed information.
 //
 // Unless otherwise stated, methods of this class are thread-safe.
 //

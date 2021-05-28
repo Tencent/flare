@@ -251,39 +251,6 @@ class NonmultiplexableTestService : public testing::SyncEchoService {
   std::vector<Endpoint> eps;
 };
 
-TEST(Channel, NonmultiplexableTalk) {
-  static const std::string kReply = "Bad weather.";
-  // Start a service.
-  auto ep = testing::PickAvailableEndpoint();
-  NonmultiplexableTestService echo_svc;
-  Server rs;
-
-  rs.AddProtocol("svrkit");
-  rs.AddService(MaybeOwning(non_owning, &echo_svc));
-  rs.ListenOn(ep);
-  CHECK(rs.Start());
-
-  auto talk = [&] {
-    RpcChannel channel;
-    CHECK(channel.Open("svrkit://" + ep.ToString()));
-    testing::EchoRequest req;
-    testing::EchoService_SyncStub stub(&channel);
-    RpcClientController ctlr;
-
-    (void)stub.Echo(req, &ctlr);
-  };
-
-  // Make two RPCs.
-  auto f1 = fiber::Async(talk);
-  auto f2 = fiber::Async(talk);
-
-  fiber::BlockingGet(WhenAll(&f1, &f2));
-  ASSERT_EQ(2, echo_svc.eps.size());  // Two connections were made.
-
-  rs.Stop();
-  rs.Join();
-}
-
 TEST(Channel, MockRpc) {
   static const auto kResponse = "test body"s;
   RpcChannel channel;

@@ -3,7 +3,7 @@
 [![license NewBSD](https://img.shields.io/badge/license-BSD-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
 [![Code Style](https://img.shields.io/badge/code%20style-google-blue.svg)](https://google.github.io/styleguide/cppguide.html)
-[![Platform](https://img.shields.io/badge/platform-linux%20-lightgrey.svg)](doc/en/prerequisites.md)
+![Platform](https://img.shields.io/badge/platform-linux%20-lightgrey.svg)
 
 [腾讯广告](https://e.qq.com/ads/) 是腾讯公司最重要的业务之一，其后台大量采用 C++ 开发。
 
@@ -15,7 +15,7 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 
 ## 特点
 
-- 现代 C++ 设计风格，广泛采用了 C++11/14/17 的新的语法特性和标准库
+- 现代 C++ 设计风格，广泛采用了 C++11/14/17/2a 的新的语法特性和标准库
 - 提供了 [M:N 的线程模型](https://en.wikipedia.org/wiki/Thread_(computing))的微线程实现[Fiber](flare/doc/fiber.md)，方便业务开发人员以便利的同步调用语法编写高性能的异步调用代码
 - 支持基于消息的[流式 RPC](flare/doc/streaming-rpc.md)支持
 - 除了 RPC 外，还提供了一系列便利的[基础库](flare/base)，比如字符串、时间日期、编码处理、压缩、加密解密、配置、HTTP 客户端等，方便快速上手开发业务代码
@@ -33,6 +33,8 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 ## 开始使用
 
 Flare 是开箱即用的，已经自带了所需的[第三方库](thirdparty/)，因此通常不需要额外安装依赖库。只需要在 Linux 下，拉取代码，即可使用。
+
+`thirdparty/`下面的压缩包我们通过[Git LFS](https://git-lfs.github.com/)存储，因此在拉取代码之前您需要确保`git-lfs`已经正确的安装了。
 
 ### 构建
 

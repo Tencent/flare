@@ -88,7 +88,7 @@ int Entry(int argc, char** argv) {
       flare::Server::Options{.service_name = "example_relay_server"}};
 
   server.AddProtocols(
-      {"flare", "http+gdt-json", "http+pb", "qzone-pb", "trpc", "baidu-std"});
+      {"flare", "http+gdt-json", "http+pb", "qzone-pb", "baidu-std"});
   server.AddService(std::make_unique<RelayServiceImpl>());
   server.ListenOn(flare::EndpointFromIpv4(FLAGS_ip, FLAGS_port));
   FLARE_CHECK(server.Start());

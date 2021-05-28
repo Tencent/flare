@@ -359,14 +359,6 @@ service EchoService {
 
 **对于流式RPC，这一格式只能提供有限的支持**。另外，由于QZone协议无法传递end-of-stream标记，因此需要服务实现方自行通过响应消息等方式提前通知对端实际的响应个数（而不能连续读取直到`StreamReader::Read`返回`EndOfStream`。对于新的服务或接口，我们推荐通过flare协议提供流式RPC的能力。
 
-### trpc
-
-这一协议在URI中使用`trpc`标识，默认的NSLB为Polaris。如：`trpc://example.service`。
-
-目前只支持使用trpc协议承载Protocol Buffers的请求（即不支持jce、或纯二进制等），支持压缩，不支持透传KV对。
-
-目前trpc的协议实现暂不支持流式RPC、不支持附件（trpc协议中附件只能作为透传KV对二次序列化传输，没有性能收益。）。
-
 ### baidu_std (brpc)
 
 这一协议在URI中使用`baidu-std`标识，默认的NSLB为Polaris（因为我们没有[BNS](https://github.com/apache/incubator-brpc/blob/master/src/brpc/policy/baidu_naming_service.cpp)）。如`baidu-std://example.service`。
@@ -376,44 +368,6 @@ brpc的协议格式可参考[brpc文档](https://github.com/apache/incubator-brp
 对端如果使用brpc开发，需要启用`baidu_protocol_use_fullname`（brpc默认启用）。
 
 目前我们的实现尚不支持流式RPC、RPC调用追踪。
-
-### svrkit
-
-这一协议在URI中使用`svrkit`标识，其默认的NSLB为`list+rr`。如：`svrkit://192.0.2.1:5678`。
-
-线上格式可直接[参阅代码](../../rpc/protocol/protobuf/svrkit_protocol.cc)，此处不作单独描述。
-
-类似于QZone协议，Svrkit协议本身并未提供通过字符串标识被调方法的能力，因此需要通过[`flare.svrkit_service_id`、`flare.svrkit_method_id`](../../rpc/rpc_options.proto)来修饰支持Svrkit协议的方法：
-
-*由于历史原因，Flare同样支持广点通代码库中之前使用的`gdt.wechat_protocol_magic`、`gdt.wechat_protocol_cmd`，二者效果相同。但`svrkit_service_id`、`svrkit_method_id`更能体现出这些ID逻辑层面的实际含义。*
-
-```protobuf
-syntax = "proto3";
-
-import "flare/rpc/rpc_options.proto";
-
-// ... (Definition of `EchoRequest` & `EchoResponse`.)
-
-service EchoService {
-  option (flare.svrkit_service_id) = 12345;
-  rpc Echo(EchoRequest) returns(EchoResponse) {
-    option (flare.svrkit_method_id) = 1001;
-  }
-}
-```
-
-需要注意的是，Svrkit格式没有字段（如flare协议的`correlation_id`字段）可以用于关联请求及响应。也因此，这个协议并不支持[链路复用（multiplexing）](https://en.wikipedia.org/wiki/Multiplexing)，即同一个连接上不能同时支持有多个未完成的RPC，性能表现较为一般。
-
-这一格式不支持流式RPC、压缩、附件、RPC调用追踪等。**通常我们不推荐使用这一协议。**
-
-#### RPC状态码转换
-
-由于Svrkit协议使用的状态码和我们不同，因此我们采取如下方式转换：
-
-- 系统状态码（即[[`rpc::STATUS_SUCCESS`, `rpc::STATUS_RESERVED_MAX`]](../../rpc/protocol/protobuf/rpc_meta.proto)区间内的）：我们尽力做语义相同的映射。无法映射时，对于收到的Svrkit状态码，映射为`rpc::STATUS_FAILED`、对于发出去的Flare状态码，映射至`COMM_ERR_GENERAL`。
-- 用户状态码：Svrkit规范中大于0的是用户状态码，我们的规范中大于`rpc::STATUS_RESERVED_MAX`的是用户状态码。因此我们的映射方式为加上（或减去，取决于映射方向）`rpc::STATUS_RESERVED_MAX`。
-  - 转换至Svrkit状态码：`status + rpc::STATUS_RESERVED_MAX`。
-  - 从Svrkit状态码转换：`status - rpc::STATUS_RESERVED_MAX`。
 
 ### poppy
 

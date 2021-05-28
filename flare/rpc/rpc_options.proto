@@ -29,10 +29,7 @@ extend google.protobuf.ServiceOptions {
   // called. To associated services with their IDs, we provide these options.
   optional int32 qzone_service_id = 11000;  // `version` in header.
 
-  // Per spec this should always be zero..
-  //
-  // `magic` in Svrkit message header.
-  optional int32 svrkit_service_id = 11001;
+  // `11001` is reserved internally.
 
   // Not implemented anyway.
   //
@@ -51,8 +48,8 @@ extend google.protobuf.MethodOptions {
 
   // Several "legacy" protocol uses integral IDs to identify method being
   // called. To associated methods with their IDs, we provide these options.
-  optional int32 qzone_method_id = 11000;   // `cmd` in header.
-  optional int32 svrkit_method_id = 11001;  // `cmd` in header.
+  optional int32 qzone_method_id = 11000;  // `cmd` in header.
+  // `11001` is reserved internally.
 
   // If set, the request is not parsed by the framework, instead, its serialized
   // form is passed to the service implementation via `GetRequestRawBytes()` of

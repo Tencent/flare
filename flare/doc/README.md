@@ -1,7 +1,6 @@
 # Flare 服务框架技术文档
 ## 使用
 
-- [开始使用](getting-started.md)
 - [RPC 入门导引](intro-rpc.md)
 - [GFlags](gflags.md)
 - [Channel](channel.md)

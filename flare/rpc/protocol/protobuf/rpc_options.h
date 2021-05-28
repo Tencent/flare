@@ -30,17 +30,13 @@
 
 namespace flare::protobuf {
 
-// Surprisingly enough, there are indeed some services use 0 as either service ID
-// or method ID in their definitions.
+// Surprisingly enough, there are indeed some services use 0 as either service
+// ID or method ID in their definitions.
 //
 // Both options defined by Poppy and us are recognized.
 std::optional<int> TryGetQZoneServiceId(
     const google::protobuf::ServiceDescriptor* service);
-std::optional<int> TryGetSvrkitServiceId(
-    const google::protobuf::ServiceDescriptor* service);
 std::optional<int> TryGetQZoneMethodId(
-    const google::protobuf::MethodDescriptor* method);
-std::optional<int> TryGetSvrkitMethodId(
     const google::protobuf::MethodDescriptor* method);
 
 // FIXME: Remove method below, there's little sense in keeping support
