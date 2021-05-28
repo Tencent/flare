@@ -6,23 +6,16 @@ cmake_build(
     package_name = 'zstd',
     lib_names = ['zstd'],
     source_dir = 'zstd-1.4.5/build/cmake',
-    deps = [
-    ],
     cmake_options=[
         '-DZSTD_BUILD_SHARED=ON',
         '-DZSTD_BUILD_STATIC=ON',
         '-DCMAKE_BUILD_TYPE=Release',
     ],
-    strip_include_prefix='',
-    install_dir='',
-    lib_dir='lib64',
     generate_dynamic=True,
 )
 
 foreign_cc_library(
     name = 'zstd',
-    install_dir = '',
-    lib_dir='lib64',
     deps = [
       ':zstd_build',
     ],

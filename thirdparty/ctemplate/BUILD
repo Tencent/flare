@@ -15,7 +15,6 @@ autotools_build(
 
 foreign_cc_library(
     name='ctemplate',
-    install_dir='',
     deps=[
         ':ctemplate_build',
     ],

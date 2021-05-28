@@ -6,7 +6,6 @@ cmake_build(
     source_package='jsoncpp-0.10.7.tar.gz',
     package_name='jsoncpp',
     lib_names=['jsoncpp'],
-    deps=[],
     cmake_options=[
         '-DBUILD_SHARED_LIBS=ON',
         '-DBUILD_STATIC_LIBS=ON',
@@ -14,15 +13,12 @@ cmake_build(
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
     ],
     strip_include_prefix='jsoncpp/json',
-    install_dir='',
-    lib_dir='lib',
+    patches=['no_multi_arch_libdir.patch'],
     generate_dynamic=True,
 )
 
 foreign_cc_library(
     name='jsoncpp',
-    install_dir='',
-    lib_dir='lib',
     deps=[
         ':jsoncpp_build',
         '#pthread',

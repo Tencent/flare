@@ -27,7 +27,6 @@ autotools_build(
 
 foreign_cc_library(
     name='profiler',
-    install_dir='',
     deps=[
         ':gperftools_build',
         '#pthread',
@@ -41,7 +40,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='tcmalloc',
-    install_dir='',
     deps=[
         ':gperftools_build',
         '#pthread',
@@ -55,7 +53,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='tcmalloc_and_profiler',
-    install_dir='',
     deps=[
         ':gperftools_build',
         '#pthread',
@@ -69,7 +66,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='tcmalloc_debug',
-    install_dir='',
     deps=[
         ':gperftools_build',
         '#pthread',
@@ -83,7 +79,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='tcmalloc_minimal',
-    install_dir='',
     deps=[
         ':gperftools_build',
         '#pthread',
@@ -97,7 +92,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='tcmalloc_minimal_debug',
-    install_dir='',
     deps=[
         ':gperftools_build',
         '#pthread',

@@ -16,7 +16,6 @@ autotools_build(
 
 foreign_cc_library(
     name = 'crypto',
-    install_dir = '',
     deps = [
       '#pthread',
       '#dl',
@@ -28,7 +27,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name = 'ssl',
-    install_dir = '',
     deps = [
       ':crypto',
       ':openssl_build',

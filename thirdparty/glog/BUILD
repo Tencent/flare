@@ -21,7 +21,6 @@ autotools_build(
 
 foreign_cc_library(
     name='glog',
-    install_dir='',
     deps=[
         ':glog_build',
         '#pthread',

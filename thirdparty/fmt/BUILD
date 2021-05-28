@@ -5,23 +5,18 @@ cmake_build(
     source_package='fmt-7.1.3.tar.gz',
     package_name='fmt',
     lib_names=['fmt'],
-    deps=[],
     cmake_options=[
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
         '-DFMT_TEST=OFF',
     ],
-    install_dir='',
     strip_include_prefix='fmt',
-    lib_dir='lib64',
     patches=['generate_dynamic.patch'],
     generate_dynamic=True,
 )
 
 foreign_cc_library(
     name='fmt',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':fmt_build',
     ],

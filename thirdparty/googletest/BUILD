@@ -5,22 +5,16 @@ cmake_build(
     source_package='googletest-release-1.10.0.tar.gz',
     package_name='googletest',
     lib_names=['gmock', 'gmock_main', 'gtest', 'gtest_main'],
-    deps=[],
     cmake_options=[
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
     ],
-    strip_include_prefix='',
-    install_dir='',
-    lib_dir='lib64',
     patches=['generate_dynamic.patch'],
     generate_dynamic=True,
 )
 
 foreign_cc_library(
     name='gmock',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':gtest',
         ':googletest_build',
@@ -31,8 +25,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='gmock_main',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':gmock',
         ':googletest_build',
@@ -43,8 +35,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='gtest',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':googletest_build',
     ],
@@ -54,8 +44,6 @@ foreign_cc_library(
 
 foreign_cc_library(
     name='gtest_main',
-    install_dir='',
-    lib_dir='lib64',
     deps=[
         ':gtest',
         ':googletest_build',
