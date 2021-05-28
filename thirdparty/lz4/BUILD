@@ -6,16 +6,11 @@ cmake_build(
     package_name = 'lz4',
     lib_names = ['lz4'],
     source_dir = 'lz4-1.9.3/build/cmake',
-    deps = [
-    ],
     cmake_options=[
         '-DBUILD_SHARED_LIBS=ON',
         '-DBUILD_STATIC_LIBS=ON',
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
     ],
-    strip_include_prefix='',
-    install_dir='',
-    lib_dir='lib64',
     generate_dynamic=True,
 )
 

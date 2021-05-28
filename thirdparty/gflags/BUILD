@@ -12,10 +12,7 @@ cmake_build(
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
     ],
-    lib_dir="lib",
-    deps=[],
     strip_include_prefix = 'gflags',
-    include_dir='include',
     generate_dynamic=True,
 )
 

@@ -5,14 +5,10 @@ cmake_build(
     source_package='googletest-release-1.10.0.tar.gz',
     package_name='googletest',
     lib_names=['gmock', 'gmock_main', 'gtest', 'gtest_main'],
-    deps=[],
     cmake_options=[
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
     ],
-    strip_include_prefix='',
-    install_dir='',
-    lib_dir='lib64',
     patches=['generate_dynamic.patch'],
     generate_dynamic=True,
 )

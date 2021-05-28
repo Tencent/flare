@@ -11,10 +11,6 @@ cmake_build(
         '-DCMAKE_BUILD_TYPE=Release',
         '-DSNAPPY_BUILD_TESTS=OFF',
     ],
-    strip_include_prefix='',
-    install_dir='',
-    include_dir='include',
-    lib_dir='lib64',
     patches=['generate_dynamic.patch'],
     generate_dynamic=True)
 

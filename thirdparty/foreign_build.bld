@@ -223,7 +223,8 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
     build_dir = blade.path.join(blade.current_target_dir(), build_dir_name)
     install_dir = blade.path.join('..', install_dir)
     log_file = '$OUT_DIR/%s.log' % name
-    cmake_options = '-DCMAKE_INSTALL_PREFIX=%s' % install_dir
+    cmake_options = ' '.join('-DCMAKE_INSTALL_PREFIX=%s' % install_dir,
+                             '-DCMAKE_INSTALL_LIBDIR=lib')
     if options:
         cmake_options += ' '
         cmake_options += ' '.join(options)
