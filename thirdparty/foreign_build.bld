@@ -305,3 +305,6 @@ def cmake_cc_library(
         package_name=name,
         deps=[':' + target_build] + with_packages + deps,
         export_incs=blade.path.join(install_dir, include_dir))
+
+def get_install_dir(name):
+    return blade.path.join(blade.path.dirname(blade.path.abspath(blade.current_target_dir())), name)

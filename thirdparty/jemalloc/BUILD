@@ -20,8 +20,7 @@ foreign_cc_library(
         ':jemalloc_build',
         '#pthread',
         '#rt',
-        '#z',
     ],
     has_dynamic=True,
-    visibility = 'PUBLIC',
+    visibility='PUBLIC',
 )

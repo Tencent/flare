@@ -1,0 +1,20 @@
+diff -uNr a/configure.ac b/configure.ac
+--- a/configure.ac	2021-05-31 12:33:03.683544680 +0800
++++ b/configure.ac	2021-05-31 12:34:33.675544680 +0800
+@@ -180,16 +180,6 @@
+ 
+ # We want to link in libunwind if it exists
+ UNWIND_LIBS=
+-# Unfortunately, we need to check the header file in addition to the
+-# lib file to check if libunwind is available since libunwind-0.98
+-# doesn't install all necessary header files.
+-if test x"$ac_cv_have_libunwind_h" = x"1"; then
+- AC_CHECK_LIB(unwind, backtrace, UNWIND_LIBS=-lunwind)
+-fi
+-AC_SUBST(UNWIND_LIBS)
+-if test x"$UNWIND_LIBS" != x""; then
+-  AC_DEFINE(HAVE_LIB_UNWIND, 1, [define if you have libunwind])
+-fi
+ 
+ # We'd like to use read/write locks in several places in the code.
+ # See if our pthreads support extends to that.  Note: for linux, it
