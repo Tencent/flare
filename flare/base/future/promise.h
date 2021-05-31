@@ -23,6 +23,8 @@
 
 namespace flare::future {
 
+// `Promise` is used to notify the holder of `Future` about completion. It's
+// valid even if it's orphaned (i.e., the corresponding `Future` is destroyed).
 template <class... Ts>
 class Promise {
  public:

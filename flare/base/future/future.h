@@ -40,6 +40,10 @@ struct futurize_tuple_t {
 inline constexpr futurize_values_t futurize_values;
 inline constexpr futurize_tuple_t futurize_tuple;
 
+// `Future` can be used to receive result from an asynchronous operation.
+//
+// If the `Future` is destroyed before the operation completes, the operation is
+// detached (i.e., the result is discarded.).
 template <class... Ts>
 class Future {
  public:

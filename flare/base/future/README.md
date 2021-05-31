@@ -83,6 +83,8 @@ template <class U> Future(U&&) -> Future<std::decay_t<U>>;
 
 `Future<>`自身不要求`Ts...`是`DefaultConstructible`或`CopyConstructible`的。
 
+如果未使用`Future<>::Then`即析构`Future<>`，那么对应的`Future<>`的执行结果将会被丢弃。
+
 ### Future<...>::Then(F&& continuation)
 
 我们通过这一方法指定当`Future<>`有值之后调用的后续操作逻辑。
