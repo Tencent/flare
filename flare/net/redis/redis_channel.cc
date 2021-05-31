@@ -110,7 +110,7 @@ bool RedisChannel::Open(const std::string& address, const Options& options) {
   // To avoid possible ambiguity introduced by colon in username / password, we
   // encode them before building "call gate pool" key.
   impl_->call_gate_pool = rpc::internal::GetGlobalStreamCallGatePool(Format(
-      "ckv:{}:{})", EncodeHex(options.username), EncodeHex(options.password)));
+      "redis:{}:{})", EncodeHex(options.username), EncodeHex(options.password)));
 
   impl_->opened = true;
   return true;

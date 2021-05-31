@@ -26,9 +26,6 @@
 - [Protocol Buffers](protocol/protocol-buffers.md)
 - [Redis](protocol/redis.md)
 - [HBase](protocol/hbase.md)
-- [CKV](protocol/ckv.md)
-- [JCE](protocol/jce.md)
-- [TDBank](protocol/tdbank.md)
 
 ## 多协议支持的实现
 

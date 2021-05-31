@@ -21,7 +21,6 @@ cc_library(
     '//flare/base:string',
   ],
   visibility = [
-    '//flare/rpc/protocol/protobuf:jce_on_http_server_protocol',
     '//flare/rpc/protocol/protobuf:proto_over_http_protocol',
   ]
 )
