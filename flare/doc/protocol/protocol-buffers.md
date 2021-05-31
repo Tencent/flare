@@ -50,7 +50,7 @@
 
 > ... A host identified by a registered name is a sequence of characters usually intended for lookup within a locally defined host or service name registry, **though the URI's scheme-specific semantics may require that a specific registry (or fixed name table) be used instead.**
 
-*取决于具体的[NSLB](nslb.md)，RFC 3986中关于大小写敏感的要求我们可能无法满足。*
+*取决于具体的[NSLB](../nslb.md)，RFC 3986中关于大小写敏感的要求我们可能无法满足。*
 
 对于需要使用非默认NSLB的场景，`RpcChannel`允许通过`RpcChannel::Options::override_nslb`来指定不同的名字服务及负载均衡策略，如：
 

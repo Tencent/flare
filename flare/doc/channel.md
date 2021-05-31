@@ -16,7 +16,7 @@ Channel用于RPC主调方（客户端方），用来描述一个到特定服务�
 
 这儿需要Channel将URI按照`协议://服务名`的格式进行解析。
 
-取决于[协议的具体实现](protocol.md)，`协议`字段可能是确定的（如[ckv](protocol/ckv.md)），也可能是某种字符串（如[Protocol Buffers](protocol/protocol-buffers.md)。
+取决于[协议的具体实现](protocol.md)，`协议`字段可能是确定的，也可能是某种字符串（如[Protocol Buffers](protocol/protocol-buffers.md)。
 
 不同的协议有不同的`服务名`的默认格式，取决于Channel的具体实现，可能会提供覆盖这一默认行为的方法。具体请参考各个协议的文档。
 
@@ -29,7 +29,7 @@ Channel通常会按照`服务名`的格式（无论是默认格式又或者是�
 
 ## 协议解、打包
 
-取决于Channel的具体实现，其可能关联至特定的协议（如ckv），又或是支持多种协议（如Protocol Buffers），对于后者的情况，通过修改URI中的`协议`段，调用方可以选择其认为可以被后端服务所理解的线上格式进行RPC。
+取决于Channel的具体实现，其可能关联至特定的协议，又或是支持多种协议（如Protocol Buffers），对于后者的情况，通过修改URI中的`协议`段，调用方可以选择其认为可以被后端服务所理解的线上格式进行RPC。
 
 关于协议的更多信息可以参考[protocol.md](protocol.md)。
 
