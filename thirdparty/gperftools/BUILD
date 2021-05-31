@@ -16,7 +16,7 @@ autotools_build(
         '--enable-shared', '--enable-static', '--with-pic',
         '--enable-heap-checker', '--enable-heap-profiler',
         '--enable-cpu-profiler', '--enable-debugalloc',
-        '--enable-frame-pointers'
+        '--enable-frame-pointers', '--disable-libunwind',
     ]),
     deps=[
         '//thirdparty/gflags:gflags',

@@ -19,6 +19,7 @@ autotools_build(
         '//thirdparty/gflags:gflags',
         '//thirdparty/zlib:z',
     ],
+    patches=['disable_libunwind.patch'],
     strip_include_prefix='glog',
     configure_file_name='./autogen.sh && ./configure',
     generate_dynamic=True,
