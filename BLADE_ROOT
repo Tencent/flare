@@ -97,7 +97,7 @@ cc_config(
         'thirdparty/',
     ],
     linkflags = [
-        '-Lthirdparty/jdk/lib',
+        '-Wl,--no-as-needed -lpthread -Wl,--as-needed',
     ],
     benchmark_libs = ['//thirdparty/benchmark:benchmark'],
     benchmark_main_libs = ['//thirdparty/benchmark:benchmark_main'],
