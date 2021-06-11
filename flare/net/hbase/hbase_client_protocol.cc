@@ -17,7 +17,7 @@
 #include <memory>
 #include <utility>
 
-#include "thirdparty/protobuf/util/delimited_message_util.h"
+#include "protobuf/util/delimited_message_util.h"
 
 #include "flare/base/buffer/zero_copy_stream.h"
 #include "flare/base/down_cast.h"

@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/jsoncpp/value.h"
+#include "jsoncpp/value.h"
 
 #include "flare/base/function.h"
 #include "flare/base/logging.h"

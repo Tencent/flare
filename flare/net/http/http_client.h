@@ -21,7 +21,7 @@
 #include <thread>
 #include <vector>
 
-#include "thirdparty/gflags/gflags_declare.h"
+#include "gflags/gflags_declare.h"
 
 #include "flare/base/expected.h"
 #include "flare/base/function.h"

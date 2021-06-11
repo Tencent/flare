@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 #include "flare/init.h"
 

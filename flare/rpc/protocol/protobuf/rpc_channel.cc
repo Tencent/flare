@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "opentracing/ext/tags.h"
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/buffer/zero_copy_stream.h"
 #include "flare/base/callback.h"

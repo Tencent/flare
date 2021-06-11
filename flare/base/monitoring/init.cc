@@ -21,8 +21,8 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/yaml-cpp/yaml.h"
+#include "gflags/gflags.h"
+#include "yaml-cpp/yaml.h"
 
 #include "flare/base/internal/hash_map.h"
 #include "flare/base/monitoring/dispatcher.h"

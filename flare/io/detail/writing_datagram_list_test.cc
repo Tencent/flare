@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/io/util/socket.h"
 #include "flare/testing/endpoint.h"

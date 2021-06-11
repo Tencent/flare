@@ -15,7 +15,7 @@
 #include <functional>
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/buffer/compression_output_stream.h"
 #include "flare/base/compression.h"

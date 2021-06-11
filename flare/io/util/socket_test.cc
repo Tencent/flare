@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/testing/endpoint.h"
 #include "flare/testing/main.h"

@@ -20,7 +20,7 @@
 #include <utility>
 
 #include "opentracing/ext/tags.h"
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/exposed_var.h"
 #include "flare/base/internal/cpu.h"

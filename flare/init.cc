@@ -16,9 +16,9 @@
 
 #include <sys/signal.h>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/glog/logging.h"
-#include "thirdparty/glog/raw_logging.h"
+#include "gflags/gflags.h"
+#include "glog/logging.h"
+#include "glog/raw_logging.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/internal/background_task_host.h"

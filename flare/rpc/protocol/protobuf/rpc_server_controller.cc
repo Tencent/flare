@@ -19,7 +19,7 @@
 #include <optional>
 #include <string>
 
-#include "thirdparty/protobuf-3.4.1/src/google/protobuf/empty.pb.h"
+#include "protobuf-3.4.1/src/google/protobuf/empty.pb.h"
 
 #include "flare/base/logging.h"
 

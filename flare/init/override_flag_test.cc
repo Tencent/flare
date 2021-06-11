@@ -14,8 +14,8 @@
 
 #include "flare/init/override_flag.h"
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/testing/main.h"
 

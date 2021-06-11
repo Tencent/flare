@@ -16,8 +16,8 @@
 
 #include <optional>
 
-#include "thirdparty/protobuf/descriptor.h"
-#include "thirdparty/protobuf/descriptor.pb.h"
+#include "protobuf/descriptor.h"
+#include "protobuf/descriptor.pb.h"
 
 #include "flare/base/logging.h"
 #include "flare/rpc/rpc_options.pb.h"

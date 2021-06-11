@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare::experimental {
 

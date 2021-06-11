@@ -17,7 +17,7 @@
 #include <atomic>
 #include <thread>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/fiber/detail/testing.h"
 #include "flare/fiber/this_fiber.h"

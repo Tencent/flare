@@ -15,7 +15,7 @@
 #ifndef FLARE_RPC_PROTOCOL_HTTP_BUILTIN_RPC_STATISTICS_HANDLER_H_
 #define FLARE_RPC_PROTOCOL_HTTP_BUILTIN_RPC_STATISTICS_HANDLER_H_
 
-#include "thirdparty/jsoncpp/value.h"
+#include "jsoncpp/value.h"
 
 #include "flare/base/function.h"
 #include "flare/rpc/http_handler.h"

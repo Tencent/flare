@@ -14,8 +14,8 @@
 
 #include "flare/base/option.h"
 
-#include "thirdparty/benchmark/benchmark.h"
-#include "thirdparty/gflags/gflags.h"
+#include "benchmark/benchmark.h"
+#include "gflags/gflags.h"
 
 // Run on (76 X 2494.14 MHz CPU s)
 // CPU Caches:

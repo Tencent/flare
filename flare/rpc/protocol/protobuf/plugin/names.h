@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "thirdparty/protobuf/descriptor.h"
+#include "protobuf/descriptor.h"
 
 #include "flare/rpc/protocol/protobuf/plugin/code_writer.h"
 

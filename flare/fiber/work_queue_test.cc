@@ -14,7 +14,7 @@
 
 #include "flare/fiber/work_queue.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/fiber/async.h"
 #include "flare/fiber/detail/testing.h"

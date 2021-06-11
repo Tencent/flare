@@ -14,7 +14,7 @@
 
 #include "flare/base/experimental/seqlocked.h"
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 // x86-64 (Skylake):
 //

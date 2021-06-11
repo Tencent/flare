@@ -18,10 +18,10 @@
 #include <string_view>
 #include <vector>
 
-#include "thirdparty/jsoncpp/reader.h"
-#include "thirdparty/jsoncpp/writer.h"
-#include "thirdparty/protobuf/descriptor.h"
-#include "thirdparty/protobuf/message.h"
+#include "jsoncpp/reader.h"
+#include "jsoncpp/writer.h"
+#include "protobuf/descriptor.h"
+#include "protobuf/message.h"
 
 #include "flare/base/string.h"
 

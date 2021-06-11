@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "thirdparty/protobuf/service.h"
+#include "protobuf/service.h"
 
 #include "flare/base/net/endpoint.h"
 

@@ -15,7 +15,7 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/logging.h"
 #include "flare/init/override_flag.h"

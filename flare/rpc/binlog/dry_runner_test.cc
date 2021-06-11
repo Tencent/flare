@@ -16,8 +16,8 @@
 
 #include <typeinfo>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "googletest/gtest/gtest.h"
 
 using namespace std::literals;
 

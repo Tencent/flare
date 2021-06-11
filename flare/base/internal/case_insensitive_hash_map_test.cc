@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare::internal {
 

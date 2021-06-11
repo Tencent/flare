@@ -23,7 +23,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/internal/annotation.h"
 #include "flare/base/internal/cpu.h"

@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/copyable_atomic.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare::internal {
 

@@ -18,8 +18,8 @@
 #include <string>
 #include <typeinfo>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/string.h"
 #include "flare/init/override_flag.h"

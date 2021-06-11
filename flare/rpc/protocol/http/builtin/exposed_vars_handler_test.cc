@@ -14,8 +14,8 @@
 
 #include "flare/rpc/protocol/http/builtin/exposed_vars_handler.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "googletest/gtest/gtest.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/exposed_var.h"
 

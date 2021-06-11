@@ -14,7 +14,7 @@
 
 #include <sys/signal.h>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/callback.h"
 #include "flare/base/random.h"

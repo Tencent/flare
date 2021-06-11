@@ -14,7 +14,7 @@
 
 #include "flare/fiber/fiber_local.h"
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 #include "flare/init.h"
 

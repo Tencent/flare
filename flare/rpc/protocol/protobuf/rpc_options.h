@@ -17,7 +17,7 @@
 
 #include <optional>
 
-#include "thirdparty/protobuf/service.h"
+#include "protobuf/service.h"
 
 // To be compatible with Poppy's RPC options (`common/rpc/rpc_options.proto`),
 // we need to either:

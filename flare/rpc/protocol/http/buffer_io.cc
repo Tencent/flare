@@ -24,7 +24,7 @@
 #include <variant>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/string.h"

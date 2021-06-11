@@ -14,9 +14,9 @@
 
 #include "flare/testing/main.h"
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/glog/logging.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "glog/logging.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/init.h"
 

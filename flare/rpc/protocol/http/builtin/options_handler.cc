@@ -17,8 +17,8 @@
 #include <memory>
 #include <string>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "gflags/gflags.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/option.h"
 #include "flare/base/string.h"

@@ -14,8 +14,8 @@
 
 #include "flare/net/http/query_string.h"
 
-#include "thirdparty/googletest/gmock/gmock.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gmock/gmock.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/string.h"
 #include "flare/net/http/http_request.h"

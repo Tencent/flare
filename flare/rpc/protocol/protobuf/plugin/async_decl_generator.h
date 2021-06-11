@@ -15,7 +15,7 @@
 #ifndef FLARE_RPC_PROTOCOL_PROTOBUF_PLUGIN_ASYNC_DECL_GENERATOR_H_
 #define FLARE_RPC_PROTOCOL_PROTOBUF_PLUGIN_ASYNC_DECL_GENERATOR_H_
 
-#include "thirdparty/protobuf/descriptor.h"
+#include "protobuf/descriptor.h"
 
 #include "flare/rpc/protocol/protobuf/plugin/code_writer.h"
 

@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/index_alloc.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare::internal {
 

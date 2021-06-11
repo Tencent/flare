@@ -14,7 +14,7 @@
 
 #include "flare/base/option/proto_parser.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/testing/message.pb.h"
 

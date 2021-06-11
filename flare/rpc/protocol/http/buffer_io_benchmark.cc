@@ -14,7 +14,7 @@
 
 #include "flare/rpc/protocol/http/buffer_io.h"
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 #include "flare/base/logging.h"
 #include "flare/net/http/http_headers.h"

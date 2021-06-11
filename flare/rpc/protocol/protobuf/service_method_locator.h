@@ -26,9 +26,9 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/protobuf/descriptor.h"
-#include "thirdparty/protobuf/message.h"
-#include "thirdparty/protobuf/service.h"
+#include "protobuf/descriptor.h"
+#include "protobuf/message.h"
+#include "protobuf/service.h"
 
 #include "flare/base/erased_ptr.h"
 #include "flare/base/function.h"

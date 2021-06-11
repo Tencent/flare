@@ -14,7 +14,7 @@
 
 #include "flare/net/hbase/hbase_channel.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/net/hbase/hbase_client_controller.h"
 #include "flare/net/hbase/hbase_server_controller.h"

@@ -16,7 +16,7 @@
 
 #include <chrono>
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 using namespace std::literals;
 

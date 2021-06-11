@@ -14,7 +14,7 @@
 
 #include "flare/base/id_alloc.h"
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 namespace flare {
 

@@ -14,7 +14,7 @@
 
 #include "flare/base/experimental/bloom_filter.h"
 
-#include "thirdparty/xxhash/xxhash.h"
+#include "xxhash/xxhash.h"
 
 namespace flare::experimental::bloom_filter::detail {
 

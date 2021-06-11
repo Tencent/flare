@@ -22,9 +22,9 @@
 #include <memory>
 #include <string>
 
-#include "thirdparty/gflags/gflags_declare.h"
-#include "thirdparty/googletest/gtest/gtest_prod.h"
-#include "thirdparty/protobuf/service.h"
+#include "gflags/gflags_declare.h"
+#include "googletest/gtest/gtest_prod.h"
+#include "protobuf/service.h"
 
 #include "flare/base/internal/lazy_init.h"
 #include "flare/base/ref_ptr.h"

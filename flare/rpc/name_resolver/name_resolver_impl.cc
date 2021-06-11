@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/logging.h"
 

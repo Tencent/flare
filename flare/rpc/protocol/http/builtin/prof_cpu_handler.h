@@ -19,7 +19,7 @@
 #include <mutex>
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest_prod.h"
+#include "googletest/gtest/gtest_prod.h"
 
 #include "flare/rpc/http_handler.h"
 

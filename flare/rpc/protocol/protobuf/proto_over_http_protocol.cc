@@ -18,8 +18,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "thirdparty/protobuf/text_format.h"
-#include "thirdparty/protobuf/util/json_util.h"
+#include "protobuf/text_format.h"
+#include "protobuf/util/json_util.h"
 
 #include "flare/base/buffer/zero_copy_stream.h"
 #include "flare/base/down_cast.h"

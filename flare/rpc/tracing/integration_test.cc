@@ -18,9 +18,9 @@
 #include <vector>
 
 #include "opentracing/ext/tags.h"
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gmock/gmock-matchers.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "googletest/gmock/gmock-matchers.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/overloaded.h"
 #include "flare/fiber/this_fiber.h"

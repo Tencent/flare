@@ -23,9 +23,9 @@
 #include <atomic>
 #include <string>
 
-#include "thirdparty/fmt/format.h"
-#include "thirdparty/fmt/ostream.h"
-#include "thirdparty/glog/logging.h"
+#include "fmt/format.h"
+#include "fmt/ostream.h"
+#include "glog/logging.h"
 
 #include "flare/base/internal/macro.h"
 #include "flare/base/likely.h"

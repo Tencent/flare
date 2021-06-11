@@ -24,8 +24,8 @@
 #include <utility>
 
 #include "gperftools/malloc_extension.h"
-#include "thirdparty/glog/logging.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "glog/logging.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/string.h"
 #include "flare/rpc/builtin/detail/prof_utility.h"

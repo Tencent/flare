@@ -31,7 +31,7 @@
 #include "flare/fiber/detail/scheduling_group.h"
 #include "flare/fiber/detail/stack_allocator.h"
 #include "flare/fiber/detail/waitable.h"
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 DECLARE_int32(flare_fiber_stack_size);
 

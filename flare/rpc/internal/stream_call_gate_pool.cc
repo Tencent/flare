@@ -18,7 +18,7 @@
 #include <mutex>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/exposed_var.h"
 #include "flare/base/hazptr.h"

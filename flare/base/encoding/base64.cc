@@ -18,7 +18,7 @@
 #include <string>
 #include <string_view>
 
-#include "thirdparty/openssl/evp.h"
+#include "openssl/evp.h"
 
 #include "flare/base/logging.h"
 

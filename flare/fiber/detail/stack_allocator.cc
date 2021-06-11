@@ -19,7 +19,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/internal/annotation.h"
 #include "flare/base/logging.h"

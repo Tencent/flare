@@ -21,8 +21,8 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/jsoncpp/json.h"
-#include "thirdparty/protobuf/descriptor.h"
+#include "jsoncpp/json.h"
+#include "protobuf/descriptor.h"
 
 #include "flare/base/internal/annotation.h"
 #include "flare/base/never_destroyed.h"

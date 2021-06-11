@@ -14,7 +14,7 @@
 
 #include "flare/base/crypto/md5.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/encoding.h"

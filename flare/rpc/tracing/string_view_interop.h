@@ -17,7 +17,7 @@
 
 #include <string_view>
 
-#include "thirdparty/opentracing-cpp/span.h"  // FIXME: `opentracing/string_view.h`
+#include "opentracing-cpp/span.h"  // FIXME: `opentracing/string_view.h`
 
 // It's unfortunate that `opentracing-cpp` comes with its own `string_view`, and
 // does not interoperate with `std::`'s well, so we provide some helpers here.

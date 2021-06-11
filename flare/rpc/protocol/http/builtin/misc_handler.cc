@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "thirdparty/jsoncpp/json.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/string.h"
 

@@ -30,7 +30,7 @@
 #include <sys/resource.h>
 #include <sys/time.h>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/logging.h"
 #include "flare/base/string.h"

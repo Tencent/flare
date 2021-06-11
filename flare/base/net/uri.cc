@@ -21,7 +21,7 @@
 #include <string_view>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/experimental/byte_set.h"
 #include "flare/base/string.h"

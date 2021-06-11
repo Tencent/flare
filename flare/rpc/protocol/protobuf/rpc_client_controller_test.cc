@@ -21,7 +21,7 @@
 #include <chrono>
 #include <thread>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/callback.h"
 #include "flare/base/string.h"

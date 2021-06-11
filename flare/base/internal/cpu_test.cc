@@ -14,8 +14,8 @@
 
 #include "flare/base/internal/cpu.h"
 
-#include "thirdparty/googletest/gmock/gmock-matchers.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gmock/gmock-matchers.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare::internal {
 

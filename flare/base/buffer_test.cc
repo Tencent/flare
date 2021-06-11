@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/init/override_flag.h"
 #include "flare/testing/main.h"

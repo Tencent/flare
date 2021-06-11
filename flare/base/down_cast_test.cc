@@ -14,7 +14,7 @@
 
 #include "flare/base/down_cast.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare {
 

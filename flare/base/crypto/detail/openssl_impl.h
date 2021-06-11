@@ -20,7 +20,7 @@
 #include <string>
 #include <string_view>
 
-#include "thirdparty/openssl/hmac.h"
+#include "openssl/hmac.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/logging.h"

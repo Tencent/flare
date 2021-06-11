@@ -16,7 +16,7 @@
 
 #include <chrono>
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 // Run on (76 X 2494.14 MHz CPU s)
 // CPU Caches:

@@ -14,7 +14,7 @@
 
 #include "flare/base/deferred.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 using namespace std::literals;
 

@@ -14,7 +14,7 @@
 
 #include "flare/base/crypto/md5.h"
 
-#include "thirdparty/openssl/md5.h"
+#include "openssl/md5.h"
 
 #include "flare/base/crypto/detail/openssl_impl.h"
 

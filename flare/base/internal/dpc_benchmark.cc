@@ -16,7 +16,7 @@
 
 #include <chrono>
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 #include "flare/base/internal/background_task_host.h"
 #include "flare/init.h"

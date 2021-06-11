@@ -21,8 +21,8 @@
 #include <memory>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/protobuf/descriptor.h"
+#include "gflags/gflags.h"
+#include "protobuf/descriptor.h"
 
 #include "flare/base/callback.h"
 #include "flare/base/down_cast.h"

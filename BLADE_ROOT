@@ -2,11 +2,17 @@ def get_env(s):
     import os
     return os.environ[s] if s in os.environ else None
 
+
+def get_build_dir():
+    return 'build%d_%s' % (build_target.bits,
+                           'debug' if build_target.is_debug() else 'release')
+
+
 global_config(
-    duplicated_source_action = 'error',
-    test_timeout = 600,  # In seconds
-    glob_error_severity = 'error',
-    legacy_public_targets = load_value('legacy_public_targets.conf'),
+    duplicated_source_action='error',
+    test_timeout=600,  # In seconds
+    glob_error_severity='error',
+    legacy_public_targets=load_value('legacy_public_targets.conf'),
 )
 
 cc_test_config(
@@ -21,7 +27,7 @@ cc_test_config(
     gperftools_libs='thirdparty/gperftools:tcmalloc',
     gtest_libs=['thirdparty/googletest:gtest', '#pthread'],
     gtest_main_libs=['thirdparty/googletest:gtest_main'],
-    pprof_path = 'thirdparty/gperftools/bin/pprof',
+    pprof_path='thirdparty/gperftools/bin/pprof',
 )
 
 cc_config(
@@ -29,8 +35,8 @@ cc_config(
         '-gdwarf-2',
         '-mcx16' if build_target.arch == 'x86_64' else '',
     ],
-    cflags = '-std=gnu11',
-    cxxflags = [
+    cflags='-std=gnu11',
+    cxxflags=[
         '-std=gnu++2a',
 
         # This option must be applied here. Options applied in `warnings` are
@@ -41,7 +47,7 @@ cc_config(
     ],
 
     # NOTE: Please keep all warnings in order in one same group.
-    warnings = [
+    warnings=[
         '-Werror',
         '-Wall',
         '-Wextra',
@@ -76,7 +82,6 @@ cc_config(
         # Causes too many 'note's when it is disabled due to the size of the code
         '-Wno-misleading-indentation',
         '-Wno-missing-field-initializers',
-
         '-Wno-sign-compare',
         '-Wno-strict-aliasing',
         '-Wno-unused-but-set-variable',
@@ -84,7 +89,7 @@ cc_config(
         '-Wno-unused-parameter',
     ],
     # C++ only warning flags
-    cxx_warnings = [
+    cxx_warnings=[
         '-Wnon-virtual-dtor',
         '-Woverloaded-virtual',
 
@@ -95,49 +100,48 @@ cc_config(
     extra_incs=[
         # for all thirdparty packages
         'thirdparty/',
+        '%s/thirdparty/' % get_build_dir(),
     ],
-    linkflags = [
+    linkflags=[
         # We need this in some platforms for `link_all_symbols=True` to work.
         '-Wl,--no-as-needed',
         '-lpthread',
     ],
-    benchmark_libs = ['//thirdparty/benchmark:benchmark'],
-    benchmark_main_libs = ['//thirdparty/benchmark:benchmark_main'],
-    allowed_undeclared_hdrs = load_value('allowed_undeclared_hdrs.conf'),
+    benchmark_libs=['//thirdparty/benchmark:benchmark'],
+    benchmark_main_libs=['//thirdparty/benchmark:benchmark_main'],
+    allowed_undeclared_hdrs=load_value('allowed_undeclared_hdrs.conf'),
     # header_inclusion_dependencies = True,
-    hdr_dep_missing_severity = 'error',
+    hdr_dep_missing_severity='error',
 )
 
-cc_binary_config(
-    run_lib_paths = ['//thirdparty/jdk/lib'],
-)
+cc_binary_config(run_lib_paths=['//thirdparty/jdk/lib'],)
 
 cc_library_config(
-    generate_dynamic = True,
-    arflags = ['rcsDT'],
-    prebuilt_libpath_pattern = 'lib${bits}',
-    hdrs_missing_severity = 'error',
-    hdrs_missing_suppress = load_value('hdrs_missing_suppress.conf'),
+    generate_dynamic=True,
+    arflags=['rcsDT'],
+    prebuilt_libpath_pattern='lib${bits}',
+    hdrs_missing_severity='error',
+    hdrs_missing_suppress=load_value('hdrs_missing_suppress.conf'),
 )
 
 proto_library_config(
     protoc='thirdparty/protobuf/bin/%s/protoc-3.4.1' % build_target.arch,
     protobuf_libs=['//thirdparty/protobuf:protobuf'],
     protobuf_path='thirdparty',
-    protobuf_incs = 'thirdparty/protobuf-3.4.1/src',
+    protobuf_incs='thirdparty/protobuf-3.4.1/src',
     protoc_direct_dependencies=True,
-    well_known_protos = [
-        "google/protobuf/any.proto",
-        "google/protobuf/api.proto",
-        "google/protobuf/compiler/plugin.proto",
-        "google/protobuf/descriptor.proto",
-        "google/protobuf/duration.proto",
-        "google/protobuf/empty.proto",
-        "google/protobuf/field_mask.proto",
-        "google/protobuf/source_context.proto",
-        "google/protobuf/struct.proto",
-        "google/protobuf/timestamp.proto",
-        "google/protobuf/type.proto",
-        "google/protobuf/wrappers.proto",
+    well_known_protos=[
+        'google/protobuf/any.proto',
+        'google/protobuf/api.proto',
+        'google/protobuf/compiler/plugin.proto',
+        'google/protobuf/descriptor.proto',
+        'google/protobuf/duration.proto',
+        'google/protobuf/empty.proto',
+        'google/protobuf/field_mask.proto',
+        'google/protobuf/source_context.proto',
+        'google/protobuf/struct.proto',
+        'google/protobuf/timestamp.proto',
+        'google/protobuf/type.proto',
+        'google/protobuf/wrappers.proto',
     ],
 )

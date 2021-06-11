@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/chrono.h"
 #include "flare/testing/main.h"

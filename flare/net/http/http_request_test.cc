@@ -17,7 +17,7 @@
 #include <string_view>
 #include <utility>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/rpc/protocol/http/buffer_io.h"
 

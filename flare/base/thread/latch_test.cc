@@ -19,7 +19,7 @@
 #include <memory>
 #include <thread>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/chrono.h"
 

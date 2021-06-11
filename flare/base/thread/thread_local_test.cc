@@ -29,7 +29,7 @@
 #include <thread>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/thread/latch.h"
 

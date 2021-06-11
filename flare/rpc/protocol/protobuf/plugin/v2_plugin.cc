@@ -20,13 +20,13 @@
 #include <sstream>
 #include <string>
 
-#include "thirdparty/glog/logging.h"
-#include "thirdparty/protobuf/compiler/code_generator.h"
-#include "thirdparty/protobuf/compiler/cpp/cpp_helpers.h"
-#include "thirdparty/protobuf/compiler/plugin.h"
-#include "thirdparty/protobuf/compiler/plugin.pb.h"
-#include "thirdparty/protobuf/io/coded_stream.h"
-#include "thirdparty/protobuf/io/zero_copy_stream.h"
+#include "glog/logging.h"
+#include "protobuf/compiler/code_generator.h"
+#include "protobuf/compiler/cpp/cpp_helpers.h"
+#include "protobuf/compiler/plugin.h"
+#include "protobuf/compiler/plugin.pb.h"
+#include "protobuf/io/coded_stream.h"
+#include "protobuf/io/zero_copy_stream.h"
 
 #include "flare/base/encoding/hex.h"
 #include "flare/base/logging.h"

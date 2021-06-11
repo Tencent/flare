@@ -23,9 +23,9 @@
 #include <vector>
 
 #include "opentracing/ext/tags.h"
-#include "thirdparty/googletest/gtest/gtest_prod.h"
-#include "thirdparty/opentracing-cpp/span.h"
-#include "thirdparty/opentracing-cpp/tracer.h"
+#include "googletest/gtest/gtest_prod.h"
+#include "opentracing-cpp/span.h"
+#include "opentracing-cpp/tracer.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/maybe_owning.h"

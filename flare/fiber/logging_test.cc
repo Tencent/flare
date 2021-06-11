@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/logging.h"
 #include "flare/fiber/execution_context.h"

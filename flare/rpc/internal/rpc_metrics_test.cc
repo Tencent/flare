@@ -17,8 +17,8 @@
 #include <chrono>
 #include <thread>
 
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "googletest/gtest/gtest.h"
+#include "jsoncpp/json.h"
 
 #include "flare/testing/echo_service.flare.pb.h"
 #include "flare/testing/main.h"

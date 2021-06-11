@@ -14,7 +14,7 @@
 
 #include <chrono>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/string.h"
 #include "flare/net/http/http_client.h"

@@ -17,7 +17,7 @@
 
 #include <limits>
 
-#include "thirdparty/protobuf/message.h"
+#include "protobuf/message.h"
 
 #include "flare/base/maybe_owning.h"
 #include "flare/base/object_pool.h"

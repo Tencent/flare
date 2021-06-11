@@ -20,10 +20,10 @@
 #include <iostream>
 #include <string>
 
-#include "thirdparty/protobuf/compiler/code_generator.h"
-#include "thirdparty/protobuf/compiler/cpp/cpp_helpers.h"
-#include "thirdparty/protobuf/compiler/plugin.h"
-#include "thirdparty/protobuf/compiler/plugin.pb.h"
+#include "protobuf/compiler/code_generator.h"
+#include "protobuf/compiler/cpp/cpp_helpers.h"
+#include "protobuf/compiler/plugin.h"
+#include "protobuf/compiler/plugin.pb.h"
 
 #include "flare/base/logging.h"
 #include "flare/base/string.h"

@@ -15,7 +15,7 @@
 #ifndef FLARE_RPC_PROTOCOL_PROTOBUF_MOCK_CHANNEL_H_
 #define FLARE_RPC_PROTOCOL_PROTOBUF_MOCK_CHANNEL_H_
 
-#include "thirdparty/protobuf/service.h"
+#include "protobuf/service.h"
 
 namespace flare::protobuf::detail {
 

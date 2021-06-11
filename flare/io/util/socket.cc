@@ -21,7 +21,7 @@
 
 #include <fstream>
 
-#include "thirdparty/fmt/format.h"
+#include "fmt/format.h"
 
 #include "flare/base/logging.h"
 

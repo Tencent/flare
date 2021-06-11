@@ -21,7 +21,7 @@
 #include <string>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/fiber/future.h"
 #include "flare/net/redis/redis_channel.h"

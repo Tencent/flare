@@ -19,8 +19,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "thirdparty/googletest/gtest/gtest_prod.h"
-#include "thirdparty/protobuf/service.h"
+#include "googletest/gtest/gtest_prod.h"
+#include "protobuf/service.h"
 
 #include "flare/net/hbase/proto/rpc.pb.h"
 #include "flare/rpc/protocol/stream_protocol.h"

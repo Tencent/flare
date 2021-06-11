@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 // Note: We do two context switches each round in `Benchmark_JumpContext`, the
 // actual cost of `jump_context` is half of the timings shown below.

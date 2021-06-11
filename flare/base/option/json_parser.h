@@ -18,7 +18,7 @@
 #include <optional>
 #include <string>
 
-#include "thirdparty/jsoncpp/value.h"
+#include "jsoncpp/value.h"
 
 namespace flare::option {
 

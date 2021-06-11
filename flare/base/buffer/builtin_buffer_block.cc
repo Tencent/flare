@@ -17,7 +17,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/object_pool.h"
 #include "flare/init/on_init.h"

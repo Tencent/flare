@@ -14,7 +14,7 @@
 
 #include "flare/net/cos/ops/object/get_object.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 namespace flare {
 

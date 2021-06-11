@@ -16,7 +16,7 @@
 
 #include <variant>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/rpc/protocol/protobuf/message.h"
 #include "flare/testing/message.pb.h"

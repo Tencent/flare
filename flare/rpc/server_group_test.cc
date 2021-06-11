@@ -17,7 +17,7 @@
 #include <memory>
 #include <utility>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/net/http/http_client.h"
 #include "flare/rpc/http_handler.h"

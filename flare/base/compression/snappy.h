@@ -15,7 +15,7 @@
 #ifndef FLARE_BASE_COMPRESSION_SNAPPY_H_
 #define FLARE_BASE_COMPRESSION_SNAPPY_H_
 
-#include "thirdparty/snappy/snappy.h"
+#include "snappy/snappy.h"
 
 #include "flare/base/compression/compression.h"
 

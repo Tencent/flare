@@ -14,7 +14,7 @@
 
 #include "flare/rpc/protocol/http/http11_protocol.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/rpc/protocol/http/message.h"
 #include "flare/testing/main.h"

@@ -12,8 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/protobuf/util/message_differencer.h"
+#include "googletest/gtest/gtest.h"
+#include "protobuf/util/message_differencer.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/init/on_init.h"

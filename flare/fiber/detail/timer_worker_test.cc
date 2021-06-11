@@ -18,7 +18,7 @@
 #include <thread>
 #include <utility>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "googletest/gtest/gtest.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/thread/latch.h"

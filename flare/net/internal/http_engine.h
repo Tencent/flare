@@ -18,7 +18,7 @@
 #include <chrono>
 #include <string>
 
-#include "thirdparty/curl/curl.h"
+#include "curl/curl.h"
 
 #include "flare/base/expected.h"
 #include "flare/base/function.h"
