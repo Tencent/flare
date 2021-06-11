@@ -97,7 +97,9 @@ cc_config(
         'thirdparty/',
     ],
     linkflags = [
-        '-Wl,--no-as-needed -lpthread -Wl,--as-needed',
+        # We need this in some platforms for `link_all_symbols=True` to work.
+        '-Wl,--no-as-needed',
+        '-lpthread',
     ],
     benchmark_libs = ['//thirdparty/benchmark:benchmark'],
     benchmark_main_libs = ['//thirdparty/benchmark:benchmark_main'],
