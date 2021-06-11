@@ -12,7 +12,7 @@ global_config(
     duplicated_source_action='error',
     test_timeout=600,  # In seconds
     glob_error_severity='error',
-    legacy_public_targets=load_value('legacy_public_targets.conf'),
+    legacy_public_targets=load_value('build/blade/legacy_public_targets.conf'),
 )
 
 cc_test_config(
@@ -109,7 +109,7 @@ cc_config(
     ],
     benchmark_libs=['//thirdparty/benchmark:benchmark'],
     benchmark_main_libs=['//thirdparty/benchmark:benchmark_main'],
-    allowed_undeclared_hdrs=load_value('allowed_undeclared_hdrs.conf'),
+    allowed_undeclared_hdrs=load_value('build/blade/allowed_undeclared_hdrs.conf'),
     # header_inclusion_dependencies = True,
     hdr_dep_missing_severity='error',
 )
@@ -121,7 +121,7 @@ cc_library_config(
     arflags=['rcsDT'],
     prebuilt_libpath_pattern='lib${bits}',
     hdrs_missing_severity='error',
-    hdrs_missing_suppress=load_value('hdrs_missing_suppress.conf'),
+    hdrs_missing_suppress=load_value('build/blade/hdrs_missing_suppress.conf'),
 )
 
 proto_library_config(
