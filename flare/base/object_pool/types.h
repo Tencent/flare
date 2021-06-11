@@ -99,47 +99,64 @@ const TypeDescriptor* GetTypeDesc() {
 // converted to `ErasedPtr`), or destroyed by this class's dtor.
 class FixedVector {
  public:
-  using NakedPtr = std::pair<void*, void (*)(void*)>;
-
   FixedVector() = default;
-  explicit FixedVector(std::size_t size)
-      : objects_(std::make_unique<NakedPtr[]>(size)),
+  explicit FixedVector(void (*deleter)(void*), std::size_t size)
+      : deleter_(deleter),
+        objects_(std::make_unique<void*[]>(size)),
         current_(objects_.get()),
-        end_(objects_.get() + size) {}
+        end_(objects_.get() + size) {
+    FLARE_CHECK(deleter_);
+  }
 
   ~FixedVector() {
     while (!empty()) {
-      auto&& [p, deleter] = *pop_back();
-      deleter(p);
+      deleter_(pop_back());
     }
 
     // We **hope** after destruction, calls to `full()` would return `true`.
     //
     // Frankly it's U.B.. Yet we  need this behavior when thread is leaving, so
     // as to deal with thread-local destruction order issues.
-    *const_cast<NakedPtr* volatile*>(&current_) =
-        *const_cast<NakedPtr* volatile*>(&end_) = nullptr;
+    *const_cast<void** volatile*>(&current_) =
+        *const_cast<void** volatile*>(&end_) = nullptr;
   }
 
   bool empty() const noexcept { return current_ == objects_.get(); }
   std::size_t size() const noexcept { return current_ - objects_.get(); }
   bool full() const noexcept { return current_ == end_; }
-  template <class... Ts>
-  void emplace_back(Ts&&... args) noexcept {
+  void emplace_back(void* ptr) noexcept {
     FLARE_DCHECK_LT(current_, end_);
     FLARE_DCHECK_GE(current_, objects_.get());
-    *current_++ = {std::forward<Ts>(args)...};
+    *current_++ = ptr;
   }
-  NakedPtr* pop_back() noexcept {
+  void* pop_back() noexcept {
     FLARE_DCHECK_LE(current_, end_);
     FLARE_DCHECK_GT(current_, objects_.get());
-    return --current_;
+    return *--current_;
+  }
+
+  // Move elements from `from`.
+  void refill_from(void** from, std::size_t count) {
+    FLARE_DCHECK(empty());
+    FLARE_DCHECK_LE(count, end_ - objects_.get());
+    memcpy(objects_.get(), from, count * sizeof(void*));
+    current_ = objects_.get() + count;
+  }
+
+  // Move `count` elements out from `*this`. Returns pointer to the first
+  // element moved.
+  void** move_out(std::size_t count) {
+    FLARE_DCHECK_LE(count, size());
+    current_ -= count;
+    return current_;
   }
 
  private:
-  std::unique_ptr<NakedPtr[]> objects_;
-  NakedPtr* current_;
-  NakedPtr* end_;
+  void (*deleter_)(void*);
+
+  std::unique_ptr<void*[]> objects_;
+  void** current_;
+  void** end_;
 };
 
 }  // namespace flare::object_pool::detail
