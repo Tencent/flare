@@ -54,7 +54,7 @@ class OptionImpl {
              Function<bool(T)> validator, bool fixed)
       : provider_(provider),
         name_(std::move(name)),
-        value_(std::move(default_value)) {
+        value_(ParseDefaultValue(std::move(default_value))) {
     option_id_ = option::OptionService::Instance()->RegisterOptionWatcher<T>(
         provider, &name_, fixed,
         [=](T value) { return OnChanged(std::move(value)); });
@@ -90,6 +90,14 @@ class OptionImpl {
     }
     value_.Emplace(std::move(*parsed));
     return true;
+  }
+
+  // Use `Parser` to parse the default value. This cannot fail, otherwise we
+  // won't be able to initialize in a sane way.
+  static parsed_t ParseDefaultValue(T&& default_value) {
+    auto parsed = Parser{}.TryParse(std::move(default_value));
+    FLARE_CHECK(parsed, "Value parser failed to parse the default value.");
+    return *parsed;
   }
 
  private:
