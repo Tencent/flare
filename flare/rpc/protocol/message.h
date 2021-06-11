@@ -127,10 +127,7 @@ class MessageFactory {
   static const MessageFactory* null_factory;
 };
 
-template <>
-struct is_enum_bitmask_enabled<Message::Type> {
-  static constexpr auto value = true;
-};
+FLARE_DEFINE_ENUM_BITMASK_OPS(Message::Type);
 
 }  // namespace flare
 

@@ -19,19 +19,6 @@
 
 namespace flare {
 
-// Specialize this trait and specify `value` to true for enabling bit-fields
-// operators.
-//
-// `T` must be an enumeration type.
-template <class T>
-struct is_enum_bitmask_enabled {
-  static constexpr bool value = false;
-};
-
-}  // namespace flare
-
-namespace flare {
-
 // But why don't you simply use `std::underlying_type_t<T>(v)`, instead of using
 // this one?
 template <class T, class = std::enable_if_t<std::is_enum_v<T>>>
@@ -41,60 +28,44 @@ constexpr auto underlying_value(T v) {
 
 }  // namespace flare
 
-// Intentionally put into global namespace.
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T operator|(T left, T right) {
-  return static_cast<T>(flare::underlying_value(left) |
-                        flare::underlying_value(right));
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T& operator|=(T& left, T right) {
-  left = left | right;
-  return left;
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T operator&(T left, T right) {
-  return static_cast<T>(flare::underlying_value(left) &
-                        flare::underlying_value(right));
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T& operator&=(T& left, T right) {
-  left = left & right;
-  return left;
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T operator^(T left, T right) {
-  return static_cast<T>(flare::underlying_value(left) ^
-                        flare::underlying_value(right));
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T& operator^=(T& left, T right) {
-  left = left ^ right;
-  return left;
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr T operator~(T value) {
-  return static_cast<T>(~flare::underlying_value(value));
-}
-
-template <class T,
-          class = std::enable_if_t<flare::is_enum_bitmask_enabled<T>::value>>
-constexpr bool operator!(T value) {
-  return !flare::underlying_value(value);
-}
+// Allow `Type` to be used as a bitmask.
+#define FLARE_DEFINE_ENUM_BITMASK_OPS(Type)                    \
+  constexpr Type operator|(Type left, Type right) {            \
+    return static_cast<Type>(flare::underlying_value(left) |   \
+                             flare::underlying_value(right));  \
+  }                                                            \
+                                                               \
+  constexpr Type& operator|=(Type& left, Type right) {         \
+    left = left | right;                                       \
+    return left;                                               \
+  }                                                            \
+                                                               \
+  constexpr Type operator&(Type left, Type right) {            \
+    return static_cast<Type>(flare::underlying_value(left) &   \
+                             flare::underlying_value(right));  \
+  }                                                            \
+                                                               \
+  constexpr Type& operator&=(Type& left, Type right) {         \
+    left = left & right;                                       \
+    return left;                                               \
+  }                                                            \
+                                                               \
+  constexpr Type operator^(Type left, Type right) {            \
+    return static_cast<Type>(flare::underlying_value(left) ^   \
+                             flare::underlying_value(right));  \
+  }                                                            \
+                                                               \
+  constexpr Type& operator^=(Type& left, Type right) {         \
+    left = left ^ right;                                       \
+    return left;                                               \
+  }                                                            \
+                                                               \
+  constexpr Type operator~(Type value) {                       \
+    return static_cast<Type>(~flare::underlying_value(value)); \
+  }                                                            \
+                                                               \
+  constexpr bool operator!(Type value) {                       \
+    return !flare::underlying_value(value);                    \
+  }
 
 #endif  // FLARE_BASE_ENUM_H_
