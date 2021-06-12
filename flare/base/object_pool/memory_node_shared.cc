@@ -40,7 +40,18 @@ namespace flare::object_pool::detail::memory_node_shared {
 struct Block {
   flare::internal::DoublyLinkedListEntry chain;
   std::chrono::steady_clock::time_point transferred{ReadCoarseSteadyClock()};
-  std::vector<ErasedPtr> objects;
+  std::vector<void*> objects;
+  void (*object_deleter)(void*);
+
+  explicit Block(void (*deleter)(void*)) : object_deleter(deleter) {
+    FLARE_CHECK(object_deleter);
+  }
+
+  ~Block() {
+    for (auto&& e : objects) {
+      object_deleter(e);
+    }
+  }
 };
 
 struct alignas(hardware_destructive_interference_size) Bucket {
@@ -309,8 +320,9 @@ void RegisterGlobalPoolDescriptor(GlobalPoolDescriptor* desc) {
 }
 
 LocalPoolDescriptor CreateLocalPoolDescriptor(GlobalPoolDescriptor* gp_desc) {
-  return LocalPoolDescriptor{.objects =
-                                 FixedVector(gp_desc->transfer_threshold)};
+  return LocalPoolDescriptor{
+      .objects =
+          FixedVector(gp_desc->type->destroy, gp_desc->transfer_threshold)};
 }
 
 void StartPeriodicalCacheWasher() {
@@ -351,11 +363,12 @@ void* GetSlow(const TypeDescriptor& type, GlobalPoolDescriptor* global,
   }
   auto rc = std::move(transferred->objects.back());
   transferred->objects.pop_back();
-  for (auto&& e : transferred->objects) {
-    local->objects.emplace_back(e.Get(), e.GetDeleter());
-    (void)e.Leak();
-  }
-  return rc.Leak();
+  local->objects.refill_from(transferred->objects.data(),
+                             transferred->objects.size());
+  // Everything here is invalidated. So don't let the destructor to destroy
+  // them.
+  transferred->objects.clear();
+  return rc;
 }
 
 void PutSlow(const TypeDescriptor& type, GlobalPoolDescriptor* global,
@@ -378,6 +391,7 @@ void PutSlow(const TypeDescriptor& type, GlobalPoolDescriptor* global,
     ScopedDeferred _([&] {
       auto now = ReadCoarseSteadyClock().time_since_epoch();
       auto prev_wash = now - kMinimumWashInterval;
+      // FIXME: `bucket.flushing.xchg` will likely introduce cache thrashing.
       if (!bucket.flushing.exchange(true, std::memory_order_relaxed)) {
         ScopedDeferred __([start_tsc = ReadTsc()] {
           sync_washout_delay->Report(TscElapsed(start_tsc, ReadTsc()));
@@ -414,21 +428,19 @@ void PutSlow(const TypeDescriptor& type, GlobalPoolDescriptor* global,
 
     // TODO(luobogao): Does it make sense to pool `Block` (using thread-local
     // cache.)?
-    auto transferring = std::make_unique<Block>();
-
+    auto transferring = std::make_unique<Block>(type.destroy);
     transferring->objects.reserve(global->transfer_batch_size);
-    transferring->objects.emplace_back(ptr, type.destroy);
-    FLARE_CHECK_GE(local->objects.size(), global->transfer_batch_size - 1);
-    for (std::size_t index = 0; index != global->transfer_batch_size - 1;
-         ++index) {
-      auto&& current = local->objects.pop_back();
-      transferring->objects.emplace_back(current->first, current->second);
-    }
+    transferring->objects.emplace_back(ptr);
 
+    auto moving_size = global->transfer_batch_size - 1;
+    FLARE_CHECK_GE(local->objects.size(), moving_size);
+    auto moving = local->objects.move_out(moving_size);
+    transferring->objects.insert(transferring->objects.end(), moving,
+                                 moving + moving_size);
     bucket.Push(std::move(transferring));
   } else {
     FLARE_CHECK(!local->objects.full());
-    local->objects.emplace_back(ptr, type.destroy);
+    local->objects.emplace_back(ptr);
   }
   FLARE_CHECK_LE(local->objects.size(), global->transfer_threshold);
 }
