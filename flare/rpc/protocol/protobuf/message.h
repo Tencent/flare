@@ -142,10 +142,7 @@ struct PoolTraits<rpc::RpcMeta> {
   static void OnGet(rpc::RpcMeta* p) { p->Clear(); }
 };
 
-template <>
-struct is_enum_bitmask_enabled<rpc::MessageFlags> {
-  static constexpr auto value = true;
-};
+FLARE_DEFINE_ENUM_BITMASK_OPS(rpc::MessageFlags);
 
 }  // namespace flare
 

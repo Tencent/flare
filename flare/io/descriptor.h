@@ -185,14 +185,7 @@ class alignas(hardware_destructive_interference_size) Descriptor
   } read_mostly_;
 };
 
-}  // namespace flare
-
-namespace flare {
-
-template <>
-struct is_enum_bitmask_enabled<Descriptor::Event> {
-  static constexpr bool value = true;
-};
+FLARE_DEFINE_ENUM_BITMASK_OPS(Descriptor::Event);
 
 }  // namespace flare
 

@@ -161,6 +161,8 @@ FLARE_DECLARE_CLASS_DEPENDENCY_REGISTRY(client_side_stream_protocol_registry,
 FLARE_DECLARE_CLASS_DEPENDENCY_REGISTRY(server_side_stream_protocol_registry,
                                         StreamProtocol);
 
+FLARE_DEFINE_ENUM_BITMASK_OPS(StreamProtocol::MessageCutStatus);
+
 }  // namespace flare
 
 // Define protocol by its class name.
@@ -194,14 +196,5 @@ FLARE_DECLARE_CLASS_DEPENDENCY_REGISTRY(server_side_stream_protocol_registry,
   FLARE_REGISTER_CLASS_DEPENDENCY_FACTORY(                  \
       flare::server_side_stream_protocol_registry, Name,    \
       [] { return std::make_unique<Implementation>(__VA_ARGS__); })
-
-namespace flare {
-
-template <>
-struct is_enum_bitmask_enabled<StreamProtocol::MessageCutStatus> {
-  static constexpr bool value = true;
-};
-
-}  // namespace flare
 
 #endif  // FLARE_RPC_PROTOCOL_STREAM_PROTOCOL_H_
