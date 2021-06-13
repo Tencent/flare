@@ -16,7 +16,7 @@
 
 #include "gflags/gflags.h"
 #include "glog/logging.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/init.h"
 

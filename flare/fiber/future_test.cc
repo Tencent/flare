@@ -17,8 +17,8 @@
 #include <chrono>
 #include <vector>
 
-#include "googletest/gmock/gmock.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/random.h"
 #include "flare/fiber/async.h"

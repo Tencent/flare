@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "google/protobuf/util/message_differencer.h"
 
 #include "flare/base/down_cast.h"

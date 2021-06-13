@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "gflags/gflags.h"
-#include "googletest/gmock/gmock-matchers.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/monitoring/monitoring_system.h"

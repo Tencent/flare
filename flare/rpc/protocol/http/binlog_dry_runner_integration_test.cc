@@ -16,7 +16,7 @@
 #include <string>
 #include <typeinfo>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "jsoncpp/json.h"
 
 #include "flare/base/buffer.h"

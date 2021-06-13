@@ -16,8 +16,8 @@
 
 #include <string>
 
-#include "googletest/gmock/gmock.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/buffer.h"
 #include "flare/net/http/http_headers.h"

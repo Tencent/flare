@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/lazy_init.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::internal {
 

@@ -17,7 +17,7 @@
 #include <string>
 #include <string_view>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/random.h"
 #include "flare/base/string.h"

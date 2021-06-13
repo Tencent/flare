@@ -14,7 +14,7 @@
 
 #include "flare/net/http/http_message.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::http {
 

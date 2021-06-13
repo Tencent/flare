@@ -16,7 +16,7 @@
 
 #include <chrono>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/testing/main.h"
 

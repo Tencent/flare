@@ -19,7 +19,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 #include "google/protobuf/service.h"
 
 #include "flare/net/hbase/proto/rpc.pb.h"

@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "opentracing/ext/tags.h"
-#include "googletest/gmock/gmock-matchers.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 #include "flare/rpc/tracing/framework_tags.h"
 #include "flare/rpc/tracing/string_view_interop.h"

@@ -19,7 +19,7 @@
 #include <typeinfo>
 
 #include "gflags/gflags.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/string.h"
 #include "flare/init/override_flag.h"

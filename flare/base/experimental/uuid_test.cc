@@ -14,7 +14,7 @@
 
 #include "flare/base/experimental/uuid.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/string.h"
 

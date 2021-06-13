@@ -18,7 +18,7 @@
 #include <thread>
 #include <vector>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/fiber/detail/testing.h"
 #include "flare/fiber/fiber.h"

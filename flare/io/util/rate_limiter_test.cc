@@ -22,7 +22,7 @@
 
 #include "flare/base/chrono.h"
 #include "flare/base/random.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

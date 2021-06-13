@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "gflags/gflags.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/option/json_parser.h"
 #include "flare/base/option/option_provider.h"

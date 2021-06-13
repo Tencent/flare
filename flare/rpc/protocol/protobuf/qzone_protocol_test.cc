@@ -14,7 +14,7 @@
 
 #include "flare/rpc/protocol/protobuf/qzone_protocol.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "google/protobuf/util/message_differencer.h"
 
 #include "flare/init/on_init.h"

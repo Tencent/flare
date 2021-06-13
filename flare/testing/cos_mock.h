@@ -19,7 +19,7 @@
 #include <tuple>
 #include <utility>
 
-#include "googletest/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include "flare/base/demangle.h"
 #include "flare/base/function.h"

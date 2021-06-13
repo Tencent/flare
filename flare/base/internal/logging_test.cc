@@ -17,8 +17,8 @@
 #include <string>
 #include <vector>
 
-#include "googletest/gmock/gmock-matchers.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 namespace foreign_ns {
 

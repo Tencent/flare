@@ -14,7 +14,7 @@
 
 #include "flare/base/experimental/byte_set.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::experimental {
 

@@ -15,7 +15,7 @@
 #include "flare/rpc/protocol/protobuf/std_protocol.h"
 
 #include "google/protobuf/util/message_differencer.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/init/on_init.h"
 #include "flare/rpc/protocol/protobuf/call_context.h"

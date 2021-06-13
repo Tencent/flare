@@ -14,7 +14,7 @@
 
 #include "flare/fiber/execution_context.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/fiber/async.h"
 #include "flare/fiber/future.h"

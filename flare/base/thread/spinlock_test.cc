@@ -17,7 +17,7 @@
 #include <thread>
 
 #include "flare/base/thread/latch.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

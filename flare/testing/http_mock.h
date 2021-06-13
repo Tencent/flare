@@ -18,7 +18,7 @@
 #include <string>
 #include <tuple>
 
-#include "googletest/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include "flare/base/internal/lazy_init.h"
 #include "flare/net/http/http_client.h"

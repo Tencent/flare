@@ -17,7 +17,7 @@
 
 #include <vector>
 
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/align.h"
 #include "flare/base/buffer.h"

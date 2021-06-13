@@ -53,7 +53,8 @@ foreign_cc_library(
 )
 
 cc_library(
-    name = 'gtest_prod',
-    hdrs = 'gtest/gtest_prod.h',
-    visibility = 'PUBLIC',
+    name='gtest_prod',
+    hdrs='gtest/gtest_prod.h',
+    visibility='PUBLIC',
+    export_incs='.',
 )

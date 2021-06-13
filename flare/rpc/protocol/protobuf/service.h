@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "google/protobuf/service.h"
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 #include "jsoncpp/value.h"
 
 #include "flare/base/deferred.h"

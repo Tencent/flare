@@ -20,7 +20,7 @@
 
 #include <string_view>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/deferred.h"
 #include "flare/fiber/async.h"

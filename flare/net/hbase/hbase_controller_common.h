@@ -18,7 +18,7 @@
 #include <chrono>
 #include <string>
 
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 #include "google/protobuf/service.h"
 
 #include "flare/base/buffer.h"

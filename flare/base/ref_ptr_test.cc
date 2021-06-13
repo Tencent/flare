@@ -18,7 +18,7 @@
 #include <chrono>
 #include <thread>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/random.h"

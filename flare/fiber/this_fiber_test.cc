@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "gflags/gflags.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/random.h"
 #include "flare/fiber/detail/testing.h"

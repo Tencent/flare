@@ -14,7 +14,7 @@
 
 #include "flare/base/option/json_parser.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::option {
 

@@ -17,7 +17,7 @@
 #include <iostream>
 
 #include "gflags/gflags.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/option.h"
 

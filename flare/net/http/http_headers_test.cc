@@ -14,8 +14,8 @@
 
 #include "flare/net/http/http_headers.h"
 
-#include "googletest/gmock/gmock.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

@@ -16,7 +16,7 @@
 
 #include <cstddef>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace ns1 {
 

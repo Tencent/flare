@@ -14,7 +14,7 @@
 
 #include "flare/rpc/protocol/http/builtin/prof_cpu_handler.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::rpc::builtin {
 

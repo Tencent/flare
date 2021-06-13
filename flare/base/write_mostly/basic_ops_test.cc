@@ -17,7 +17,7 @@
 #include <atomic>
 #include <vector>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

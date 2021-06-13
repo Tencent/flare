@@ -17,7 +17,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "google/protobuf/util/message_differencer.h"
 
 #include "flare/base/down_cast.h"

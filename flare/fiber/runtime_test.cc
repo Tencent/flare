@@ -17,7 +17,7 @@
 #include <set>
 
 #include "gflags/gflags.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/internal/cpu.h"
 #include "flare/base/thread/latch.h"

@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/background_task_host.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/thread/latch.h"
 

@@ -19,8 +19,8 @@
 
 #include "opentracing/ext/tags.h"
 #include "gflags/gflags.h"
-#include "googletest/gmock/gmock-matchers.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/overloaded.h"
 #include "flare/fiber/this_fiber.h"

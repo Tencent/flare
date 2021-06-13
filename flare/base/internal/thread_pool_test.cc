@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/thread_pool.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

@@ -14,7 +14,7 @@
 
 #include "flare/base/status.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

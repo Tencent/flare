@@ -14,7 +14,7 @@
 
 #include "flare/rpc/builtin/detail/uri_matcher.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::detail {
 

@@ -18,7 +18,7 @@
 #include <string>
 
 #include "google/protobuf/descriptor.pb.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "jsoncpp/reader.h"
 
 #include "flare/base/net/endpoint.h"

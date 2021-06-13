@@ -14,7 +14,7 @@
 
 #include "flare/fiber/detail/fiber_entity.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::fiber::detail {
 

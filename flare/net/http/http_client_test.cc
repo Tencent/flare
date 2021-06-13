@@ -21,7 +21,7 @@
 #include <string>
 
 #include "curl/curl.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/compression.h"
 #include "flare/base/expected.h"

@@ -21,7 +21,7 @@
 #include <string>
 #include <thread>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/random.h"
 #include "flare/io/util/socket.h"

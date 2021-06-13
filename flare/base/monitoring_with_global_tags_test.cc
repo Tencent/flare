@@ -18,7 +18,7 @@
 #include <mutex>
 #include <thread>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/monitoring/monitoring_system.h"

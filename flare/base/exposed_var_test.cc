@@ -14,7 +14,7 @@
 
 #include "flare/base/exposed_var.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 #include "jsoncpp/json.h"
 
 #include "flare/base/write_mostly/metrics.h"

@@ -16,8 +16,8 @@
 
 #include "flare/rpc/protocol/http/http_handler.h"
 
-#include "googletest/gmock/gmock.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/testing/main.h"

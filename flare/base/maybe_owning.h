@@ -18,7 +18,7 @@
 #include <memory>
 #include <utility>
 
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/internal/logging.h"
 

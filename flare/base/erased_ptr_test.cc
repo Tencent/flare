@@ -14,7 +14,7 @@
 
 #include "flare/base/erased_ptr.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

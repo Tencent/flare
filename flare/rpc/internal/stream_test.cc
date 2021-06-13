@@ -22,8 +22,8 @@
 #include "flare/fiber/latch.h"
 #include "flare/fiber/timer.h"
 #include "flare/testing/main.h"
-#include "googletest/gmock/gmock.h"
-#include "googletest/gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

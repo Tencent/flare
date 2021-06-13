@@ -14,7 +14,7 @@
 
 #include "flare/rpc/name_resolver/list.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::name_resolver {
 

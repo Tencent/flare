@@ -14,7 +14,7 @@
 
 #include <chrono>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/internal/cpu.h"

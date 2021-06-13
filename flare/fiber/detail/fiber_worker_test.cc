@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "gflags/gflags.h"
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/internal/cpu.h"
 #include "flare/base/random.h"

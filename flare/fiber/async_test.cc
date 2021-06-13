@@ -14,7 +14,7 @@
 
 #include "flare/fiber/async.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/future.h"
 #include "flare/fiber/detail/testing.h"

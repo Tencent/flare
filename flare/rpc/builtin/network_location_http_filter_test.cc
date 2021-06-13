@@ -14,7 +14,7 @@
 
 #include "flare/rpc/builtin/network_location_http_filter.h"
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/testing/main.h"
 

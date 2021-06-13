@@ -22,7 +22,7 @@
 #include <string>
 
 #include "gflags/gflags_declare.h"
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/status.h"
 #include "flare/rpc/internal/stream_call_gate_pool.h"

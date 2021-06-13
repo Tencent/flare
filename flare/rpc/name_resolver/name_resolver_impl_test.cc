@@ -16,7 +16,7 @@
 #include <future>
 #include <thread>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

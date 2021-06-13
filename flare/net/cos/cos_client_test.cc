@@ -17,7 +17,7 @@
 #include <chrono>
 #include <string>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/enum.h"

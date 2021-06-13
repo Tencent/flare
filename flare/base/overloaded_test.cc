@@ -17,7 +17,7 @@
 #include <string>
 #include <variant>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

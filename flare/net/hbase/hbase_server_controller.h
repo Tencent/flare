@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/net/hbase/hbase_controller_common.h"
 

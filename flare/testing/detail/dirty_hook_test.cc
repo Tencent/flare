@@ -17,7 +17,7 @@
 #include <sstream>
 #include <string>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::testing::detail {
 

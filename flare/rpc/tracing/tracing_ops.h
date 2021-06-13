@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "opentracing/ext/tags.h"
-#include "googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 #include "opentracing-cpp/span.h"
 #include "opentracing-cpp/tracer.h"
 

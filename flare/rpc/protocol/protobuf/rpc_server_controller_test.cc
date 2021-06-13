@@ -21,7 +21,7 @@
 #include <chrono>
 #include <thread>
 
-#include "googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/logging.h"
 #include "flare/fiber/this_fiber.h"
