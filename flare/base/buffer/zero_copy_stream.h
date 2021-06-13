@@ -18,7 +18,7 @@
 // This file provides helper classes for you to serialize / deserialize Protocol
 // Buffers to / from `NoncontiguousBuffer`.
 
-#include "protobuf/io/zero_copy_stream.h"
+#include "google/protobuf/io/zero_copy_stream.h"
 
 #include "flare/base/buffer.h"
 

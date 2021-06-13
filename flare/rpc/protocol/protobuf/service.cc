@@ -22,7 +22,7 @@
 #include <utility>
 
 #include "gflags/gflags.h"
-#include "protobuf/descriptor.h"
+#include "google/protobuf/descriptor.h"
 
 #include "flare/base/callback.h"
 #include "flare/base/down_cast.h"

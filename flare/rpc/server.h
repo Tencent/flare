@@ -27,8 +27,8 @@
 #include <vector>
 
 #include "gflags/gflags.h"
+#include "google/protobuf/service.h"
 #include "googletest/gtest/gtest_prod.h"
-#include "protobuf/service.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/exposed_var.h"

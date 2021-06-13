@@ -408,7 +408,7 @@ cc_library(
     '//flare/base:string',
     '//flare/rpc/internal:session_context',
     '//thirdparty/googletest:gtest_prod',
-    '//thirdparty/protobuf-3.4.1:protobuf',
+    '//thirdparty/protobuf:protobuf',
   ],
   visibility = ['//flare/testing:rpc_controller'],
 )

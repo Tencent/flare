@@ -19,9 +19,9 @@
 #include <string>
 #include <vector>
 
-#include "protobuf/descriptor.h"
-#include "protobuf/descriptor.pb.h"
-#include "protobuf/message.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/descriptor.pb.h"
+#include "google/protobuf/message.h"
 
 #include "flare/rpc/protocol/protobuf/gdt_json_proto_conversion.h"
 #include "flare/rpc/protocol/protobuf/service_method_locator.h"

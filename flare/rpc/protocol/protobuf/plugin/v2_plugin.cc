@@ -21,12 +21,12 @@
 #include <string>
 
 #include "glog/logging.h"
-#include "protobuf/compiler/code_generator.h"
-#include "protobuf/compiler/cpp/cpp_helpers.h"
-#include "protobuf/compiler/plugin.h"
-#include "protobuf/compiler/plugin.pb.h"
-#include "protobuf/io/coded_stream.h"
-#include "protobuf/io/zero_copy_stream.h"
+#include "google/protobuf/compiler/code_generator.h"
+#include "google/protobuf/compiler/cpp/cpp_helpers.h"
+#include "google/protobuf/compiler/plugin.h"
+#include "google/protobuf/compiler/plugin.pb.h"
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/io/zero_copy_stream.h"
 
 #include "flare/base/encoding/hex.h"
 #include "flare/base/logging.h"

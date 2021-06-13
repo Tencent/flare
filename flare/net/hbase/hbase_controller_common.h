@@ -19,7 +19,7 @@
 #include <string>
 
 #include "googletest/gtest/gtest_prod.h"
-#include "protobuf/service.h"
+#include "google/protobuf/service.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/internal/time_view.h"

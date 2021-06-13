@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-#include "protobuf/compiler/cpp/cpp_helpers.h"
+#include "google/protobuf/compiler/cpp/cpp_helpers.h"
 
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/protobuf/plugin/names.h"

@@ -18,7 +18,7 @@
 #include <utility>
 
 #include "googletest/gtest/gtest.h"
-#include "protobuf/util/message_differencer.h"
+#include "google/protobuf/util/message_differencer.h"
 
 #include "flare/testing/message.pb.h"
 

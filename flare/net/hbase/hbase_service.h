@@ -20,7 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "protobuf/service.h"
+#include "google/protobuf/service.h"
 
 #include "flare/rpc/protocol/stream_service.h"
 

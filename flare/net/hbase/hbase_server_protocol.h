@@ -20,7 +20,7 @@
 #include <unordered_map>
 
 #include "googletest/gtest/gtest_prod.h"
-#include "protobuf/service.h"
+#include "google/protobuf/service.h"
 
 #include "flare/net/hbase/proto/rpc.pb.h"
 #include "flare/rpc/protocol/stream_protocol.h"

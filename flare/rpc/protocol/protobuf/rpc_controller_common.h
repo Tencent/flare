@@ -19,7 +19,7 @@
 #include <memory>
 
 #include "gflags/gflags_declare.h"
-#include "protobuf/service.h"
+#include "google/protobuf/service.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/internal/time_view.h"

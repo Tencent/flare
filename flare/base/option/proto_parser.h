@@ -18,7 +18,7 @@
 #include <optional>
 #include <string>
 
-#include "protobuf/text_format.h"
+#include "google/protobuf/text_format.h"
 
 namespace flare::option {
 

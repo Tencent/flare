@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "protobuf/service.h"
+#include "google/protobuf/service.h"
 
 #include "flare/rpc/protocol/controller.h"
 #include "flare/net/hbase/proto/rpc.pb.h"

@@ -24,7 +24,7 @@
 
 #include "gflags/gflags_declare.h"
 #include "googletest/gtest/gtest_prod.h"
-#include "protobuf/service.h"
+#include "google/protobuf/service.h"
 
 #include "flare/base/internal/lazy_init.h"
 #include "flare/base/ref_ptr.h"

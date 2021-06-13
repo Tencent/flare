@@ -17,7 +17,7 @@
 
 #include <utility>
 
-#include "protobuf/service.h"  // ...
+#include "google/protobuf/service.h"  // ...
 
 // You shouldn't be using `google::protobuf::Closure`..
 //
