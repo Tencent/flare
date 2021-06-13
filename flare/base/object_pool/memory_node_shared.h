@@ -20,6 +20,7 @@
 #include <memory>
 #include <mutex>
 
+#include "flare/base/align.h"
 #include "flare/base/demangle.h"
 #include "flare/base/exposed_var.h"
 #include "flare/base/internal/annotation.h"
@@ -110,7 +111,7 @@ struct GlobalPoolDescriptor {
 };
 
 // Thread-local object cache.
-struct LocalPoolDescriptor {
+struct alignas(hardware_destructive_interference_size) LocalPoolDescriptor {
   // See comments on `FixedVector` for the reason why `std::vector<...>` is not
   // used here.
   FixedVector objects;
