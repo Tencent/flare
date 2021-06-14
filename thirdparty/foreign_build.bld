@@ -1,5 +1,4 @@
 # vim: filetype=python
-
 """
 This file defines rules to build from source package with foreign build tools,
 such as `GNU Autotools(autoconf, automake)`, CMake.
@@ -51,7 +50,7 @@ def _cmd_with_log(cmd, log_file):
     """Make cmd run silently if success else show log"""
     # NOTE: the inner parenthesis is necessary because bash is left associative
     return '({cmd} > {log_file} 2>&1 || (cat {log_file} && false))'.format(
-            cmd=cmd, log_file=log_file)
+        cmd=cmd, log_file=log_file)
 
 
 def _expand_libnames(install_dir, lib_dir, lib_names, generate_dynamic):
@@ -96,24 +95,18 @@ def _unpack_source_package(name, source_package, source_dir, patches):
              cmd_name='UNPACK')
 
 
-def _configure(
-        name,
-        package_name,
-        source_dir,
-        install_dir,
-        with_packages,
-        deps,
-        configure_options,
-        configure_file_name,
-        ld_library_path):
+def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
+               configure_options, configure_file_name, ld_library_path):
     # Some packages use their homemake configure which doesn't generate Makefile.
     # Force touch it to avoid always rebuilding.
     # The doubled '$' is required to avoid early expansion
 
-    full_install_dir = blade.path.abspath(blade.path.join(blade.current_target_dir(), install_dir))
+    full_install_dir = blade.path.abspath(
+        blade.path.join(blade.current_target_dir(), install_dir))
     lib_path_env = ':'.join(ld_library_path)
     configure = 'cd $OUT_DIR/%s && LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH ./%s --prefix=%s %s' % (
-            source_dir, lib_path_env, configure_file_name, full_install_dir, configure_options)
+        source_dir, lib_path_env, configure_file_name, full_install_dir,
+        configure_options)
     if with_packages:
         for pkg in with_packages:
             pkg = pkg[1:]  # remove prefix ':'
@@ -124,28 +117,30 @@ def _configure(
         _cmd_with_log('(%s)' % configure, log_file),
         'touch $OUT_DIR/%s' % makefile
     ]
-    gen_rule(
-        name=name, srcs=[blade.path.join(source_dir, _BLADE_UNPACK_STAMP)],
-        outs=[makefile], cmd=' && '.join(cmds), cmd_name = 'CONFIGURE', deps=deps + with_packages)
+    gen_rule(name=name,
+             srcs=[blade.path.join(source_dir, _BLADE_UNPACK_STAMP)],
+             outs=[makefile],
+             cmd=' && '.join(cmds),
+             cmd_name='CONFIGURE',
+             deps=deps + with_packages)
 
 
-def autotools_build(
-        name,
-        source_package,
-        package_name,
-        lib_names,
-        install_dir='',
-        source_dir=None,
-        with_packages=[],
-        include_dir='include',
-        strip_include_prefix='',
-        deps = [],
-        configure_options = "",
-        configure_file_name="configure",
-        install_target = "install",
-        generate_dynamic=False,
-        patches=[],
-        ld_library_path=[]):
+def autotools_build(name,
+                    source_package,
+                    package_name,
+                    lib_names,
+                    install_dir='',
+                    source_dir=None,
+                    with_packages=[],
+                    include_dir='include',
+                    strip_include_prefix='',
+                    deps=[],
+                    configure_options="",
+                    configure_file_name="configure",
+                    install_target="install",
+                    generate_dynamic=False,
+                    patches=[],
+                    ld_library_path=[]):
     """Build a autotools(also known as the GNU build system) source package.
     Args:
         name: str, the name of the target, suggest based on the package name with a '_build' suffix
@@ -158,62 +153,71 @@ def autotools_build(
     """
     source_dir = source_dir or _get_package_name(source_package)
     target_unpack = package_name + '_unpack'
-    _unpack_source_package(name = target_unpack, source_package=source_package,
-                           source_dir=source_dir,patches=patches)
+    _unpack_source_package(name=target_unpack,
+                           source_package=source_package,
+                           source_dir=source_dir,
+                           patches=patches)
 
     target_configure = package_name + '_configure'
-    _configure(name = target_configure, package_name = package_name, install_dir=install_dir,
-               source_dir=source_dir, with_packages=with_packages, deps=[':' + target_unpack] + deps,
-               configure_options=configure_options, configure_file_name=configure_file_name,
+    _configure(name=target_configure,
+               package_name=package_name,
+               install_dir=install_dir,
+               source_dir=source_dir,
+               with_packages=with_packages,
+               deps=[':' + target_unpack] + deps,
+               configure_options=configure_options,
+               configure_file_name=configure_file_name,
                ld_library_path=ld_library_path)
     full_install_dir = blade.path.join(blade.current_target_dir(), install_dir)
-    build_outs = _expand_libnames(install_dir, 'lib', lib_names, generate_dynamic)
-    log_file = blade.path.join(blade.current_target_dir(), package_name + '_make.log')
+    build_outs = _expand_libnames(install_dir, 'lib', lib_names,
+                                  generate_dynamic)
+    log_file = blade.path.join(blade.current_target_dir(),
+                               package_name + '_make.log')
     build_cmd = '(make -C {dir} -j8 && make -C {dir} {install_target})'.format(
-            dir=blade.path.join('$OUT_DIR', source_dir), install_target=install_target)
-    strip_include_dir = blade.path.normpath(blade.path.join(include_dir, strip_include_prefix))
+        dir=blade.path.join('$OUT_DIR', source_dir),
+        install_target=install_target)
+    strip_include_dir = blade.path.normpath(
+        blade.path.join(include_dir, strip_include_prefix))
     cmds = [
         _cmd_with_log(build_cmd, log_file),
-        _EXPORT_HEADERS.format(install_dir=full_install_dir, include_dir=strip_include_dir),
+        _EXPORT_HEADERS.format(install_dir=full_install_dir,
+                               include_dir=strip_include_dir),
     ]
-    gen_rule(
-        name = name,
-        srcs = source_package,
-        outs = build_outs,
-        cmd = ' && '.join(cmds),
-        cmd_name = 'MAKE',
-        deps = deps + with_packages + [':' + target_configure],
-        generated_incs = '',
-        export_incs=blade.path.join(install_dir, include_dir),
-        heavy=True)
+    gen_rule(name=name,
+             srcs=source_package,
+             outs=build_outs,
+             cmd=' && '.join(cmds),
+             cmd_name='MAKE',
+             deps=deps + with_packages + [':' + target_configure],
+             generated_incs='',
+             export_incs=blade.path.join(install_dir, include_dir),
+             heavy=True)
 
 
-def autotools_cc_library(
-        name,
-        source_package,
-        source_dir = None,
-        lib_name = None,
-        with_packages=[],
-        include_dir='include',
-        deps = [],
-        autogen=False,
-        enables = [],
-        verbose=False):
+def autotools_cc_library(name,
+                         source_package,
+                         source_dir=None,
+                         lib_name=None,
+                         with_packages=[],
+                         include_dir='include',
+                         deps=[],
+                         autogen=False,
+                         enables=[],
+                         verbose=False):
     target_build = name + '_build'
-    autotools_build(
-        name=target_build,
-        source_package=source_package,
-        package_name=name,
-        lib_names = [name],
-        source_dir=source_dir,
-        with_packages=with_packages,
-        include_dir=include_dir)
+    autotools_build(name=target_build,
+                    source_package=source_package,
+                    package_name=name,
+                    lib_names=[name],
+                    source_dir=source_dir,
+                    with_packages=with_packages,
+                    include_dir=include_dir)
     install_dir = blade.current_target_dir()
-    foreign_cc_library(
-        name=name,
-        package_name='',
-        deps=[':' + target_build] + with_packages + deps,
-        export_incs='//' + blade.path.join(install_dir, 'include'))
+    foreign_cc_library(name=name,
+                       package_name='',
+                       deps=[':' + target_build] + with_packages + deps,
+                       export_incs='//' +
+                       blade.path.join(install_dir, 'include'))
 
 
 def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
@@ -224,49 +228,68 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
     install_dir = blade.path.join('..', install_dir)
     log_file = '$OUT_DIR/%s.log' % name
     cmake_options = ' '.join([
-        '-DCMAKE_INSTALL_PREFIX=%s' % install_dir, '-DCMAKE_INSTALL_LIBDIR=lib',
+        '-DCMAKE_INSTALL_PREFIX=%s' % install_dir,
+        '-DCMAKE_INSTALL_LIBDIR=lib',
+        # Do NOT use user's cmake package registry.
+        '-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON',
+        '-DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON',
+        '-DCMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY=ON',
+        '-DCMAKE_EXPORT_PACKAGE_REGISTRY=OFF',
+        '-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF',
+        '-DCMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY=OFF',
     ])
     if options:
         cmake_options += ' '
         cmake_options += ' '.join(options)
-    cmd = 'rm -fr {build_dir} && mkdir -p {build_dir} && cd {build_dir} && CXX=g++ CC=gcc cmake {options} ../{source_dir}'.format(
-            build_dir=build_dir, options=cmake_options, source_dir=source_dir)
+    cmd = ' && '.join([
+        'rm -fr {build_dir}', 'mkdir -p {build_dir}', 'cd {build_dir}',
+        'CXX=g++ CC=gcc cmake {options} ../{source_dir}'
+    ]).format(build_dir=build_dir, options=cmake_options, source_dir=source_dir)
     build_file = blade.path.join(build_dir_name, 'Makefile')
-    gen_rule(name=name, srcs=[blade.path.join(source_dir, _BLADE_UNPACK_STAMP)], outs=[build_file],
-             cmd=_cmd_with_log('(%s)' % cmd, log_file), cmd_name='CMAKE GENERATE', deps=deps)
+    gen_rule(name=name,
+             srcs=[blade.path.join(source_dir, _BLADE_UNPACK_STAMP)],
+             outs=[build_file],
+             cmd=_cmd_with_log('(%s)' % cmd, log_file),
+             cmd_name='CMAKE GENERATE',
+             deps=deps)
     return build_dir, build_file
 
 
-def cmake_build(
-        name,
-        package_name,
-        source_package,
-        source_dir=None,
-        deps=[],
-        install_dir='',
-        lib_dir='lib',
-        lib_names=None,
-        include_dir='include',
-        strip_include_prefix='',
-        cmake_options=None,
-        generate_dynamic=False,
-        patches=[]):
+def cmake_build(name,
+                package_name,
+                source_package,
+                source_dir=None,
+                deps=[],
+                install_dir='',
+                lib_dir='lib',
+                lib_names=None,
+                include_dir='include',
+                strip_include_prefix='',
+                cmake_options=None,
+                generate_dynamic=False,
+                patches=[]):
     source_dir = source_dir or _get_package_name(source_package)
     lib_names = lib_names or [package_name]
     target_unpack = package_name + '_unpack'
-    _unpack_source_package(name = target_unpack, source_package=source_package,
-                           source_dir=source_dir, patches=patches)
+    _unpack_source_package(name=target_unpack,
+                           source_package=source_package,
+                           source_dir=source_dir,
+                           patches=patches)
     target_generate = package_name + '_generate'
     cmake_options = cmake_options or []
-    build_dir, build_file = _cmake_generate(name=target_generate, package_name=package_name,
-                                            source_dir=source_dir, install_dir=install_dir,
+    build_dir, build_file = _cmake_generate(name=target_generate,
+                                            package_name=package_name,
+                                            source_dir=source_dir,
+                                            install_dir=install_dir,
                                             deps=[':' + target_unpack] + deps,
                                             options=cmake_options)
-    build_outs = _expand_libnames(install_dir, lib_dir, lib_names, generate_dynamic)
+    build_outs = _expand_libnames(install_dir, lib_dir, lib_names,
+                                  generate_dynamic)
     log_file = blade.path.join(blade.current_target_dir(), name + '.log')
     build_cmd = 'make -C {dir} -j16 install'.format(dir=build_dir)
     full_install_dir = blade.path.join(blade.current_target_dir(), install_dir)
-    strip_include_dir = blade.path.normpath(blade.path.join(include_dir, strip_include_prefix))
+    strip_include_dir = blade.path.normpath(
+        blade.path.join(include_dir, strip_include_prefix))
     cmds = [
         _cmd_with_log(build_cmd, log_file),
         _EXPORT_HEADERS.format(install_dir=full_install_dir,
@@ -282,29 +305,30 @@ def cmake_build(
              export_incs=blade.path.join(install_dir, include_dir),
              heavy=True)
 
-def cmake_cc_library(
-        name,
-        source_package,
-        source_dir = None,
-        out_of_source_build = True,
-        install_dir='',
-        include_dir='include',
-        strip_include_prefix='',
-        verbose=False):
+
+def cmake_cc_library(name,
+                     source_package,
+                     source_dir=None,
+                     out_of_source_build=True,
+                     install_dir='',
+                     include_dir='include',
+                     strip_include_prefix='',
+                     verbose=False):
     target_build = name + '_build'
-    cmake_build(
-        name=target_build,
-        package_name=package_name,
-        source_dir=source_dir,
-        deps=deps,
-        lib_names=[name],
-        include_dir=include_dir,
-        strip_include_prefix=strip_include_prefix)
-    foreign_cc_library(
-        name=name,
-        package_name=name,
-        deps=[':' + target_build] + with_packages + deps,
-        export_incs=blade.path.join(install_dir, include_dir))
+    cmake_build(name=target_build,
+                package_name=package_name,
+                source_dir=source_dir,
+                deps=deps,
+                lib_names=[name],
+                include_dir=include_dir,
+                strip_include_prefix=strip_include_prefix)
+    foreign_cc_library(name=name,
+                       package_name=name,
+                       deps=[':' + target_build] + with_packages + deps,
+                       export_incs=blade.path.join(install_dir, include_dir))
+
 
 def get_install_dir(name):
-    return blade.path.join(blade.path.dirname(blade.path.abspath(blade.current_target_dir())), name)
+    return blade.path.join(
+        blade.path.dirname(blade.path.abspath(blade.current_target_dir())),
+        name)

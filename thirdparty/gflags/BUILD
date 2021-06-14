@@ -11,10 +11,10 @@ cmake_build(
         '-DGFLAGS_BUILD_STATIC_LIBS=ON',
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
-        '-DZLIB_ROOT=' + get_install_dir('zlib'),
-    ],
-    deps=[
-        '//thirdparty/zlib:z',
+        # Disabling `CMAKE_EXPORT_PACKAGE_REGISTRY` does not work for gflags, we
+        # need to suppress the behaviro using gflags' own flag.
+        '-DREGISTER_BUILD_DIR=OFF',
+        '-DREGISTER_INSTALL_PREFIX=OFF'
     ],
     strip_include_prefix='gflags',
     generate_dynamic=True,
@@ -24,7 +24,6 @@ foreign_cc_library(
     name='gflags',
     deps=[
         ':gflags_build',
-        '//thirdparty/zlib:z',
         '#pthread',
         '#rt',
     ],
