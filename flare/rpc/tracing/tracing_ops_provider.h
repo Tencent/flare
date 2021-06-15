@@ -18,8 +18,8 @@
 #include <memory>
 #include <string>
 
-#include "thirdparty/opentracing-cpp/span.h"
-#include "thirdparty/opentracing-cpp/tracer.h"
+#include "opentracing-cpp/span.h"
+#include "opentracing-cpp/tracer.h"
 
 #include "flare/base/dependency_registry.h"
 #include "flare/base/function.h"

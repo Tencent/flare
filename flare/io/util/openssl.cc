@@ -17,10 +17,10 @@
 #include <pthread.h>
 #include <stdint.h>
 
-#include "thirdparty/openssl/crypto.h"
-#include "thirdparty/openssl/engine.h"
-#include "thirdparty/openssl/err.h"
-#include "thirdparty/openssl/ssl.h"
+#include "openssl/crypto.h"
+#include "openssl/engine.h"
+#include "openssl/err.h"
+#include "openssl/ssl.h"
 
 namespace flare::io::util {
 

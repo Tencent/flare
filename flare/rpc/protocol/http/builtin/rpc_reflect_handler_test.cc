@@ -17,9 +17,9 @@
 #include <memory>
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/jsoncpp/reader.h"
-#include "thirdparty/protobuf/descriptor.pb.h"
+#include "google/protobuf/descriptor.pb.h"
+#include "gtest/gtest.h"
+#include "jsoncpp/reader.h"
 
 #include "flare/base/net/endpoint.h"
 #include "flare/net/http/http_client.h"

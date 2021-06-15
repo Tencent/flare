@@ -18,7 +18,7 @@
 #include <tuple>
 #include <utility>
 
-#include "thirdparty/googletest/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include "flare/base/internal/meta.h"
 

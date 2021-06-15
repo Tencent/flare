@@ -18,8 +18,8 @@
 #include <chrono>
 #include <string>
 
-#include "thirdparty/googletest/gtest/gtest_prod.h"
-#include "thirdparty/protobuf/service.h"
+#include "gtest/gtest_prod.h"
+#include "google/protobuf/service.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/internal/time_view.h"

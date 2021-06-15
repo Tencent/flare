@@ -17,8 +17,8 @@
 #include <memory>
 #include <string>
 
-#include "thirdparty/ctemplate/template.h"
-#include "thirdparty/ctemplate/template_dictionary.h"
+#include "ctemplate/template.h"
+#include "ctemplate/template_dictionary.h"
 
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/http/builtin/static_resources.h"

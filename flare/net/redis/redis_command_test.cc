@@ -14,7 +14,7 @@
 
 #include "flare/net/redis/redis_command.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/buffer.h"
 

@@ -21,7 +21,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/logging.h"

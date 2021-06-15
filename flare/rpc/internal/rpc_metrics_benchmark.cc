@@ -14,7 +14,7 @@
 
 #include "flare/rpc/internal/rpc_metrics.h"
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 #include "flare/testing/echo_service.flare.pb.h"
 

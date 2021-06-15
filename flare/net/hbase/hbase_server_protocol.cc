@@ -19,8 +19,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "thirdparty/protobuf/descriptor.h"
-#include "thirdparty/protobuf/util/delimited_message_util.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/util/delimited_message_util.h"
 
 #include "flare/base/buffer/zero_copy_stream.h"
 #include "flare/base/down_cast.h"

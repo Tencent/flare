@@ -23,7 +23,7 @@
 
 #include "flare/base/chrono.h"
 #include "flare/base/thread/latch.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/gflags/gflags_declare.h"
+#include "gflags/gflags_declare.h"
 
 #include "flare/base/function_view.h"
 #include "flare/base/internal/early_init.h"

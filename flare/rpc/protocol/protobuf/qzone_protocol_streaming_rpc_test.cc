@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/fiber/this_fiber.h"
 #include "flare/rpc/rpc_channel.h"

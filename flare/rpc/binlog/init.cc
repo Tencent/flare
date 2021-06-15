@@ -14,7 +14,7 @@
 
 #include "flare/rpc/binlog/init.h"
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/rpc/binlog/dry_runner.h"
 #include "flare/rpc/binlog/dumper.h"

@@ -14,7 +14,7 @@
 
 #include "flare/base/crypto/sha.h"
 
-#include "thirdparty/openssl/sha.h"
+#include "openssl/sha.h"
 
 #include "flare/base/crypto/detail/openssl_impl.h"
 

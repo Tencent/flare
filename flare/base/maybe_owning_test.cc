@@ -14,7 +14,7 @@
 
 #include "flare/base/maybe_owning.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

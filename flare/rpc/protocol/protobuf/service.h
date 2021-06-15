@@ -21,9 +21,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest_prod.h"
-#include "thirdparty/jsoncpp/value.h"
-#include "thirdparty/protobuf/service.h"
+#include "google/protobuf/service.h"
+#include "gtest/gtest_prod.h"
+#include "jsoncpp/value.h"
 
 #include "flare/base/deferred.h"
 #include "flare/base/internal/hash_map.h"

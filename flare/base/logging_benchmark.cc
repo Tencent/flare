@@ -14,7 +14,7 @@
 
 #include "flare/base/logging.h"
 
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 // The benchmark result makes little sense, as L1i / iTLB effect is negligible
 // for such small method, and branch predictor should always predict right.

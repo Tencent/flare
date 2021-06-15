@@ -16,8 +16,8 @@
 
 #include <unistd.h>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/internal/annotation.h"
 #include "flare/base/logging.h"

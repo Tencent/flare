@@ -22,7 +22,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "thirdparty/googletest/gmock/gmock.h"
+#include "gmock/gmock.h"
 
 #include "flare/base/internal/macro.h"
 #include "flare/base/logging.h"

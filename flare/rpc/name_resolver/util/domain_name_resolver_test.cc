@@ -14,7 +14,7 @@
 
 #include "flare/rpc/name_resolver/util/domain_name_resolver.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::name_resolver::util {
 

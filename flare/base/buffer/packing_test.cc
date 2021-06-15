@@ -14,7 +14,7 @@
 
 #include "flare/base/buffer/packing.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

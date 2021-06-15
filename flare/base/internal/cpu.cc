@@ -25,8 +25,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/glog/raw_logging.h"
+#include "gflags/gflags.h"
+#include "glog/raw_logging.h"
 
 #include "flare/base/internal/logging.h"
 #include "flare/base/string.h"

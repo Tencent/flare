@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/string.h"
 #include "flare/fiber/latch.h"

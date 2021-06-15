@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/align.h"
 #include "flare/base/deferred.h"

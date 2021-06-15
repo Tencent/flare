@@ -14,7 +14,7 @@
 
 #include "flare/net/cos/ops/bucket/get_bucket.h"
 
-#include "thirdparty/rapidxml/rapidxml.h"
+#include "rapidxml/rapidxml.h"
 
 #include "flare/base/encoding/percent.h"
 #include "flare/net/cos/xml_reader.h"

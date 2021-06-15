@@ -14,7 +14,7 @@
 
 #include "flare/base/option/key.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::option {
 

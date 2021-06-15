@@ -14,7 +14,7 @@
 
 #include "flare/net/cos/signature.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::cos {
 

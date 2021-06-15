@@ -19,8 +19,8 @@
 #include <string>
 #include <thread>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gflags/gflags.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/random.h"

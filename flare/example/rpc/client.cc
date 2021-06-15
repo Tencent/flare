@@ -14,7 +14,7 @@
 
 // A simple client. Provided for illustration purpose.
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/example/rpc/echo_service.flare.pb.h"
 #include "flare/init.h"

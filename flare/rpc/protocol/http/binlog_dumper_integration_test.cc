@@ -16,7 +16,7 @@
 #include <string>
 #include <typeinfo>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/string.h"

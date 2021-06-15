@@ -17,8 +17,8 @@
 #include <string>
 #include <variant>
 
-#include "thirdparty/protobuf/message.h"
-#include "thirdparty/protobuf/util/json_util.h"
+#include "google/protobuf/message.h"
+#include "google/protobuf/util/json_util.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/buffer/zero_copy_stream.h"

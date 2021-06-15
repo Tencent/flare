@@ -14,9 +14,9 @@
 
 #include "flare/rpc/protocol/http/builtin/gflags_handler.h"
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "gflags/gflags.h"
+#include "gtest/gtest.h"
+#include "jsoncpp/json.h"
 
 DEFINE_int64(builtin_gflags_ut_flag_1, 1234, "UT flag");
 DEFINE_int64(builtin_gflags_ut_flag_2, 4567, "UT flag");

@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "thirdparty/openssl/ssl.h"
+#include "openssl/ssl.h"
 
 #include "flare/io/util/stream_io.h"
 

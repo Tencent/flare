@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/snappy/snappy-sinksource.h"
+#include "snappy/snappy-sinksource.h"
 
 #include "flare/base/compression/util.h"
 

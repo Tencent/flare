@@ -18,7 +18,7 @@
 #include <string>
 #include <type_traits>
 
-#include "thirdparty/rapidxml/rapidxml.h"
+#include "rapidxml/rapidxml.h"
 
 #include "flare/base/encoding/percent.h"
 #include "flare/base/logging.h"

@@ -21,7 +21,7 @@
 #include <tuple>
 #include <utility>
 
-#include "thirdparty/rapidxml/rapidxml.h"
+#include "rapidxml/rapidxml.h"
 
 #include "flare/base/enum.h"
 #include "flare/base/logging.h"

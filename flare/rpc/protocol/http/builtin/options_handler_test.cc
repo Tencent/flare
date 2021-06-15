@@ -14,9 +14,9 @@
 
 #include "flare/rpc/protocol/http/builtin/options_handler.h"
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "gflags/gflags.h"
+#include "gtest/gtest.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/option.h"
 

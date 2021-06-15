@@ -17,7 +17,7 @@
 
 #include <functional>
 
-#include "thirdparty/lz4/lz4frame.h"
+#include "lz4/lz4frame.h"
 
 #include "flare/base/compression/compression.h"
 

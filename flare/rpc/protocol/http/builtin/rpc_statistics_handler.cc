@@ -17,7 +17,7 @@
 #include <mutex>
 #include <string>
 
-#include "thirdparty/jsoncpp/json.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/string.h"
 #include "flare/rpc/internal/rpc_metrics.h"

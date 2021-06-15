@@ -19,7 +19,7 @@
 
 #include <variant>
 
-#include "thirdparty/protobuf/message.h"
+#include "google/protobuf/message.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/maybe_owning.h"

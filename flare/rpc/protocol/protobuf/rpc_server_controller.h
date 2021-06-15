@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest_prod.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/protobuf/rpc_controller_common.h"

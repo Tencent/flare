@@ -20,7 +20,7 @@
 #include <thread>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/internal/cpu.h"
 #include "flare/base/logging.h"

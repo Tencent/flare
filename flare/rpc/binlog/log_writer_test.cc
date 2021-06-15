@@ -19,9 +19,9 @@
 #include <streambuf>
 #include <thread>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "gflags/gflags.h"
+#include "gtest/gtest.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/string.h"

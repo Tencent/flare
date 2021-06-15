@@ -18,7 +18,7 @@
 #include <memory>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/thread/latch.h"

@@ -14,7 +14,7 @@
 
 #include "flare/net/cos/ops/bucket/get_bucket.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

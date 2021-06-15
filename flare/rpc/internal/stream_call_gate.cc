@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/internal/early_init.h"
 #include "flare/base/logging.h"

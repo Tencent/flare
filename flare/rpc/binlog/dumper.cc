@@ -18,7 +18,7 @@
 #include <memory>
 #include <random>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/id_alloc.h"
 #include "flare/base/never_destroyed.h"

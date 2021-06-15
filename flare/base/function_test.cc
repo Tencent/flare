@@ -17,7 +17,7 @@
 #include <array>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

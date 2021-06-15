@@ -14,7 +14,7 @@
 
 #include <sys/signal.h>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/compression.h"
 #include "flare/base/string.h"

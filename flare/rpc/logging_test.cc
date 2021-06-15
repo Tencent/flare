@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "thirdparty/googletest/gmock/gmock-matchers.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 #include "flare/rpc/rpc_channel.h"
 #include "flare/rpc/rpc_client_controller.h"

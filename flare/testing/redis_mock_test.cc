@@ -14,8 +14,8 @@
 
 #include "flare/testing/redis_mock.h"
 
-#include "thirdparty/googletest/gmock/gmock-matchers.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 #include "flare/net/redis/redis_channel.h"
 #include "flare/net/redis/redis_client.h"

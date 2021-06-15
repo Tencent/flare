@@ -20,8 +20,8 @@
 #include <set>
 #include <string>
 
-#include "thirdparty/curl/curl.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "curl/curl.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/compression.h"
 #include "flare/base/expected.h"

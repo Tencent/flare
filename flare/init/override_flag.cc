@@ -18,8 +18,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/glog/raw_logging.h"
+#include "gflags/gflags.h"
+#include "glog/raw_logging.h"
 
 #include "flare/base/logging.h"
 #include "flare/base/never_destroyed.h"

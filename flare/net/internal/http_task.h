@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "thirdparty/curl/curl.h"
+#include "curl/curl.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/expected.h"

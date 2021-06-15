@@ -21,8 +21,8 @@
 #include <string_view>
 #include <vector>
 
-#include "thirdparty/fmt/format.h"
-#include "thirdparty/fmt/ostream.h"
+#include "fmt/format.h"
+#include "fmt/ostream.h"
 
 namespace flare {
 

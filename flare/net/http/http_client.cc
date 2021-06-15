@@ -19,8 +19,8 @@
 #include <memory>
 #include <utility>
 
-#include "thirdparty/curl/curl.h"
-#include "thirdparty/gflags/gflags.h"
+#include "curl/curl.h"
+#include "gflags/gflags.h"
 
 #include "flare/fiber/latch.h"
 #include "flare/fiber/runtime.h"

@@ -14,8 +14,8 @@
 
 #include "flare/testing/cos_mock.h"
 
-#include "thirdparty/googletest/gmock/gmock-matchers.h"
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gmock/gmock-matchers.h"
+#include "gtest/gtest.h"
 
 #include "flare/net/cos/cos_client.h"
 #include "flare/net/cos/ops/object/get_object.h"

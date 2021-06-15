@@ -18,9 +18,9 @@
 #include <memory>
 #include <string>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/jsoncpp/json.h"
-#include "thirdparty/protobuf/util/json_util.h"
+#include "gflags/gflags.h"
+#include "google/protobuf/util/json_util.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/logging.h"

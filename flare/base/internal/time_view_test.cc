@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/time_view.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

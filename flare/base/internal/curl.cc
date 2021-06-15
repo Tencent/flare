@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/curl/curl.h"
+#include "curl/curl.h"
 
 #include "flare/base/deferred.h"
 #include "flare/base/logging.h"

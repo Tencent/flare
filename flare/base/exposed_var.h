@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "thirdparty/jsoncpp/value.h"
+#include "jsoncpp/value.h"
 
 #include "flare/base/deferred.h"
 #include "flare/base/function.h"

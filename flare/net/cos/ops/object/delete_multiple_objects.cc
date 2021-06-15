@@ -16,7 +16,7 @@
 
 #include <sstream>
 
-#include "thirdparty/rapidxml/rapidxml.h"
+#include "rapidxml/rapidxml.h"
 
 #include "flare/base/encoding/percent.h"
 #include "flare/net/cos/xml_reader.h"

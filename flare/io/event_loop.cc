@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/exposed_var.h"
 #include "flare/base/logging.h"

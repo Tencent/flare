@@ -19,7 +19,7 @@
 #include <iterator>
 #include <utility>
 
-#include "thirdparty/glog/raw_logging.h"
+#include "glog/raw_logging.h"
 
 #include "flare/base/chrono.h"
 

@@ -14,7 +14,7 @@
 
 #include "flare/base/internal/early_init.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare::internal {
 

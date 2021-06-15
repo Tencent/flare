@@ -19,7 +19,7 @@
 #include <string>
 #include <string_view>
 
-#include "thirdparty/blake3/blake3.h"
+#include "blake3/blake3.h"
 
 #include "flare/base/buffer.h"
 

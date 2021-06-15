@@ -16,7 +16,7 @@
 
 #include <memory>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/never_destroyed.h"
 #include "flare/base/string.h"

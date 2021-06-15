@@ -14,7 +14,7 @@
 
 #include "flare/rpc/internal/buffered_stream_provider.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/maybe_owning.h"
 #include "flare/testing/main.h"

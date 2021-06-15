@@ -19,7 +19,7 @@
 #include <chrono>
 #include <string>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/logging.h"
 #include "flare/rpc/protocol/protobuf/call_context.h"

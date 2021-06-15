@@ -14,7 +14,7 @@
 
 #include "flare/base/option/option_provider.h"
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/string.h"
 

@@ -14,7 +14,7 @@
 
 #include "flare/base/option/json_parser.h"
 
-#include "thirdparty/jsoncpp/json.h"
+#include "jsoncpp/json.h"
 
 namespace flare::option {
 

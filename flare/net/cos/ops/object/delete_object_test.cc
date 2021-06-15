@@ -14,7 +14,7 @@
 
 #include "flare/net/cos/ops/object/delete_object.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 

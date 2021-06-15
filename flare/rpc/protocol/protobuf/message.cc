@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/buffer/zero_copy_stream.h"
 #include "flare/base/enum.h"

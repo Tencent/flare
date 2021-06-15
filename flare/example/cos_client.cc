@@ -15,7 +15,7 @@
 #include <chrono>
 #include <unordered_map>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/init.h"
 #include "flare/init/override_flag.h"

@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "thirdparty/jsoncpp/json.h"
+#include "jsoncpp/json.h"
 
 namespace flare::monitoring {
 

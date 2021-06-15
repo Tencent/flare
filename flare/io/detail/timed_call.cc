@@ -14,7 +14,7 @@
 
 #include "flare/io/detail/timed_call.h"
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 DEFINE_bool(flare_io_dump_slow_calls, true,
             "If enabled, Flare prints a warning message (at most one per "

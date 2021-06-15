@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "thirdparty/zlib/zlib.h"
+#include "zlib/zlib.h"
 
 #include "flare/base/compression/compression.h"
 

@@ -17,7 +17,7 @@
 #include <string>
 #include <string_view>
 
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/base/string.h"
 #include "flare/net/cos/cos_channel.h"

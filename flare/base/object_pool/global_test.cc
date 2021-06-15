@@ -14,6 +14,6 @@
 
 #include "flare/base/object_pool.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 // Not implemented yet.

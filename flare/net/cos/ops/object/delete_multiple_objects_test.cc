@@ -16,8 +16,8 @@
 
 #include <string_view>
 
-#include "thirdparty/googletest/gtest/gtest.h"
-#include "thirdparty/rapidxml/rapidxml.h"
+#include "gtest/gtest.h"
+#include "rapidxml/rapidxml.h"
 
 using namespace std::literals;
 

@@ -17,7 +17,7 @@
 
 #include <memory>
 
-#include "thirdparty/zstd/zstd.h"
+#include "zstd/zstd.h"
 
 #include "flare/base/compression/compression.h"
 

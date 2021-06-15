@@ -15,7 +15,7 @@
 #include "flare/rpc/tracing/tracing_ops.h"
 
 #include "opentracing/ext/tags.h"
-#include "thirdparty/benchmark/benchmark.h"
+#include "benchmark/benchmark.h"
 
 #include "flare/rpc/tracing/framework_tags.h"
 

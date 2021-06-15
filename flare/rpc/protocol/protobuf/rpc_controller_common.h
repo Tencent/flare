@@ -18,8 +18,8 @@
 #include <chrono>
 #include <memory>
 
-#include "thirdparty/gflags/gflags_declare.h"
-#include "thirdparty/protobuf/service.h"
+#include "gflags/gflags_declare.h"
+#include "google/protobuf/service.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/internal/time_view.h"

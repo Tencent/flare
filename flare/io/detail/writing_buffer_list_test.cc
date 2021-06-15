@@ -23,7 +23,7 @@
 #include <thread>
 #include <utility>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/thread/latch.h"
 #include "flare/io/util/socket.h"

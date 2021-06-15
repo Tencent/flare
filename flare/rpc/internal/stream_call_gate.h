@@ -22,8 +22,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "thirdparty/gflags/gflags.h"
-#include "thirdparty/googletest/gtest/gtest_prod.h"
+#include "gflags/gflags.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/align.h"
 #include "flare/base/delayed_init.h"

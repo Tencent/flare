@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/net/hbase/call_context.h"

@@ -21,8 +21,8 @@
 
 #include <string>
 
-#include "thirdparty/gflags/gflags_declare.h"
-#include "thirdparty/googletest/gtest/gtest_prod.h"
+#include "gflags/gflags_declare.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/status.h"
 #include "flare/rpc/internal/stream_call_gate_pool.h"

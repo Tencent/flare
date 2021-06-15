@@ -17,7 +17,7 @@
 #include <chrono>
 #include <memory>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/net/redis/message.h"

@@ -17,7 +17,7 @@
 #include <thread>
 #include <vector>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 using namespace std::literals;
 

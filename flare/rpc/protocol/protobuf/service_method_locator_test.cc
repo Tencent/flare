@@ -16,7 +16,7 @@
 
 #include <set>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 #include "flare/testing/main.h"
 #include "flare/testing/echo_service.flare.pb.h"

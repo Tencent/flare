@@ -23,9 +23,9 @@
 #include <string>
 #include <utility>
 
-#include "thirdparty/glog/logging.h"
-#include "thirdparty/jemalloc/jemalloc.h"
-#include "thirdparty/jsoncpp/json.h"
+#include "glog/logging.h"
+#include "jemalloc/jemalloc.h"
+#include "jsoncpp/json.h"
 
 #include "flare/base/string.h"
 #include "flare/rpc/builtin/detail/prof_utility.h"

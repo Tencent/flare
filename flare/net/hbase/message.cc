@@ -17,7 +17,7 @@
 #include <initializer_list>
 #include <utility>
 
-#include "thirdparty/protobuf/util/delimited_message_util.h"
+#include "google/protobuf/util/delimited_message_util.h"
 
 #include "flare/base/buffer.h"
 #include "flare/base/buffer/zero_copy_stream.h"

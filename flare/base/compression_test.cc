@@ -14,7 +14,7 @@
 
 #include "flare/base/compression.h"
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace flare {
 
