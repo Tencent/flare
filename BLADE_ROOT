@@ -106,6 +106,7 @@ cc_config(
         # We need this in some platforms for `link_all_symbols=True` to work.
         '-Wl,--no-as-needed',
         '-lpthread',
+        '-lbrotlidec',
     ],
     benchmark_libs=['//thirdparty/benchmark:benchmark'],
     benchmark_main_libs=['//thirdparty/benchmark:benchmark_main'],
