@@ -18,6 +18,7 @@ autotools_build(
         '--with-pic',
         '--disable-ldap',
         '--disable-ldaps',
+        '--without-brotli',
     ]),
     deps=[
         '//thirdparty/nghttp2:nghttp2',
