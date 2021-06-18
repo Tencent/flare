@@ -37,6 +37,8 @@
 
 namespace flare::fiber::detail {
 
+struct RunnableEntity;
+struct FiberDesc;
 struct FiberEntity;
 class TimerWorker;
 
@@ -97,6 +99,12 @@ class alignas(hardware_destructive_interference_size) SchedulingGroup {
   // `kSchedulingGroupShuttingDown`.
   FiberEntity* RemoteAcquireFiber() noexcept;
 
+  // Start a fiber.
+  //
+  // Depending on usage scenarios, calling this method can be more performant
+  // that instantiate `FiberEntity` and `ReadyFiber` it.
+  void StartFiber(FiberDesc* desc) noexcept;
+
   // Schedule fibers in [start, end) to run in batch.
   //
   // No scheduling lock should be held by the caller, and all fibers to be
@@ -108,8 +116,8 @@ class alignas(hardware_destructive_interference_size) SchedulingGroup {
   //
   // CAUTION: `scheduling_group_local` is NOT respected by this method. (FIXME.)
   //
-  // TODO(luobogao): `span<FiberEntity*>` seems to be superior.
-  void StartFibers(FiberEntity** start, FiberEntity** end) noexcept;
+  // TODO(luobogao): `span<FiberDesc*>` seems to be superior.
+  void StartFibers(FiberDesc** start, FiberDesc** end) noexcept;
 
   // Schedule a fiber to run.
   //
@@ -268,6 +276,16 @@ class alignas(hardware_destructive_interference_size) SchedulingGroup {
   bool WakeUpWorkers(std::size_t n) noexcept;
   bool WakeUpOneSpinningWorker() noexcept;
   bool WakeUpOneDeepSleepingWorker() noexcept;
+
+  // Push `entity `into run queue associated with this scheduling group.
+  void QueueRunnableEntity(RunnableEntity* entity, bool sg_local) noexcept;
+
+  // Returns `entity` as is if it's already fully instantiated, otherwise
+  // instantiate a new one.
+  //
+  // To simplify programming, this method explicit allows `nullptr` as input (in
+  // this case `nullptr` is returned).
+  FiberEntity* GetOrInstantiateFiber(RunnableEntity* entity) noexcept;
 
  private:
   static constexpr auto kUninitializedWorkerIndex =

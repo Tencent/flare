@@ -259,9 +259,14 @@ template <class T, class U>
 
 // Test if `val` is *actually* (i.e., its runtime type is tested) an instance of
 // `T`.
-template <class T, class U>
+template <class T, class U, class = std::enable_if_t<!std::is_pointer_v<U>>>
 inline bool isa(const U& val) {
   return casting::detail::RuntimeTypeCheck<T>(val);
+}
+
+template <class T, class U>
+inline bool isa(const U* val) {
+  return isa<T>(*val);
 }
 
 // Cast `ptr` to `T*` if runtime type of what it points to is (or inherits from)
@@ -270,7 +275,7 @@ inline bool isa(const U& val) {
 // Passing `nullptr` to this method results in U.B. (@sa: `dyn_cast_or_null`.)
 template <class T, class U, class R = casting::detail::casted_type_t<T, U>>
 R dyn_cast(U* ptr) {
-  return isa<T>(*ptr) ? static_cast<R>(ptr) : nullptr;
+  return isa<T>(ptr) ? static_cast<R>(ptr) : nullptr;
 }
 
 // Same as `T* dyn_cast(U*)`, but accepts a reference. Returns pointer.
@@ -291,7 +296,7 @@ inline auto dyn_cast_or_null(U* ptr) {
 // Passing `nullptr` to this method results in U.B. (@sa: `cast_or_null`.)
 template <class T, class U, class R = casting::detail::casted_type_t<T, U>>
 inline R cast(U* ptr) {
-  if (FLARE_LIKELY(isa<T>(*ptr))) {
+  if (FLARE_LIKELY(isa<T>(ptr))) {
     return static_cast<R>(ptr);
   }
   casting::detail::InvalidCast<T>(ptr);

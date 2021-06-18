@@ -27,11 +27,20 @@ cc_benchmark(
 )
 
 cc_library(
+  name = 'runnable_entity',
+  hdrs = 'runnable_entity.h',
+  deps = [
+    '//flare/base:casting',
+  ]
+)
+
+cc_library(
   name = 'run_queue',
   hdrs = 'run_queue.h',
   srcs = 'run_queue.cc',
   deps = [
     ':assembly',
+    ':runnable_entity',
     '//flare/base:align',
     '//flare/base:likely',
     '//flare/base:logging',
@@ -65,6 +74,7 @@ cc_benchmark(
 cc_library(
   name = 'fiber_impl',
   hdrs = [
+    'fiber_desc.h',
     'fiber_entity.h',
     'fiber_worker.h',
     'scheduling_group.h',
@@ -72,6 +82,7 @@ cc_library(
     'waitable.h',
   ],
   srcs = [
+    'fiber_desc.cc',
     'fiber_entity.cc',
     'scheduling_group.cc',
     'timer_worker.cc',
@@ -82,8 +93,10 @@ cc_library(
     ':assembly',
     ':context',
     ':run_queue',
+    ':runnable_entity',
     ':stack_allocator',
     '//flare/base:align',
+    '//flare/base:casting',
     '//flare/base:chrono',
     '//flare/base:deferred',
     '//flare/base:delayed_init',
@@ -114,6 +127,14 @@ cc_library(
 )
 
 cc_test(
+  name = 'fiber_desc_test',
+  srcs = 'fiber_desc_test.cc',
+  deps = [
+    ':fiber_impl',
+  ]
+)
+
+cc_test(
   name = 'fiber_entity_test',
   srcs = 'fiber_entity_test.cc',
   deps = [
@@ -126,10 +147,10 @@ cc_test(
   srcs = 'scheduling_group_test.cc',
   deps = [
     ':fiber_impl',
+    ':testing',
     '//flare/base:chrono',
     '//flare/base:random',
     '//flare/base:string',
-    '//flare/fiber/detail:testing',
     '//thirdparty/gflags:gflags',
   ],
   exclusive = True

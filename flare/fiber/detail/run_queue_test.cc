@@ -21,35 +21,37 @@
 
 #include "gtest/gtest.h"
 
-#include "flare/base/thread/latch.h"
 #include "flare/base/random.h"
+#include "flare/base/thread/latch.h"
 
 using namespace std::literals;
 
 namespace flare::fiber::detail {
 
-FiberEntity* CreateEntity(int x) { return reinterpret_cast<FiberEntity*>(x); }
+RunnableEntity* CreateRunnableFiber(int x) {
+  return reinterpret_cast<RunnableEntity*>(x);
+}
 
 TEST(RunQueue, Basics) {
   RunQueue queue(32);
-  ASSERT_TRUE(queue.Push(CreateEntity(3), false));
+  ASSERT_TRUE(queue.Push(CreateRunnableFiber(3), false));
   ASSERT_FALSE(queue.UnsafeEmpty());
-  ASSERT_EQ(CreateEntity(3), queue.Pop());
+  ASSERT_EQ(CreateRunnableFiber(3), queue.Pop());
 }
 
 TEST(RunQueue, Steal) {
   RunQueue queue(32);
-  ASSERT_TRUE(queue.Push(CreateEntity(3), false));
+  ASSERT_TRUE(queue.Push(CreateRunnableFiber(3), false));
   ASSERT_FALSE(queue.UnsafeEmpty());
-  ASSERT_EQ(CreateEntity(3), queue.Steal());
+  ASSERT_EQ(CreateRunnableFiber(3), queue.Steal());
 }
 
 TEST(RunQueue, Nonstealable) {
   RunQueue queue(32);
-  ASSERT_TRUE(queue.Push(CreateEntity(3), true));
+  ASSERT_TRUE(queue.Push(CreateRunnableFiber(3), true));
   ASSERT_FALSE(queue.UnsafeEmpty());
   ASSERT_FALSE(queue.Steal());
-  ASSERT_EQ(CreateEntity(3), queue.Pop());
+  ASSERT_EQ(CreateRunnableFiber(3), queue.Pop());
 }
 
 TEST(RunQueue, Torture) {
@@ -64,16 +66,16 @@ TEST(RunQueue, Torture) {
     std::thread ts[T];
     Latch latch(T);
     std::mutex lock;
-    std::vector<FiberEntity*> rcs;
+    std::vector<RunnableEntity*> rcs;
     std::atomic<std::size_t> read = 0;
     static_assert(N % T == 0 && T % 2 == 0);
     for (int i = 0; i != T / 2; ++i) {
       ts[i] = std::thread([s = N / (T / 2) * i, &queue, &latch] {
         auto as_batch = Random() % 2 == 0;
         if (as_batch) {
-          std::vector<FiberEntity*> fbs;
+          std::vector<RunnableEntity*> fbs;
           for (int i = 0; i != N / (T / 2); ++i) {
-            fbs.push_back(CreateEntity(s + i + 1));
+            fbs.push_back(CreateRunnableFiber(s + i + 1));
           }
           latch.count_down();
           latch.wait();
@@ -86,14 +88,14 @@ TEST(RunQueue, Torture) {
           latch.count_down();
           latch.wait();
           for (int i = 0; i != N / (T / 2); ++i) {
-            ASSERT_TRUE(queue.Push(CreateEntity(s + i + 1), false));
+            ASSERT_TRUE(queue.Push(CreateRunnableFiber(s + i + 1), false));
           }
         }
       });
     }
     for (int i = 0; i != T / 2; ++i) {
       ts[i + T / 2] = std::thread([&] {
-        std::vector<FiberEntity*> vfes;
+        std::vector<RunnableEntity*> vfes;
         latch.count_down();
         latch.wait();
         while (read != N) {
@@ -114,8 +116,8 @@ TEST(RunQueue, Torture) {
     std::sort(rcs.begin(), rcs.end());
     ASSERT_EQ(rcs.end(), std::unique(rcs.begin(), rcs.end()));
     ASSERT_EQ(N, rcs.size());
-    ASSERT_EQ(rcs.front(), CreateEntity(1));
-    ASSERT_EQ(rcs.back(), CreateEntity(N));
+    ASSERT_EQ(rcs.front(), CreateRunnableFiber(1));
+    ASSERT_EQ(rcs.back(), CreateRunnableFiber(N));
   }
 }
 
@@ -138,7 +140,7 @@ TEST(RunQueue, Overrun) {
         if (as_batch) {
           static_assert(N % 100 == 0);
           constexpr auto B = N / 100;
-          std::vector<FiberEntity*> batch(B, CreateEntity(1));
+          std::vector<RunnableEntity*> batch(B, CreateRunnableFiber(1));
           for (int j = 0; j != N; j += B) {
             while (!queue.BatchPush(&batch[0], &batch[B], false)) {
               ++overruns;
@@ -146,7 +148,7 @@ TEST(RunQueue, Overrun) {
           }
         } else {
           for (int j = 0; j != N; ++j) {
-            while (!queue.Push(CreateEntity(1), false)) {
+            while (!queue.Push(CreateRunnableFiber(1), false)) {
               ++overruns;
             }
           }
@@ -190,7 +192,7 @@ TEST(RunQueue, Throughput) {
     std::thread ts[T];
     Latch latch(T), latch2(T);
     std::mutex lock;
-    std::vector<FiberEntity*> rcs;
+    std::vector<RunnableEntity*> rcs;
     static_assert(N % T == 0);
 
     // Batch produce.
@@ -198,9 +200,9 @@ TEST(RunQueue, Throughput) {
       ts[i] = std::thread([s = N / T * i, &queue, &latch] {
         auto as_batch = Random() % 2 == 0;
         if (as_batch) {
-          std::vector<FiberEntity*> fbs;
+          std::vector<RunnableEntity*> fbs;
           for (int i = 0; i != N / T; ++i) {
-            fbs.push_back(CreateEntity(s + i + 1));
+            fbs.push_back(CreateRunnableFiber(s + i + 1));
           }
           latch.count_down();
           latch.wait();
@@ -213,7 +215,7 @@ TEST(RunQueue, Throughput) {
           latch.count_down();
           latch.wait();
           for (int i = 0; i != N / T; ++i) {
-            ASSERT_TRUE(queue.Push(CreateEntity(s + i + 1), false));
+            ASSERT_TRUE(queue.Push(CreateRunnableFiber(s + i + 1), false));
           }
         }
       });
@@ -225,7 +227,7 @@ TEST(RunQueue, Throughput) {
     // Batch consume.
     for (int i = 0; i != T; ++i) {
       ts[i] = std::thread([&] {
-        std::vector<FiberEntity*> vfes;
+        std::vector<RunnableEntity*> vfes;
         latch2.count_down();
         latch2.wait();
         for (int j = 0; j != N / T; ++j) {
@@ -244,8 +246,8 @@ TEST(RunQueue, Throughput) {
     std::sort(rcs.begin(), rcs.end());
     ASSERT_EQ(rcs.end(), std::unique(rcs.begin(), rcs.end()));
     ASSERT_EQ(N, rcs.size());
-    ASSERT_EQ(rcs.front(), CreateEntity(1));
-    ASSERT_EQ(rcs.back(), CreateEntity(N));
+    ASSERT_EQ(rcs.front(), CreateRunnableFiber(1));
+    ASSERT_EQ(rcs.back(), CreateRunnableFiber(N));
   }
 }
 

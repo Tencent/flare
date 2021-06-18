@@ -49,8 +49,17 @@ std::size_t GetMaxFibers() {
   std::ifstream ifs("/proc/sys/vm/max_map_count");
   std::string s;
   std::getline(ifs, s);
-  return std::min<std::size_t>(TryParse<std::size_t>(s).value_or(65530) / 2,
-                               1048576);
+  return std::min<std::size_t>(TryParse<std::size_t>(s).value_or(65530) / 4,
+                               131072);
+}
+
+FiberEntity* CreateFiberEntity(SchedulingGroup* sg, bool system_fiber,
+                               Function<void()>&& start_proc) noexcept {
+  auto desc = NewFiberDesc();
+  desc->scheduling_group_local = false;
+  desc->system_fiber = system_fiber;
+  desc->start_proc = std::move(start_proc);
+  return InstantiateFiberEntity(sg, desc);
 }
 
 }  // namespace
@@ -133,8 +142,6 @@ TEST_P(SystemFiberOrNot, RunFibers) {
   }
 
   for (int i = 0; i != N; ++i) {
-    // Even if we never call `FreeFiberEntity`, no leak should be reported (it's
-    // implicitly recycled when `FiberProc` returns).
     testing::StartFiberEntityInGroup(scheduling_group.get(), GetParam(),
                                      [&] { FiberProc(&context); });
   }

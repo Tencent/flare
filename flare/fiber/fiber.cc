@@ -66,24 +66,22 @@ Fiber::Fiber(const Attributes& attr, Function<void()>&& start) {
       ec->Execute(start);
     };
   }
-  // `fiber` will cease to exist once `start` returns. We don't own it.
-  //
-  // FIXME: The fiber's stack is allocated on caller's NUMA node, it would be
-  // beneficial if we can allocate if from the scheduling group it will run in.
-  auto fiber =
-      fiber::detail::CreateFiberEntity(sg, attr.system_fiber, std::move(start));
-  fiber->scheduling_group_local = attr.scheduling_group_local;
+  // `desc` will cease to exist once `start` returns. We don't own it.
+  auto desc = fiber::detail::NewFiberDesc();
+  desc->start_proc = std::move(start);
+  desc->scheduling_group_local = attr.scheduling_group_local;
+  desc->system_fiber = attr.system_fiber;
 
   // If `join()` is called, we'll sleep on this.
-  fiber->exit_barrier =
-      object_pool::GetRefCounted<fiber::detail::ExitBarrier>();
-  join_impl_ = fiber->exit_barrier;
+  desc->exit_barrier = object_pool::GetRefCounted<fiber::detail::ExitBarrier>();
+  join_impl_ = desc->exit_barrier;
 
   // Schedule the fiber.
   if (attr.launch_policy == fiber::Launch::Post) {
-    sg->ReadyFiber(fiber, {} /* Not needed. */);
+    sg->StartFiber(desc);
   } else {
-    sg->SwitchTo(fiber::detail::GetCurrentFiberEntity(), fiber);
+    sg->SwitchTo(fiber::detail::GetCurrentFiberEntity(),
+                 fiber::detail::InstantiateFiberEntity(sg, desc));
   }
 }
 
@@ -110,19 +108,23 @@ void StartFiberFromPthread(Function<void()>&& start_proc) {
 namespace fiber::internal {
 
 void StartFiberDetached(Function<void()>&& start_proc) {
-  auto sg = fiber::detail::NearestSchedulingGroup();
-  auto fiber =
-      fiber::detail::CreateFiberEntity(sg, false, std::move(start_proc));
-  fiber->scheduling_group_local = false;
-  sg->ReadyFiber(fiber, {} /* Not needed. */);
+  auto desc = detail::NewFiberDesc();
+  desc->start_proc = std::move(start_proc);
+  FLARE_CHECK(!desc->exit_barrier);
+  desc->scheduling_group_local = false;
+  desc->system_fiber = false;
+
+  fiber::detail::NearestSchedulingGroup()->StartFiber(desc);
 }
 
 void StartSystemFiberDetached(Function<void()>&& start_proc) {
-  auto sg = fiber::detail::NearestSchedulingGroup();
-  auto fiber =
-      fiber::detail::CreateFiberEntity(sg, true, std::move(start_proc));
-  fiber->scheduling_group_local = false;
-  sg->ReadyFiber(fiber, {} /* Not needed. */);
+  auto desc = detail::NewFiberDesc();
+  desc->start_proc = std::move(start_proc);
+  FLARE_CHECK(!desc->exit_barrier);
+  desc->scheduling_group_local = false;
+  desc->system_fiber = true;
+
+  fiber::detail::NearestSchedulingGroup()->StartFiber(desc);
 }
 
 void StartFiberDetached(Fiber::Attributes&& attrs,
@@ -136,28 +138,33 @@ void StartFiberDetached(Fiber::Attributes&& attrs,
     };
   }
 
-  auto fiber = fiber::detail::CreateFiberEntity(sg, attrs.system_fiber,
-                                                std::move(start_proc));
-  fiber->scheduling_group_local = attrs.scheduling_group_local;
+  auto desc = detail::NewFiberDesc();
+  desc->start_proc = std::move(start_proc);
+  FLARE_CHECK(!desc->exit_barrier);
+  desc->scheduling_group_local = attrs.scheduling_group_local;
+  desc->system_fiber = attrs.system_fiber;
 
   if (attrs.launch_policy == fiber::Launch::Post) {
-    sg->ReadyFiber(fiber, {} /* Not needed. */);
+    sg->StartFiber(desc);
   } else {
-    sg->SwitchTo(fiber::detail::GetCurrentFiberEntity(), fiber);
+    sg->SwitchTo(fiber::detail::GetCurrentFiberEntity(),
+                 detail::InstantiateFiberEntity(sg, desc));
   }
 }
 
 void BatchStartFiberDetached(std::vector<Function<void()>>&& start_procs) {
-  auto sg = fiber::detail::NearestSchedulingGroup();
-
-  std::vector<fiber::detail::FiberEntity*> fibers;
+  std::vector<fiber::detail::FiberDesc*> descs;
   for (auto&& e : start_procs) {
-    auto fiber = fiber::detail::CreateFiberEntity(sg, false, std::move(e));
-    fiber->scheduling_group_local = false;
-    fibers.push_back(fiber);
+    auto desc = fiber::detail::NewFiberDesc();
+    desc->start_proc = std::move(e);
+    FLARE_CHECK(!desc->exit_barrier);
+    desc->scheduling_group_local = false;
+    desc->system_fiber = false;
+    descs.push_back(desc);
   }
 
-  sg->StartFibers(fibers.data(), fibers.data() + fibers.size());
+  fiber::detail::NearestSchedulingGroup()->StartFibers(
+      descs.data(), descs.data() + descs.size());
 }
 
 }  // namespace fiber::internal

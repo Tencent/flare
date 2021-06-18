@@ -21,6 +21,7 @@
 
 #include "gflags/gflags.h"
 
+#include "flare/base/align.h"
 #include "flare/base/internal/annotation.h"
 #include "flare/base/logging.h"
 #include "flare/base/never_destroyed.h"
@@ -202,17 +203,17 @@ void DestroyUserStackImpl(UserStack* ptr) {
 }
 
 SystemStack* CreateSystemStackImpl() {
+  // `alignof(FiberEntity)`. Hardcoded to avoid introducing dependency to
+  // `fiber_entity.h`.
+  constexpr auto kAlign = hardware_destructive_interference_size;
+
   // Rather simple.. Memory allocator should handle it well. We don't even have
   // to make it aligned to page boundary.
 
-  // We'd still like to keep the resulting pointer 64-byte aligned. This is not
-  // mandatory for us though, as `make_context` itself fixed adjust alignment as
-  // it sees fit anyway.
-  //
   // Using POSIX `memalign` here, C++17 `aligned_alloc` is not available on
   // CentOS 6.
-  auto stack = memalign(64, kSystemStackSize);
-  FLARE_CHECK(reinterpret_cast<std::uintptr_t>(stack) % 64 == 0);
+  auto stack = memalign(kAlign, kSystemStackSize);
+  FLARE_CHECK(reinterpret_cast<std::uintptr_t>(stack) % kAlign == 0);
   auto stack_bottom = reinterpret_cast<char*>(stack) + kSystemStackSize;
 
   // Register it and return.

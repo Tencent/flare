@@ -25,7 +25,7 @@
 
 namespace flare::fiber::detail {
 
-struct FiberEntity;
+struct RunnableEntity;
 
 // Thread-safe queue for storing runnable fibers.
 class alignas(hardware_destructive_interference_size) RunQueue {
@@ -42,13 +42,13 @@ class alignas(hardware_destructive_interference_size) RunQueue {
   //
   // `instealable` should be `e.scheduling_group_local`. Internally we store
   // this value separately for `Steal` to use. This is required since `Steal`
-  // cannot access `FiberEntity` without claim ownership of it. In the meantime,
-  // once the ownership is claimed (and subsequently to find the `FiberEntity`
-  // cannot be stolen), it can't be revoked easily. So we treat `FiberEntity` as
-  // opaque, and avoid access `FiberEntity` it at all.
+  // cannot access `RunnableEntity` without claiming ownership of it. In the
+  // meantime, once the ownership is claimed (and subsequently to find the
+  // `RunnableEntity` cannot be stolen), it can't be revoked easily. So we treat
+  // `RunnableEntity` as opaque, and avoid access `RunnableEntity` it at all.
   //
   // Returns `false` on overrun.
-  bool Push(FiberEntity* e, bool instealable) {
+  bool Push(RunnableEntity* e, bool instealable) {
     auto head = head_seq_.load(std::memory_order_relaxed);
     auto&& n = nodes_[head & mask_];
     auto nseq = n.seq.load(std::memory_order_acquire);
@@ -66,12 +66,13 @@ class alignas(hardware_destructive_interference_size) RunQueue {
   // Push fibers in batch into the run queue.
   //
   // Returns `false` on overrun.
-  bool BatchPush(FiberEntity** start, FiberEntity** end, bool instealable);
+  bool BatchPush(RunnableEntity** start, RunnableEntity** end,
+                 bool instealable);
 
   // Pop a fiber from the run queue.
   //
   // Returns `nullptr` if the queue is empty.
-  FiberEntity* Pop() {
+  RunnableEntity* Pop() {
     auto tail = tail_seq_.load(std::memory_order_relaxed);
     auto&& n = nodes_[tail & mask_];
     auto nseq = n.seq.load(std::memory_order_acquire);
@@ -92,23 +93,23 @@ class alignas(hardware_destructive_interference_size) RunQueue {
   // `nullptr` will be returned.
   //
   // Returns `nullptr` if the queue is empty.
-  FiberEntity* Steal();
+  RunnableEntity* Steal();
 
   // Test if the queue is empty. The result might be inaccurate.
   bool UnsafeEmpty() const;
 
  private:
   struct alignas(hardware_destructive_interference_size) Node {
-    FiberEntity* fiber;
+    RunnableEntity* fiber;
     std::atomic<bool> instealable;
     std::atomic<std::uint64_t> seq;
   };
 
-  bool PushSlow(FiberEntity* e, bool instealable);
-  FiberEntity* PopSlow();
+  bool PushSlow(RunnableEntity* e, bool instealable);
+  RunnableEntity* PopSlow();
 
   template <class F>
-  FiberEntity* PopIf(F&& f);
+  RunnableEntity* PopIf(F&& f);
 
   std::size_t capacity_;
   std::size_t mask_;

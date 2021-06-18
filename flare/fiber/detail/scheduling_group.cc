@@ -31,12 +31,13 @@
 #include "flare/base/exposed_var.h"
 #include "flare/base/internal/annotation.h"
 #include "flare/base/internal/builtin_monitoring.h"
-#include "flare/base/thread/latch.h"
 #include "flare/base/object_pool.h"
 #include "flare/base/random.h"
 #include "flare/base/string.h"
+#include "flare/base/thread/latch.h"
 #include "flare/base/tsc.h"
 #include "flare/fiber/detail/assembly.h"
+#include "flare/fiber/detail/fiber_desc.h"
 #include "flare/fiber/detail/fiber_entity.h"
 #include "flare/fiber/detail/timer_worker.h"
 #include "flare/fiber/detail/waitable.h"
@@ -163,7 +164,7 @@ SchedulingGroup::SchedulingGroup(const std::vector<int>& affinity,
 SchedulingGroup::~SchedulingGroup() = default;
 
 FiberEntity* SchedulingGroup::AcquireFiber() noexcept {
-  if (auto rc = run_queue_.Pop()) {
+  if (auto rc = GetOrInstantiateFiber(run_queue_.Pop())) {
     // Acquiring the lock here guarantees us anyone who is working on this fiber
     // (with the lock held) has done its job before we returning it to the
     // caller (worker).
@@ -307,7 +308,7 @@ FiberEntity* SchedulingGroup::WaitForFiber() noexcept {
 }
 
 FiberEntity* SchedulingGroup::RemoteAcquireFiber() noexcept {
-  if (auto rc = run_queue_.Steal()) {
+  if (auto rc = GetOrInstantiateFiber(run_queue_.Steal())) {
     std::scoped_lock _(rc->scheduler_lock);
 
     FLARE_CHECK(rc->state == FiberState::Ready);
@@ -321,8 +322,12 @@ FiberEntity* SchedulingGroup::RemoteAcquireFiber() noexcept {
   return nullptr;
 }
 
-void SchedulingGroup::StartFibers(FiberEntity** start,
-                                  FiberEntity** end) noexcept {
+void SchedulingGroup::StartFiber(FiberDesc* desc) noexcept {
+  desc->last_ready_tsc = ReadTsc();
+  QueueRunnableEntity(desc, desc->scheduling_group_local);
+}
+
+void SchedulingGroup::StartFibers(FiberDesc** start, FiberDesc** end) noexcept {
   if (FLARE_UNLIKELY(start == end)) {
     return;  // Why would you call this method then?
   }
@@ -332,14 +337,14 @@ void SchedulingGroup::StartFibers(FiberEntity** start,
       [&] { start_fibers_latency->Report(TscElapsed(tsc, ReadTsc())); });
 
   for (auto iter = start; iter != end; ++iter) {
-    (*iter)->state = FiberState::Ready;
-    (*iter)->scheduling_group = this;
     (*iter)->last_ready_tsc = tsc;
   }
-  if (FLARE_UNLIKELY(!run_queue_.BatchPush(start, end, false))) {
+  auto s1 = reinterpret_cast<RunnableEntity**>(start),
+       s2 = reinterpret_cast<RunnableEntity**>(end);
+  if (FLARE_UNLIKELY(!run_queue_.BatchPush(s1, s2, false))) {
     auto since = ReadSteadyClock();
 
-    while (!run_queue_.BatchPush(start, end, false)) {
+    while (!run_queue_.BatchPush(s1, s2, false)) {
       FLARE_LOG_WARNING_EVERY_SECOND(
           "Run queue overflow. Too many ready fibers to run. If you're still "
           "not overloaded, consider increasing `flare_fiber_run_queue_size`.");
@@ -355,8 +360,6 @@ void SchedulingGroup::StartFibers(FiberEntity** start,
 
 void SchedulingGroup::ReadyFiber(
     FiberEntity* fiber, std::unique_lock<Spinlock>&& scheduler_lock) noexcept {
-  FLARE_DCHECK(!stopped_.load(std::memory_order_relaxed),
-               "The scheduling group has been stopped.");
   FLARE_DCHECK_NE(fiber, GetMasterFiberEntity(),
                   "Master fiber should not be added to run queue.");
 
@@ -367,23 +370,7 @@ void SchedulingGroup::ReadyFiber(
     scheduler_lock.unlock();
   }
 
-  // Push the fiber into run queue and (optionally) wake up a worker.
-  if (FLARE_UNLIKELY(!run_queue_.Push(fiber, fiber->scheduling_group_local))) {
-    auto since = ReadSteadyClock();
-
-    while (!run_queue_.Push(fiber, fiber->scheduling_group_local)) {
-      FLARE_LOG_WARNING_EVERY_SECOND(
-          "Run queue overflow. Too many ready fibers to run. If you're still "
-          "not overloaded, consider increasing `flare_fiber_run_queue_size`.");
-      FLARE_LOG_FATAL_IF(ReadSteadyClock() - since > 5s,
-                         "Failed to push fiber into ready queue after retrying "
-                         "for 5s. Gave up.");
-      std::this_thread::sleep_for(100us);
-    }
-  }
-  if (FLARE_UNLIKELY(!WakeUpOneWorker())) {
-    no_worker_available->Increment();
-  }
+  QueueRunnableEntity(fiber, fiber->scheduling_group_local);
 }
 
 void SchedulingGroup::Halt(
@@ -618,6 +605,41 @@ bool SchedulingGroup::WakeUpOneDeepSleepingWorker() noexcept {
     Pause();
   }
   return false;
+}
+
+void SchedulingGroup::QueueRunnableEntity(RunnableEntity* entity,
+                                          bool sg_local) noexcept {
+  FLARE_DCHECK(!stopped_.load(std::memory_order_relaxed),
+               "The scheduling group has been stopped.");
+
+  if (FLARE_UNLIKELY(!run_queue_.Push(entity, sg_local))) {
+    auto since = ReadSteadyClock();
+
+    while (!run_queue_.Push(entity, sg_local)) {
+      FLARE_LOG_WARNING_EVERY_SECOND(
+          "Run queue overflow. Too many ready fibers to run. If you're still "
+          "not overloaded, consider increasing `flare_fiber_run_queue_size`.");
+      FLARE_LOG_FATAL_IF(ReadSteadyClock() - since > 5s,
+                         "Failed to push fiber into ready queue after retrying "
+                         "for 5s. Gave up.");
+      std::this_thread::sleep_for(100us);
+    }
+  }
+  if (FLARE_UNLIKELY(!WakeUpOneWorker())) {
+    no_worker_available->Increment();
+  }
+}
+
+FiberEntity* SchedulingGroup::GetOrInstantiateFiber(
+    RunnableEntity* entity) noexcept {
+  if (!entity) {
+    return nullptr;
+  }
+  if (auto p = dyn_cast<FiberDesc>(entity)) {
+    return InstantiateFiberEntity(this, p);
+  }
+  FLARE_DCHECK(isa<FiberEntity>(entity));
+  return static_cast<FiberEntity*>(entity);
 }
 
 }  // namespace flare::fiber::detail

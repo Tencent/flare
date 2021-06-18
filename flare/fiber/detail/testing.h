@@ -28,6 +28,7 @@
 #include <thread>
 #include <utility>
 
+#include "flare/fiber/detail/fiber_desc.h"
 #include "flare/fiber/detail/fiber_entity.h"
 #include "flare/fiber/detail/scheduling_group.h"
 #include "flare/fiber/fiber.h"
@@ -52,9 +53,11 @@ void RunAsFiber(F&& f) {
 template <class F>
 void StartFiberEntityInGroup(detail::SchedulingGroup* sg, bool system_fiber,
                              F&& f) {
-  auto fiber = detail::CreateFiberEntity(sg, system_fiber, std::forward<F>(f));
-  fiber->scheduling_group_local = false;
-  sg->ReadyFiber(fiber, {});
+  auto desc = detail::NewFiberDesc();
+  desc->start_proc = std::move(f);
+  desc->system_fiber = system_fiber;
+  desc->scheduling_group_local = false;
+  sg->StartFiber(desc);
 }
 
 }  // namespace flare::fiber::testing
