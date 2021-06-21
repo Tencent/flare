@@ -76,13 +76,15 @@ class alignas(hardware_destructive_interference_size) RunQueue {
     auto tail = tail_seq_.load(std::memory_order_relaxed);
     auto&& n = nodes_[tail & mask_];
     auto nseq = n.seq.load(std::memory_order_acquire);
-    if (FLARE_LIKELY(nseq == tail + 1 &&
-                     tail_seq_.compare_exchange_strong(
-                         tail, tail + 1, std::memory_order_relaxed))) {
-      (void)n.seq.load(std::memory_order_acquire);  // We need this fence.
-      auto rc = n.fiber;
-      n.seq.store(tail + capacity_, std::memory_order_release);
-      return rc;
+    if (nseq == tail + 1) {
+      if (tail_seq_.compare_exchange_strong(tail, tail + 1,
+                                            std::memory_order_relaxed)) {
+        auto rc = n.fiber;
+        n.seq.store(tail + capacity_, std::memory_order_release);
+        return rc;
+      }
+    } else if (nseq == tail) {
+      return nullptr;
     }
     return PopSlow();
   }

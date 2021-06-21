@@ -151,21 +151,19 @@ RunnableEntity* RunQueue::PopIf(F&& f) {
     auto tail = tail_seq_.load(std::memory_order_relaxed);
     auto&& n = nodes_[tail & mask_];
     auto nseq = n.seq.load(std::memory_order_acquire);
-    if (FLARE_LIKELY(nseq == tail + 1)) {
-      // Test before claim ownership.
+    if (nseq == tail + 1) {
+      // Test before claiming ownership.
       if (!std::forward<F>(f)(n)) {
         return nullptr;
       }
       if (FLARE_LIKELY(tail_seq_.compare_exchange_weak(
               tail, tail + 1, std::memory_order_relaxed))) {
-        (void)n.seq.load(std::memory_order_acquire);  // We need this fence.
         auto rc = n.fiber;
         n.seq.store(tail + capacity_, std::memory_order_release);
         return rc;
       }
-    } else if (FLARE_UNLIKELY(nseq == tail ||               // Not filled yet
-                              nseq + capacity_ == tail)) {  // Wrap around
-      // Underrun.
+    } else if (nseq == tail) {
+      // Not filled yet, underrun.
       return nullptr;
     } else {
       // Fall-through.
