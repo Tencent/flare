@@ -196,12 +196,12 @@ TEST_P(SystemFiberOrNot, ConditionVariableNoTimeout) {
   std::atomic<std::size_t> done{};
   Mutex m;
   ConditionVariable cv;
-  std::thread([&] {
+  auto waiter = std::thread([&] {
     RunInFiber(N, GetParam(), [&](auto index) {
       std::unique_lock lk(m);
       done += cv.wait_until(lk, ReadSteadyClock() + 100s);
     });
-  }).detach();
+  });
   std::thread([&] {
     RunInFiber(1, GetParam(), [&](auto index) {
       while (done != N) {
@@ -210,6 +210,7 @@ TEST_P(SystemFiberOrNot, ConditionVariableNoTimeout) {
     });
   }).join();
   ASSERT_EQ(N, done);
+  waiter.join();
 }
 
 TEST_P(SystemFiberOrNot, ConditionVariableTimeout) {
@@ -370,12 +371,16 @@ TEST_P(SystemFiberOrNot, OneshotTimedEventTorture) {
 TEST_P(SystemFiberOrNot, EventFreeOnWakeup) {
   // This UT detects a use-after-free race, but it's can only be revealed by
   // UBSan in most cases, unfortunately.
-  RunInFiber(100, GetParam(), [&](auto index) {
+  RunInFiber(10, GetParam(), [&](auto index) {
+    std::vector<std::thread> ts(1000);
     for (int i = 0; i != 1000; ++i) {
       auto ev = std::make_unique<Event>();
-      std::thread([&] { ev->Set(); }).detach();
+      ts[i] = std::thread([&] { ev->Set(); });
       ev->Wait();
       ev = nullptr;
+    }
+    for (auto&& e : ts) {
+      e.join();
     }
   });
 }

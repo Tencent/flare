@@ -136,12 +136,9 @@ class Fiber(object):
 
         # Tests if the fiber has started running.
         #
-        # For fiber that hasn't yet had a chance to run (i.e., just has been
-        # initialized but no pthread worker has got it), its call stack is in a
-        # mass, so we're unlikely want to show its backtrace.
-        self.started = self._read_field(
-            fiber_entity, 'Q',
-            'ever_started_magic') == Fiber._get_fiber_ever_started_magic()
+        # For the moment this always holds. Not-yet-started fibers should have
+        # no stack allocated to them.
+        self.started = True
 
         try:
             saved_state = inferior.read_memory(state_save_area, 0x40)
@@ -203,11 +200,6 @@ class Fiber(object):
                                "Do you have debugging symbols available? "
                                "Expr: [{1}], Error [{2}].".format(
                                    name, expr, str(xcpt)))
-
-    @staticmethod
-    def _get_fiber_ever_started_magic():
-        return Fiber._get_constant(
-            "'flare::fiber::detail::kFiberEverStartedMagic'")
 
     @staticmethod
     def _get_constant(name):

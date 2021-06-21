@@ -22,11 +22,16 @@
 #include <memory>
 #include <unordered_map>
 
+#include "flare/base/align.h"
+#include "flare/base/casting.h"
 #include "flare/base/erased_ptr.h"
 #include "flare/base/function.h"
 #include "flare/base/internal/annotation.h"
+#include "flare/base/object_pool.h"
 #include "flare/base/ref_ptr.h"
 #include "flare/base/thread/spinlock.h"
+#include "flare/fiber/detail/fiber_desc.h"
+#include "flare/fiber/detail/runnable_entity.h"
 
 namespace flare::fiber::detail {
 
@@ -38,9 +43,6 @@ enum class FiberState { Ready, Running, Waiting, Dead };
 // Space reserved at stack bottom for `FiberEntity`.
 constexpr auto kFiberStackReservedSize = 512;
 
-// @sa: `FiberEntity::ever_started_magic`.
-constexpr std::uint64_t kFiberEverStartedMagic = 0x11223344ABABBBAA;
-
 // This structure is stored at the top of fiber's stack. (i.e., highest
 // address). Everything related to the fiber (control structure) are defined
 // here.
@@ -48,7 +50,8 @@ constexpr std::uint64_t kFiberEverStartedMagic = 0x11223344ABABBBAA;
 // Note that `FiberEntity` is stored starting at 64-byte (@sa: kFiberMagicSize)
 // offset in last stack page. The beginning `kFiberMagicSize` bytes are used to
 // store magic number.
-struct FiberEntity {
+struct alignas(hardware_destructive_interference_size) FiberEntity
+    : RunnableEntity {
   using trivial_fls_t = std::aligned_storage_t<8, 8>;
 
   // This constant determines how many FLS (fiber local storage) are stored in
@@ -68,9 +71,9 @@ struct FiberEntity {
   static constexpr auto kInlineTrivialLocalStorageSlots = 8;
 
   // We don't initialize primitive fields below, they're filled by
-  // `CreateFiberEntity`. Surprisingly GCC does not eliminate these dead stores
-  // (as they're immediately overwritten by `CreateFiberEntity`) if we do
-  // initialize them here.
+  // `InstantiateFiberEntity`. Surprisingly GCC does not eliminate these dead
+  // stores (as they're immediately overwritten by `InstantiateFiberEntity`) if
+  // we do initialize them here.
 
   // The first `kFiberMagicSize` bytes serve as a magic for identifying fiber's
   // stack (as well as it's control structure, i.e., us). The magic is:
@@ -83,19 +86,6 @@ struct FiberEntity {
 
   // Fiber ID for `gdb-plugin.py` to use.
   std::uint64_t debugging_fiber_id;
-
-  // Set the first time internal fiber start callback is run. This is used
-  // primarily by our GDB plugin to ignore never-started fibers. Stack of those
-  // fibers are in a mess, so we don't want to dump them out.
-  //
-  // We're using a magic number instead of a simple boolean to improve
-  // robustness of detecting alive fibers. Once the `FiberEntity` is gone, value
-  // here is not guaranteed by the standard. By using a magic number here we
-  // reduce the possibility that a dead fiber is recognized as running
-  // mistakenly.
-  //
-  // Marked as `volatile` to prevent compiler optimization.
-  volatile std::uint64_t ever_started_magic;
 
   // This lock is held when the fiber is in state-transition (e.g., from running
   // to suspended). This is required since it's inherent racy when we add
@@ -153,10 +143,6 @@ struct FiberEntity {
   //
   // Because we have no idea about which one (`Fiber` or us) will be destroyed
   // first, we share it between `Fiber` and us.
-  //
-  // Note that for perf. reasons, this one need to be filled by the fiber
-  // creator (out of `CreateFiberEntity`) before adding the fiber into run
-  // queue, if the caller indeed wants to join on the fiber.
   RefPtr<ExitBarrier> exit_barrier;
 
   // Fiber local variables stored inline.
@@ -193,6 +179,8 @@ struct FiberEntity {
   // Fiber context used by TSan.
   void* tsan_fiber = nullptr;
 #endif  // FLARE_INTERNAL_USE_TSAN
+
+  FiberEntity();
 
   // Get top (highest address) of the runtime stack (after skipping this
   // control structure).
@@ -305,9 +293,14 @@ inline bool IsFiberContextPresent() noexcept {
   return GetCurrentFiberEntity() != nullptr;
 }
 
-// Create & destroy fiber entity (both the control structure and the stack.)
-FiberEntity* CreateFiberEntity(SchedulingGroup* sg, bool system_fiber,
-                               Function<void()>&& start_proc) noexcept;
+// Instantiates a fiber entity with information from `desc`. The fiber is
+// instantiated so that it would (should) be run in `scheduling_group`.
+//
+// Ownership of `desc` is taken.
+FiberEntity* InstantiateFiberEntity(SchedulingGroup* scheduling_group,
+                                    FiberDesc* desc) noexcept;
+
+// Destroys a previously-instantiated fiber entity.
 void FreeFiberEntity(FiberEntity* fiber) noexcept;
 
 //////////////////////////////////////////

@@ -18,6 +18,19 @@
 
 namespace flare::fiber::detail {
 
+namespace {
+
+FiberEntity* CreateFiberEntity(SchedulingGroup* sg, bool system_fiber,
+                               Function<void()>&& start_proc) noexcept {
+  auto desc = NewFiberDesc();
+  desc->scheduling_group_local = false;
+  desc->system_fiber = system_fiber;
+  desc->start_proc = std::move(start_proc);
+  return InstantiateFiberEntity(sg, desc);
+}
+
+}  // namespace
+
 class SystemFiberOrNot : public ::testing::TestWithParam<bool> {};
 
 TEST_P(SystemFiberOrNot, GetMaster) {

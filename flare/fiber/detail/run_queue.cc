@@ -37,7 +37,7 @@ RunQueue::RunQueue(std::size_t capacity)
 
 RunQueue::~RunQueue() = default;
 
-bool RunQueue::BatchPush(FiberEntity** start, FiberEntity** end,
+bool RunQueue::BatchPush(RunnableEntity** start, RunnableEntity** end,
                          bool instealable) {
   auto batch = end - start;
   while (true) {
@@ -85,17 +85,17 @@ bool RunQueue::BatchPush(FiberEntity** start, FiberEntity** end,
   }
 }
 
-FiberEntity* RunQueue::Steal() {
+RunnableEntity* RunQueue::Steal() {
   return PopIf([](const Node& node) {
     return !node.instealable.load(std::memory_order_relaxed);
   });
 }
 
-FiberEntity* RunQueue::PopSlow() {
+RunnableEntity* RunQueue::PopSlow() {
   return PopIf([](auto&&) { return true; });
 }
 
-bool RunQueue::PushSlow(FiberEntity* e, bool instealable) {
+bool RunQueue::PushSlow(RunnableEntity* e, bool instealable) {
   while (true) {
     auto head = head_seq_.load(std::memory_order_relaxed);
     auto&& n = nodes_[head & mask_];
@@ -146,7 +146,7 @@ bool RunQueue::UnsafeEmpty() const {
 }
 
 template <class F>
-FiberEntity* RunQueue::PopIf(F&& f) {
+RunnableEntity* RunQueue::PopIf(F&& f) {
   while (true) {
     auto tail = tail_seq_.load(std::memory_order_relaxed);
     auto&& n = nodes_[tail & mask_];

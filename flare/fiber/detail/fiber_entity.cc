@@ -23,6 +23,8 @@
 #include <limits>
 #include <utility>
 
+#include "gflags/gflags.h"
+
 #include "flare/base/deferred.h"
 #include "flare/base/id_alloc.h"
 #include "flare/base/internal/annotation.h"
@@ -31,7 +33,6 @@
 #include "flare/fiber/detail/scheduling_group.h"
 #include "flare/fiber/detail/stack_allocator.h"
 #include "flare/fiber/detail/waitable.h"
-#include "gflags/gflags.h"
 
 DECLARE_int32(flare_fiber_stack_size);
 
@@ -83,7 +84,7 @@ std::pair<const void*, std::size_t> GetMasterFiberStack() noexcept {
 //
 // Do NOT mark this function as `noexcept`. We don't want to force stack being
 // unwound on exception.
-static void FiberProc(void* context)  {
+static void FiberProc(void* context) {
   auto self = reinterpret_cast<FiberEntity*>(context);
   // We're running in `self`'s stack now.
 
@@ -97,7 +98,6 @@ static void FiberProc(void* context)  {
 
   SetCurrentFiberEntity(self);  // We're alive.
   self->state = FiberState::Running;
-  self->ever_started_magic = kFiberEverStartedMagic;
 
   // Hmmm, there is a pending resumption callback, even if we haven't completely
   // started..
@@ -163,6 +163,8 @@ static void FiberProc(void* context)  {
   }
   FLARE_CHECK(0);  // Can't be here.
 }
+
+FiberEntity::FiberEntity() { SetRuntimeTypeTo<FiberEntity>(); }
 
 void FiberEntity::ResumeOn(Function<void()>&& cb) noexcept {
   auto caller = GetCurrentFiberEntity();
@@ -232,11 +234,12 @@ void SetCurrentFiberEntity(FiberEntity* current) { current_fiber = current; }
 
 #endif
 
-FiberEntity* CreateFiberEntity(SchedulingGroup* sg, bool system_fiber,
-                               Function<void()>&& start_proc) noexcept {
-  auto stack = system_fiber ? CreateSystemStack() : CreateUserStack();
+FiberEntity* InstantiateFiberEntity(SchedulingGroup* scheduling_group,
+                                    FiberDesc* desc) noexcept {
+  ScopedDeferred _{[&] { DestroyFiberDesc(desc); }};  // Don't leak.
+  auto stack = desc->system_fiber ? CreateSystemStack() : CreateUserStack();
   auto stack_size =
-      system_fiber ? kSystemStackSize : FLAGS_flare_fiber_stack_size;
+      desc->system_fiber ? kSystemStackSize : FLAGS_flare_fiber_stack_size;
   auto bottom = reinterpret_cast<char*>(stack) + stack_size;
   // `FiberEntity` (and magic) is stored at the stack bottom.
   auto ptr = bottom - kFiberStackReservedSize;
@@ -246,14 +249,18 @@ FiberEntity* CreateFiberEntity(SchedulingGroup* sg, bool system_fiber,
   auto fiber = new (ptr) FiberEntity;  // A new life has born.
 
   fiber->debugging_fiber_id = id_alloc::Next<FiberIdTraits>();
-  // `fiber->ever_started_magic` is not filled here. @sa: `FiberProc`.
-  fiber->system_fiber = system_fiber;
   fiber->stack_size = stack_size - kFiberStackReservedSize;
   fiber->state_save_area =
       make_context(fiber->GetStackTop(), fiber->GetStackLimit(), FiberProc);
-  fiber->scheduling_group = sg;
-  fiber->start_proc = std::move(start_proc);
+  fiber->scheduling_group = scheduling_group;
   fiber->state = FiberState::Ready;
+
+  // Now move fields from `desc` into `fiber`.
+  fiber->start_proc = std::move(desc->start_proc);
+  fiber->exit_barrier = std::move(desc->exit_barrier);
+  fiber->last_ready_tsc = desc->last_ready_tsc;
+  fiber->scheduling_group_local = desc->scheduling_group_local;
+  fiber->system_fiber = desc->system_fiber;
 
 #ifdef FLARE_INTERNAL_USE_ASAN
   // Using the lowest VA here is NOT a mistake.
@@ -292,8 +299,6 @@ void FreeFiberEntity(FiberEntity* fiber) noexcept {
   flare::internal::tsan::DestroyFiber(fiber->tsan_fiber);
 #endif
 
-  fiber->ever_started_magic = 0;  // Hopefully the compiler does not optimize
-                                  // this away.
   fiber->~FiberEntity();
 
   auto p = reinterpret_cast<char*>(fiber) + kFiberStackReservedSize -
