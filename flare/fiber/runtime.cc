@@ -436,10 +436,14 @@ std::optional<SchedulingProfile> GetSchedulingProfile() {
 }
 
 void InitializeSchedulingParametersFromFlags() {
+  constexpr auto kMinimumDefaultConcurrency = 4;
+
   auto profile = GetSchedulingProfile();
   fiber_concurrency_in_effect =
-      FLAGS_flare_concurrency_hint ? FLAGS_flare_concurrency_hint
-                                   : internal::GetNumberOfProcessorsAvailable();
+      FLAGS_flare_concurrency_hint
+          ? FLAGS_flare_concurrency_hint
+          : std::max<std::size_t>(internal::GetNumberOfProcessorsAvailable(),
+                                  kMinimumDefaultConcurrency);
 
   if (profile) {
     scheduling_parameters = GetSchedulingParameters(
