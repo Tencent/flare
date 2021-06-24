@@ -84,11 +84,11 @@ fiber从被创建（或被唤醒）到被pthread执行是一个典型的生产�
 
 对于每个线程，我们还维护如下数据：
 
-- wait slot：通过[futex](http://man7.org/linux/man-pages/man2/futex.2.html)实现，pthread worker无工作时在此休眠，并可由其他人将至唤醒。
+- wait slot：通过[futex](http://man7.org/linux/man-pages/man2/futex.2.html)实现，pthread worker无工作时在此休眠，并可由其他人将之唤醒。
 
-#### 有界对列和无界队列
+#### 有界队列和无界队列
 
-初看起来，我们这儿run queue使用有界对列会为用户引入不必要的可能需要调节的参数（`flare_fiber_run_queue_size`）。
+初看起来，我们这儿run queue使用有界队列会为用户引入不必要的可能需要调节的参数（`flare_fiber_run_queue_size`）。
 
 但是实际上，相对于无界队列，有界队列有如下优势：
 
@@ -122,7 +122,7 @@ fiber从被创建（或被唤醒）到被pthread执行是一个典型的生产�
 
 如果pthread worker轮询超时之后仍然取不到fiber，转入休眠。
 
-如果pthread worker在轮询阶段取到了fiber，在离开之前会将pending wakeup置为true。此时另一轮询的pthread worker（如果有）发现这一字段改为true之后，会唤醒（唤醒逻辑见后文）一个新的pthread worker来轮询。这样可以提前唤醒pthread worker，在持续有新的fiber生成时，尽量保证有已经被唤醒的pthread worker可以直接执行。**即改善了fiber的调度延迟，又可以避免下一次有fiber可执行时，生产方的唤醒pthread worker的syscall成本。**
+如果pthread worker在轮询阶段取到了fiber，在离开之前会将pending wakeup置为true。此时另一轮询的pthread worker（如果有）发现这一字段改为true之后，会唤醒（唤醒逻辑见后文）一个新的pthread worker来轮询。这样可以提前唤醒pthread worker，在持续有新的fiber生成时，尽量保证有已经被唤醒的pthread worker可以直接执行。**既改善了fiber的调度延迟，又可以避免下一次有fiber可执行时，生产方的唤醒pthread worker的syscall成本。**
 
 获取fiber之后返回时，pthread worker会将对应的spinning mask改为0（可能已经为0，见下文）。
 
