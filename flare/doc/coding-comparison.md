@@ -163,7 +163,7 @@ class EchoResponseStream :
 
 class EchoServiceImpl : public EchoService {
  public:
-  explicit EchoServiceImpl() :
+  explicit EchoServiceImpl(shared_ptr<ThreadPool> thread_pool) :
       thread_pool_(thread_pool) {}
   void StreamEcho(
       google::protobuf::RpcController* controller,
