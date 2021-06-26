@@ -14,7 +14,9 @@
 
 #include "flare/base/demangle.h"
 
+#ifdef __GNUC__
 #include <cxxabi.h>
+#endif
 
 #include <string>
 
@@ -22,8 +24,10 @@
 
 namespace flare {
 
-// TODO(luobogao): MSVC.
 std::string Demangle(const char* s) {
+#ifdef _MSC_VER
+  return s;
+#elif defined(__GNUC__)
   [[maybe_unused]] int status;
   auto demangled = abi::__cxa_demangle(s, nullptr, nullptr, &status);
   ScopedDeferred _([&] { free(demangled); });
@@ -31,6 +35,9 @@ std::string Demangle(const char* s) {
     return s;
   }
   return demangled;
+#else
+  #error "Demangle not supported on current compiler."
+#endif
 }
 
 }  // namespace flare
