@@ -96,7 +96,7 @@ class RefCounted {
   std::atomic<std::uint32_t> ref_count_{1};
 };
 
-// Keep the overhead the same as an atomic `std::uint3232_t`.
+// Keep the overhead the same as an atomic `std::uint32_t`.
 static_assert(sizeof(RefCounted<int>) == sizeof(std::atomic<std::uint32_t>));
 
 // Utilities for internal use.
