@@ -1,9 +1,13 @@
 # Flare 后台服务开发框架
 
+Flare Backend Service Framework
+
+[English Document](README-en.md)
+
 [![license NewBSD](https://img.shields.io/badge/license-BSD-yellow.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
+[![C++](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
 [![Code Style](https://img.shields.io/badge/code%20style-google-blue.svg)](https://google.github.io/styleguide/cppguide.html)
-![Platform](https://img.shields.io/badge/platform-linux%20-lightgrey.svg)
+[![Platform](https://img.shields.io/badge/platform-linux%20-lightgrey.svg)](https://www.kernel.org/)
 
 [腾讯广告](https://e.qq.com/ads/) 是腾讯公司最重要的业务之一，其后台大量采用 C++ 开发。
 
@@ -26,9 +30,9 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 
 ## 系统要求
 
-- Linux 3.10 及以上内核，暂不支持其他操作系统
+- Linux 3.10 或以上内核，暂不支持其他操作系统
 - x86-64 处理器，也支持 aarch64 及 ppc64le，但是未在生产环境上实际使用过
-- GCC 8 及以上版本的编译器
+- GCC 8 或以上版本的编译器
 
 ## 开始使用
 
@@ -70,7 +74,7 @@ Flare 是开箱即用的，已经自带了所需的[第三方库](thirdparty/)�
 我们提供了一些[使用示例](flare/example)以供参考，下面是一个简单的转发服务（同时包含RPC客户端及服务端的使用）。
 
 ```cpp
-#include "thirdparty/gflags/gflags.h"
+#include "gflags/gflags.h"
 
 #include "flare/example/rpc/echo_service.flare.pb.h"
 #include "flare/example/rpc/relay_service.flare.pb.h"
@@ -179,7 +183,7 @@ void FancyServiceImpl::FancyJob(const FancyJobRequest& request,
 
 出于展示目的，我们这儿请求了三个异构的服务。如果有必要，也可以通过这种方式请求同构的、或者部分同构部分异构的服务。
 
-## 二次开发
+## 参与开发
 
 我们非常欢迎参与共同建设，对于希望了解 Flare 更多内部设计的开发者，或需要对 Flare 进行二次开发的开发者而言，[`flare/doc/`](flare/doc/)下有更多的技术文档可供参考。
 
