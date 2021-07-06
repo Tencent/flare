@@ -43,23 +43,31 @@ DEFINE_string(
     flare_monitoring_extra_tags, "",
     "If desired, you may specify tags to be reporting along with every "
     "monitored value. This option is specified as K1=V1;K2=V2;K3=V3;...");
+DEFINE_int32(flare_monitoring_legacy_report_buffer_size, 131072,
+             "For performance reasons, internally we buffer events reported by "
+             "`monitoring::Report` in per-thread buffer. This option specifies "
+             "the size of the per-thread buffer.");
 
 using namespace std::literals;
 
 namespace flare {
 
-namespace monitoring {
-
 namespace {
 
 ExposedMetrics<std::uint64_t> flush_events_delay(
     "flare/monitoring/flush_events_delay");
+ExposedCounter<std::uint64_t> legacy_event_reports(
+    "flare/monitoring/legacy_event_reports");
+ExposedCounter<std::uint64_t> counter_reports(
+    "flare/monitoring/counter_reports");
+ExposedCounter<std::uint64_t> gauge_reports("flare/monitoring/gauge_reports");
+ExposedCounter<std::uint64_t> timer_reports("flare/monitoring/timer_reports");
 
 // Wrapper on `CircularBuffer`, providing some handy functionality required by
 // us.
 class alignas(hardware_destructive_interference_size) GuardedCircularBuffer
     : public RefCounted<GuardedCircularBuffer> {
-  using Buffer = internal::CircularBuffer<Event>;
+  using Buffer = internal::CircularBuffer<monitoring::Event>;
 
  public:
   ~GuardedCircularBuffer() {
@@ -85,7 +93,8 @@ class alignas(hardware_destructive_interference_size) GuardedCircularBuffer
  private:
   // This buffer should be large enough. Even if we can produce so many events,
   // we're unlikely to be able to consume them in time.
-  Buffer buffer_{1048576};
+  Buffer buffer_{static_cast<std::size_t>(
+      FLAGS_flare_monitoring_legacy_report_buffer_size)};
   std::atomic<bool> acquired_{false};
   // The object is initialized on first access (by its owning thread,
   // obviously), therefore `node_id_` should be initialized correctly.
@@ -128,17 +137,14 @@ void ReportEvents() {
       RefPtr<GuardedCircularBuffer> buffer;
       flare::Deferred ownership;
     };
-    auto cb = [ref = CapturedBufferRef{.buffer = RefPtr(ref_ptr, buffer),
-                                       .ownership = std::move(guard)}] {
-      thread_local std::vector<Event> events;
-      // No need to check if `events`'s capacity is too large (and reset it
-      // if it is, as was done in `internal/dpc.cc`) as the `buffer`'s
-      // internal storaged is bounded.
-
-      ScopedDeferred _([&] { events.clear(); });
+    auto cb = [ref =
+                   CapturedBufferRef{.buffer = RefPtr(ref_ptr, buffer),
+                                     .ownership = std::move(guard)}]() mutable {
+      std::vector<monitoring::Event> events;
       ref.buffer->Get()->Pop(&events);
+      ref.ownership = flare::Deferred();  // Release the ownership ASAP.
       if (!events.empty()) {
-        Dispatcher::Instance()->ReportEvents(events);
+        monitoring::Dispatcher::Instance()->ReportEvents(events);
       }
     };
     internal::BackgroundTaskHost::Instance()->Queue(buffer->GetNodeId(),
@@ -169,14 +175,14 @@ void InitializeMonitorTimerOnce() {
   // NOTHING.
 }
 
-ComparableTags AsComparableTags(
+monitoring::ComparableTags AsComparableTags(
     std::initializer_list<std::pair<std::string_view, std::string_view>> tags) {
   std::vector<std::pair<std::string, std::string>> values;
 
   for (auto&& [k, v] : tags) {
     values.emplace_back(k, v);
   }
-  return ComparableTags(values);
+  return monitoring::ComparableTags(values);
 }
 
 std::vector<std::pair<std::string, std::string>> MergeTags(
@@ -242,7 +248,18 @@ auto SaveReportEssentialsAndClear(const std::string& name, Extra extra,
   return essentials;
 }
 
+template <class State, class F>
+std::uint64_t AccumulateReports(const State& state, const F& reader) {
+  std::uint64_t result = reader(state->fast_reports);
+  for (auto&& [_, e] : state->tagged_reports) {
+    result += reader(e);
+  }
+  return result;
+}
+
 }  // namespace
+
+namespace monitoring {
 
 void Report(
     Reading reading, const std::string_view& key,
@@ -250,6 +267,7 @@ void Report(
     std::initializer_list<std::pair<std::string_view, std::string_view>> tags) {
   InitializeMonitorTimerOnce();  // Start background timer if we haven't yet.
 
+  legacy_event_reports->Increment();
   if (FLARE_UNLIKELY(
           !pending_events->Get()->Emplace(reading, key, value, tags))) {
     FLARE_LOG_WARNING_EVERY_SECOND(
@@ -283,7 +301,7 @@ void MonitoredCounter::Add(
 
   auto&& reports = state->tagged_reports.TryGet(tags);
   if (FLARE_UNLIKELY(!reports)) {
-    reports = &state->tagged_reports[monitoring::AsComparableTags(tags)];
+    reports = &state->tagged_reports[AsComparableTags(tags)];
   }
   reports->sum += value;
   ++reports->times;
@@ -302,13 +320,15 @@ void MonitoredCounter::FlushBufferedReports() noexcept {
     return;
   }
 
+  gauge_reports->Add(
+      AccumulateReports(state_, [](auto&& report) { return report.times; }));
+
   // Merge per-instace extra-tags with the global ones.
-  auto extra_tags =
-      monitoring::MergeTags(monitoring::GetGlobalExtraTags(), extra_tags_);
+  auto extra_tags = MergeTags(GetGlobalExtraTags(), extra_tags_);
 
   // Save the states ASAP and leave the rest (constructing an instance of
   // `CoalescedCounterEvent`) to DPC.
-  auto essentials = monitoring::SaveReportEssentialsAndClear<MonitoredCounter>(
+  auto essentials = SaveReportEssentialsAndClear<MonitoredCounter>(
       key_, std::pair(key_, extra_tags), state_.Get());
 
   // This DPC takes care of the rest.
@@ -324,8 +344,7 @@ void MonitoredCounter::FlushBufferedReports() noexcept {
 
     // The tagged ones.
     for (auto&& [tags, v] : essentials->tagged_reports) {
-      event.tags =
-          monitoring::MergeTags(essentials->extra.second, tags.GetTags());
+      event.tags = MergeTags(essentials->extra.second, tags.GetTags());
       event.sum = v.sum;
       event.times = v.times;
       monitoring::Dispatcher::Instance()->ReportCoalescedEvent(event);
@@ -380,7 +399,7 @@ void MonitoredGauge::Report(
 
   auto&& reports = state->tagged_reports.TryGet(tags);
   if (FLARE_UNLIKELY(!reports)) {
-    reports = &state->tagged_reports[monitoring::AsComparableTags(tags)];
+    reports = &state->tagged_reports[AsComparableTags(tags)];
   }
   reports->sum += value;
   ++reports->times;
@@ -395,9 +414,11 @@ void MonitoredGauge::FlushBufferedReports() noexcept {
     return;
   }
 
-  auto extra_tags =
-      monitoring::MergeTags(monitoring::GetGlobalExtraTags(), extra_tags_);
-  auto essentials = monitoring::SaveReportEssentialsAndClear<MonitoredGauge>(
+  gauge_reports->Add(
+      AccumulateReports(state_, [](auto&& report) { return report.times; }));
+
+  auto extra_tags = MergeTags(GetGlobalExtraTags(), extra_tags_);
+  auto essentials = SaveReportEssentialsAndClear<MonitoredGauge>(
       key_, std::pair(key_, extra_tags), state_.Get());
 
   internal::QueueDpc([essentials = std::move(essentials)] {
@@ -410,8 +431,7 @@ void MonitoredGauge::FlushBufferedReports() noexcept {
     monitoring::Dispatcher::Instance()->ReportCoalescedEvent(event);
 
     for (auto&& [tags, v] : essentials->tagged_reports) {
-      event.tags =
-          monitoring::MergeTags(essentials->extra.second, tags.GetTags());
+      event.tags = MergeTags(essentials->extra.second, tags.GetTags());
       event.sum = v.sum;
       event.times = v.times;
       monitoring::Dispatcher::Instance()->ReportCoalescedEvent(event);
@@ -461,7 +481,7 @@ void MonitoredTimer::Report(
 
   auto&& reports = state->tagged_reports.TryGet(tags);
   if (FLARE_UNLIKELY(!reports)) {
-    reports = &state->tagged_reports[monitoring::AsComparableTags(tags)];
+    reports = &state->tagged_reports[AsComparableTags(tags)];
   }
   if (auto count = as_count_(this, duration);
       count < kOptimizedForDurationThreshold) {
@@ -479,9 +499,17 @@ void MonitoredTimer::FlushBufferedReports() noexcept {
     return;
   }
 
-  auto extra_tags =
-      monitoring::MergeTags(monitoring::GetGlobalExtraTags(), extra_tags_);
-  auto essentials = monitoring::SaveReportEssentialsAndClear<MonitoredTimer>(
+  timer_reports->Add(AccumulateReports(state_, [](auto&& report) {
+    std::uint64_t result = 0;
+
+    for (auto&& e : report.fast_times) {
+      result += e;
+    }
+    return result + report.times.size();
+  }));
+
+  auto extra_tags = MergeTags(GetGlobalExtraTags(), extra_tags_);
+  auto essentials = SaveReportEssentialsAndClear<MonitoredTimer>(
       key_, std::tuple(key_, unit_, extra_tags), state_.Get());
 
   internal::QueueDpc([essentials = std::move(essentials)] {
@@ -512,7 +540,7 @@ void MonitoredTimer::FlushBufferedReports() noexcept {
     monitoring::Dispatcher::Instance()->ReportCoalescedEvent(event);
 
     for (auto&& [tags, v] : essentials->tagged_reports) {
-      event.tags = monitoring::MergeTags(extra_tags, tags.GetTags());
+      event.tags = MergeTags(extra_tags, tags.GetTags());
       event.times = read_times(v, unit);
       monitoring::Dispatcher::Instance()->ReportCoalescedEvent(event);
     }
