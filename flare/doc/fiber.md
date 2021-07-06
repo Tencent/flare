@@ -14,7 +14,7 @@ fiber通常对上层透明。
 
 flare底层基于[fiber](https://en.wikipedia.org/wiki/Fiber_(computer_science))开发，并[自行设计了一套fiber库](../fiber)。
 
-这一节简单介绍了fiber于[协程（coroutine）](https://en.wikipedia.org/wiki/Coroutine)之间的区别及联系。
+这一节简单介绍了fiber与[协程（coroutine）](https://en.wikipedia.org/wiki/Coroutine)之间的区别及联系。
 
 ### fiber
 
