@@ -25,26 +25,26 @@ namespace flare {
 
 // Name is the compression_algorithm and should already registered by
 // FLARE_COMPRESSION_REGISTER_COMPRESSOR/FLARE_COMPRESSION_REGISTER_DECOMPRESSOR.
-std::unique_ptr<Decompressor> MakeDecompressor(const std::string_view& name);
+std::unique_ptr<Decompressor> MakeDecompressor(std::string_view name);
 
-std::unique_ptr<Compressor> MakeCompressor(const std::string_view& name);
+std::unique_ptr<Compressor> MakeCompressor(std::string_view name);
 
 std::optional<NoncontiguousBuffer> Compress(Compressor* compressor,
                                             const NoncontiguousBuffer& nb);
 std::optional<NoncontiguousBuffer> Compress(Compressor* compressor,
-                                            const std::string_view& body);
+                                            std::string_view body);
 bool Compress(Compressor* compressor, const NoncontiguousBuffer& nb,
               NoncontiguousBufferBuilder* builder);
-bool Compress(Compressor* compressor, const std::string_view& body,
+bool Compress(Compressor* compressor, std::string_view body,
               NoncontiguousBufferBuilder* builder);
 
 std::optional<NoncontiguousBuffer> Decompress(Decompressor* decompressor,
                                               const NoncontiguousBuffer& nb);
 std::optional<NoncontiguousBuffer> Decompress(Decompressor* decompressor,
-                                              const std::string_view& body);
+                                              std::string_view body);
 bool Decompress(Decompressor* decompressor, const NoncontiguousBuffer& nb,
                 NoncontiguousBufferBuilder* builder);
-bool Decompress(Decompressor* decompressor, const std::string_view& body,
+bool Decompress(Decompressor* decompressor, std::string_view body,
                 NoncontiguousBufferBuilder* builder);
 
 }  // namespace flare

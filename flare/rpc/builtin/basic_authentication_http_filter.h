@@ -26,8 +26,8 @@ namespace flare {
 // Implements "basic" authentication scheme.
 class BasicAuthenticationHttpFilter : public HttpFilter {
   // Called with `user` / `password`.
-  using VerifyCredential = Function<bool(const std::string_view& user,
-                                         const std::string_view& password)>;
+  using VerifyCredential =
+      Function<bool(std::string_view user, std::string_view password)>;
 
  public:
   // `verify_cred` is called to determine if the credential provided by the user

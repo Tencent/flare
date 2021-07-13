@@ -47,7 +47,7 @@ void HttpHeaders::clear() noexcept {
 }
 
 std::vector<std::string_view> HttpHeaders::TryGetMultiple(
-    const std::string_view& key) const noexcept {
+    std::string_view key) const noexcept {
   std::vector<std::string_view> values;
   for (auto&& [k, v] : fields_) {
     // I really shouldn't have done this.
@@ -97,14 +97,14 @@ void HttpHeaders::Append(std::string key, std::string value) {
 }
 
 void HttpHeaders::Append(
-    const std::initializer_list<std::pair<std::string_view, std::string_view>>&
+    std::initializer_list<std::pair<std::string_view, std::string_view>>
         fields) {
   for (auto&& [k, v] : fields) {
     Append(std::string(k), std::string(v));
   }
 }
 
-bool HttpHeaders::Remove(const std::string_view& key) noexcept {
+bool HttpHeaders::Remove(std::string_view key) noexcept {
   if (!TryGet(key)) {
     return false;
   }

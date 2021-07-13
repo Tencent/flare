@@ -104,8 +104,8 @@ class DumpingCall {
 
   // Timestamps.
   virtual void SetTimestamps(
-      const std::chrono::steady_clock::time_point& start_ts,
-      const std::chrono::steady_clock::time_point& finish_ts) = 0;
+      std::chrono::steady_clock::time_point start_ts,
+      std::chrono::steady_clock::time_point finish_ts) = 0;
 
   // System tags. @sa: `tags.h`
   //

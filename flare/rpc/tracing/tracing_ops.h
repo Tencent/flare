@@ -258,7 +258,7 @@ class TracingOps {
   // tags be set in `apply_opts`, consult documentation of provider you use for
   // details.)
   template <class F>
-  QuickerSpan StartSpanWithLazyOptions(const std::string_view& operation_name,
+  QuickerSpan StartSpanWithLazyOptions(std::string_view operation_name,
                                        F&& apply_opts) {
     if (Tracing()) {
       opentracing::StartSpanOptions options = {
@@ -296,7 +296,7 @@ class TracingOps {
 };
 
 // Get `TracingOps` for distributed tracing.
-TracingOps* GetTracingOps(const std::string_view& service);
+TracingOps* GetTracingOps(std::string_view service);
 
 ////////////////////////////////////////
 // Implementation goes below.         //

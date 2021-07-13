@@ -54,8 +54,8 @@ class ComparableTags {
   //
   // FIXME: The implementation is relatively slow..
   bool operator==(
-      const std::initializer_list<
-          std::pair<std::string_view, std::string_view>>& other) const noexcept;
+      std::initializer_list<std::pair<std::string_view, std::string_view>>
+          other) const noexcept;
 
   bool operator==(const ComparableTags& other) const noexcept {
     return tags_ == other.tags_;
@@ -79,8 +79,7 @@ struct Event {
   using CharArray = std::array<char, 24>;
 
   Event() = default;
-  Event(Reading expected_reading, const std::string_view& sv,
-        std::uint64_t value,
+  Event(Reading expected_reading, std::string_view sv, std::uint64_t value,
         std::initializer_list<std::pair<std::string_view, std::string_view>>
             tags);
 
@@ -135,7 +134,7 @@ struct CoalescedTimerEvent {
 };
 
 inline Event::Event(
-    Reading expected_reading, const std::string_view& sv, std::uint64_t value,
+    Reading expected_reading, std::string_view sv, std::uint64_t value,
     std::initializer_list<std::pair<std::string_view, std::string_view>> tags)
     : expected_reading(expected_reading), value(value) {
   // static_assert(sizeof(this->key) == 32);  // Not applicable on non-x86.

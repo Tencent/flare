@@ -38,7 +38,7 @@ auto ReadClock() {
 // Cast time point to `TimePoint`.
 template <class TimePoint, class Clock, class Duration,
           class = typename TimePoint::clock>
-auto CastTo(const std::chrono::time_point<Clock, Duration>& time) {
+auto CastTo(std::chrono::time_point<Clock, Duration> time) {
   if constexpr (std::is_same_v<typename TimePoint::clock, Clock>) {
     return time;  // Nothing to convert.
   } else {
@@ -49,7 +49,7 @@ auto CastTo(const std::chrono::time_point<Clock, Duration>& time) {
 // Cast duration to `TimePoint`.
 template <class TimePoint, class Rep, class Period,
           class = typename TimePoint::clock>
-auto CastTo(const std::chrono::duration<Rep, Period>& duration) {
+auto CastTo(std::chrono::duration<Rep, Period> duration) {
   return ReadClock<typename TimePoint::clock>() + duration;
 }
 
@@ -73,14 +73,13 @@ class TimeView<TimePoint, void_t<typename TimePoint::clock>> {
 
   // Accepts a `std::chrono::duration` and convert it to `TimePoint`.
   template <class Rep, class Period>
-  constexpr /* implicit */ TimeView(
-      const std::chrono::duration<Rep, Period>& duration)
+  constexpr /* implicit */ TimeView(std::chrono::duration<Rep, Period> duration)
       : time_point_(detail::time_view::CastTo<TimePoint>(duration)) {}
 
   // Accepts a time point in `Clock`, and convert it to `TimePoint`.
   template <class Clock, class Duration>
   constexpr /* implicit */ TimeView(
-      const std::chrono::time_point<Clock, Duration>& time)
+      std::chrono::time_point<Clock, Duration> time)
       : time_point_(detail::time_view::CastTo<TimePoint>(time)) {}
 
   // Read the time point we've received.
@@ -102,14 +101,13 @@ class TimeView<Duration,
 
   // Accepts a `std::chrono::duration` and convert it to `Duration`.
   template <class Rep, class Period>
-  constexpr /* implicit */ TimeView(
-      const std::chrono::duration<Rep, Period>& duration)
+  constexpr /* implicit */ TimeView(std::chrono::duration<Rep, Period> duration)
       : duration_(duration) {}
 
   // Accepts a time point in `Clock`, and convert it to `Duration`.
   template <class Clock, class AcceptingDuration>
   constexpr /* implicit */ TimeView(
-      const std::chrono::time_point<Clock, AcceptingDuration>& time)
+      std::chrono::time_point<Clock, AcceptingDuration> time)
       : duration_(time - detail::time_view::ReadClock<Clock>()) {}
 
   // Read the time point we've received.

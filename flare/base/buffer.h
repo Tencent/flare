@@ -297,7 +297,7 @@ class NoncontiguousBufferBuilder {
   }
 
   // Append `s` to its internal buffer.
-  void Append(const std::string_view& s) { return Append(s.data(), s.size()); }
+  void Append(std::string_view s) { return Append(s.data(), s.size()); }
 
   void Append(PolymorphicBuffer buffer) {
     // If the `buffer` is small enough, and append it to the current block does

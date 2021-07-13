@@ -40,14 +40,14 @@ std::string MakeKeyTime() {
   return Format("{};{}", now, now + 600);
 }
 
-std::string DecodePctMustSucceed(const std::string_view& str) {
+std::string DecodePctMustSucceed(std::string_view str) {
   auto decoded = DecodePercent(str);
   FLARE_CHECK(decoded, "Invalid pct-encoded string: {}", str);
   return std::move(*decoded);
 }
 
 std::pair<std::string, std::string> GetPathAndQueryFromUri(
-    const std::string_view& uri) {
+    std::string_view uri) {
   auto pos1 = uri.find_last_of('/');
   if (pos1 == std::string_view::npos) {
     return {"/", ""};  // Both are empty.
@@ -62,7 +62,7 @@ std::pair<std::string, std::string> GetPathAndQueryFromUri(
 }
 
 std::vector<std::pair<std::string, std::string>> ParseQueryString(
-    const std::string_view& query_str) {
+    std::string_view query_str) {
   std::vector<std::pair<std::string, std::string>> result;
   auto split = Split(query_str, "&");
   for (auto&& e : split) {

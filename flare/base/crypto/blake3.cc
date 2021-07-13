@@ -37,7 +37,7 @@ std::string Blake3Impl(F&& cb) {
 
 }  // namespace
 
-std::string Blake3(const std::string_view& data) {
+std::string Blake3(std::string_view data) {
   return Blake3Impl([&](auto* state) {
     blake3_hasher_update(state, data.data(), data.size());
   });
@@ -61,7 +61,7 @@ std::string Blake3(std::initializer_list<std::string_view> data) {
 
 Blake3Digest::Blake3Digest() { blake3_hasher_init(&state_); }
 
-void Blake3Digest::Append(const std::string_view& data) noexcept {
+void Blake3Digest::Append(std::string_view data) noexcept {
   Append(data.data(), data.size());
 }
 

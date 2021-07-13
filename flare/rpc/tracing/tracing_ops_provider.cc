@@ -25,8 +25,7 @@ FLARE_DEFINE_CLASS_DEPENDENCY_REGISTRY(
 namespace flare::tracing {
 
 std::unique_ptr<TracingOpsProvider> MakeTracingOpsProvider(
-    const std::string_view& provider,
-    const TracingOpsProviderOptions& options) {
+    std::string_view provider, const TracingOpsProviderOptions& options) {
   auto factory =
       flare_tracing_tracer_ops_provider_factory_registry.TryGetFactory(
           provider);

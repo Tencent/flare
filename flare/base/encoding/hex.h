@@ -21,12 +21,11 @@
 
 namespace flare {
 
-std::string EncodeHex(const std::string_view& from, bool uppercase = false);
-std::optional<std::string> DecodeHex(const std::string_view& from);
+std::string EncodeHex(std::string_view from, bool uppercase = false);
+std::optional<std::string> DecodeHex(std::string_view from);
 
-void EncodeHex(const std::string_view& from, std::string* to,
-               bool uppercase = false);
-bool DecodeHex(const std::string_view& from, std::string* to);
+void EncodeHex(std::string_view from, std::string* to, bool uppercase = false);
+bool DecodeHex(std::string_view from, std::string* to);
 
 }  // namespace flare
 

@@ -352,7 +352,7 @@ struct Hash<std::chrono::duration<Rep, Period>> {
       "Unexpected: `std::chrono::duration<...>` is already specialized for "
       "`std::hash<...>`.");
   std::size_t operator()(
-      const std::chrono::duration<Rep, Period>& duration) const noexcept {
+      std::chrono::duration<Rep, Period> duration) const noexcept {
     auto count = duration.count();
     return Hash<decltype(count)>{}(count);
   }

@@ -24,13 +24,11 @@
 
 namespace flare::tracing {
 
-inline bool operator==(const std::string_view& s,
-                       const opentracing::string_view& o) {
+inline bool operator==(std::string_view s, opentracing::string_view o) {
   return s == std::string_view(o.data(), o.size());
 }
 
-inline bool operator==(const opentracing::string_view& o,
-                       const std::string_view& s) {
+inline bool operator==(opentracing::string_view o, std::string_view s) {
   return s == std::string_view(o.data(), o.size());
 }
 

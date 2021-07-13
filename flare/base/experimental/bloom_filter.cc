@@ -18,7 +18,7 @@
 
 namespace flare::experimental::bloom_filter::detail {
 
-std::size_t Hash::operator()(const std::string_view& s) const noexcept {
+std::size_t Hash::operator()(std::string_view s) const noexcept {
   return XXH64(s.data(), s.size(), 0);
 }
 

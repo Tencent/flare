@@ -27,12 +27,12 @@ void Yield() {
   self->scheduling_group->Yield(self);
 }
 
-void SleepUntil(const std::chrono::steady_clock::time_point& expires_at) {
+void SleepUntil(std::chrono::steady_clock::time_point expires_at) {
   fiber::detail::WaitableTimer wt(expires_at);
   wt.wait();
 }
 
-void SleepFor(const std::chrono::nanoseconds& expires_in) {
+void SleepFor(std::chrono::nanoseconds expires_in) {
   SleepUntil(ReadSteadyClock() + expires_in);
 }
 

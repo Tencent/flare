@@ -115,7 +115,7 @@ void FillMissingHeaders(const HttpRequest& request, HttpResponse* response) {
   CompressResponseIfNecessary(request, response);
 }
 
-std::string_view GetUriPath(const std::string_view& uri) {
+std::string_view GetUriPath(std::string_view uri) {
   auto pos = uri.find_first_of('?');
   return pos != std::string_view::npos ? uri.substr(0, pos) : uri;
 }

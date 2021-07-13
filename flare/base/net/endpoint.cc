@@ -306,8 +306,8 @@ std::ostream& operator<<(std::ostream& os, const Endpoint& endpoint) {
   return os << endpoint.ToString();
 }
 
-std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(
-    const std::string_view& s, from_ipv4_t) {
+std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(std::string_view s,
+                                                           from_ipv4_t) {
   auto pos = s.find(':');
   if (pos == std::string_view::npos) {
     return {};
@@ -330,8 +330,8 @@ std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(
   return er.Build();
 }
 
-std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(
-    const std::string_view& s, from_ipv6_t) {
+std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(std::string_view s,
+                                                           from_ipv6_t) {
   auto pos = s.find_last_of(':');
   if (pos == std::string_view::npos) {
     return {};
@@ -357,8 +357,7 @@ std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(
   return er.Build();
 }
 
-std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(
-    const std::string_view& s) {
+std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(std::string_view s) {
   if (auto opt = TryParse(s, from_ipv4)) {
     return opt;
   } else {

@@ -28,7 +28,7 @@ namespace flare {
 // Hash `data` using BLAKE3 algorithm.
 //
 // The resulting value is NOT hex-encoded.
-std::string Blake3(const std::string_view& data);
+std::string Blake3(std::string_view data);
 std::string Blake3(std::initializer_list<std::string_view> data);
 std::string Blake3(const NoncontiguousBuffer& data);
 
@@ -37,7 +37,7 @@ class Blake3Digest {
  public:
   Blake3Digest();
 
-  void Append(const std::string_view& data) noexcept;
+  void Append(std::string_view data) noexcept;
   void Append(const void* data, std::size_t length) noexcept;
   void Append(std::initializer_list<std::string_view> data) noexcept;
 

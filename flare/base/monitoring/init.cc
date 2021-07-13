@@ -73,7 +73,7 @@ struct System {
   bool passthrough_on_missing;
 };
 
-std::string GetRemapConfigOf(const std::string_view& name) {
+std::string GetRemapConfigOf(std::string_view name) {
   if (FLAGS_flare_monitoring_key_remap.find('=') != std::string::npos) {
     auto remaps = Split(FLAGS_flare_monitoring_key_remap, ",");
     for (auto&& e : remaps) {
@@ -97,7 +97,7 @@ std::string GetRemapConfigOf(const std::string_view& name) {
 }
 
 // Slow but works.
-System LoadSystem(const std::string_view& name) {
+System LoadSystem(std::string_view name) {
   System system;
 
   system.name = std::string(name);

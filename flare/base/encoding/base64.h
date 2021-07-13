@@ -23,11 +23,11 @@
 
 namespace flare {
 
-std::string EncodeBase64(const std::string_view& from);
-std::optional<std::string> DecodeBase64(const std::string_view& from);
+std::string EncodeBase64(std::string_view from);
+std::optional<std::string> DecodeBase64(std::string_view from);
 
-void EncodeBase64(const std::string_view& from, std::string* to);
-bool DecodeBase64(const std::string_view& from, std::string* to);
+void EncodeBase64(std::string_view from, std::string* to);
+bool DecodeBase64(std::string_view from, std::string* to);
 
 }  // namespace flare
 

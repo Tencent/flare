@@ -118,7 +118,7 @@ const std::unordered_map<std::string_view, HttpMethod> kMethodEnumerators = {
 
 }  // namespace
 
-const std::string_view& ToStringView(HttpStatus status) noexcept {
+std::string_view ToStringView(HttpStatus status) noexcept {
   auto v = underlying_value(status);
   if (FLARE_UNLIKELY(v < 0 || v > std::size(kStatusCodes))) {
     return internal::EarlyInitConstant<std::string_view>();
@@ -126,7 +126,7 @@ const std::string_view& ToStringView(HttpStatus status) noexcept {
   return kStatusCodes[v];
 }
 
-const std::string_view& ToStringView(HttpVersion version) noexcept {
+std::string_view ToStringView(HttpVersion version) noexcept {
   auto index = underlying_value(version);
   if (FLARE_UNLIKELY(index < 0 || index > std::size(kStringizedVersion))) {
     return internal::EarlyInitConstant<std::string_view>();
@@ -134,7 +134,7 @@ const std::string_view& ToStringView(HttpVersion version) noexcept {
   return kStringizedVersion[index];
 }
 
-const std::string_view& ToStringView(HttpMethod method) noexcept {
+std::string_view ToStringView(HttpMethod method) noexcept {
   auto v = underlying_value(method);
   if (FLARE_UNLIKELY(v < 0 || v > std::size(kStringifiedMethods))) {
     return internal::EarlyInitConstant<std::string_view>();
@@ -143,7 +143,7 @@ const std::string_view& ToStringView(HttpMethod method) noexcept {
 }
 
 std::optional<HttpMethod> TryParseTraits<HttpMethod>::TryParse(
-    const std::string_view& s) {
+    std::string_view s) {
   auto iter = kMethodEnumerators.find(s);
   if (iter == kMethodEnumerators.end()) {
     return std::nullopt;

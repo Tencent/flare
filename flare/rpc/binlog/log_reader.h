@@ -69,7 +69,7 @@ class OutgoingCallReader {
 
   // Set the timestamp this call is started in dry-run. Other method can use
   // this timestamp to emulate delays when necessary.
-  void SetStartTimestamp(const std::chrono::steady_clock::time_point& ts);
+  void SetStartTimestamp(std::chrono::steady_clock::time_point ts);
 
   // Get an incoming packet. This method emulate the packet delay for you.
   Future<Expected<DryRunPacket, Status>> TryGetIncomingPacketEnumlatingDelay(

@@ -21,8 +21,7 @@
 namespace flare::name_resolver {
 namespace {
 
-bool SplitAddr(const std::string_view& addr, std::string* hostname,
-               uint16_t* port) {
+bool SplitAddr(std::string_view addr, std::string* hostname, uint16_t* port) {
   auto port_pos = addr.find_last_of(':');
   *hostname = addr.substr(0, port_pos);
   if (auto p = TryParse<std::uint16_t>(addr.substr(port_pos + 1))) {

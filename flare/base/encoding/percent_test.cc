@@ -96,7 +96,7 @@ TEST(PercentEncoding, Rfc5987) {
   //
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent
   //
-  // auto encode_rfc5987_value_chars = [](const std::string_view& str) {
+  // auto encode_rfc5987_value_chars = [](std::string_view str) {
   //   auto result =
   //       EncodePercent(str, PercentEncodingOptions{.style =
   //       PercentEncodingStyle::Ecma262});

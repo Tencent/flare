@@ -262,7 +262,7 @@ std::uint64_t AccumulateReports(const State& state, const F& reader) {
 namespace monitoring {
 
 void Report(
-    Reading reading, const std::string_view& key,
+    Reading reading, std::string_view key,
     std::uint64_t value,  // Do we support `double`?
     std::initializer_list<std::pair<std::string_view, std::string_view>> tags) {
   InitializeMonitorTimerOnce();  // Start background timer if we haven't yet.

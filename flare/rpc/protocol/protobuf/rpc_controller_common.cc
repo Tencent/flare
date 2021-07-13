@@ -108,7 +108,7 @@ void RpcControllerCommon::SetStreamWriter(
 }
 
 void RpcControllerCommon::SetStreamTimeout(
-    const std::chrono::steady_clock::time_point& timeout) noexcept {
+    std::chrono::steady_clock::time_point timeout) noexcept {
   stream_timeout_ = timeout;
   // For streaming RPCs, we need to update stream reader / writer's timeout as
   // well.

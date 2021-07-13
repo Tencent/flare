@@ -30,7 +30,7 @@ class RedisCommand {
  public:
   // Construct a Redis command.
   template <class... Ts>
-  explicit RedisCommand(const std::string_view& op, const Ts&... args) {
+  explicit RedisCommand(std::string_view op, const Ts&... args) {
     // https://redis.io/topics/protocol:
     //
     // > Clients send commands to a Redis server as a RESP Array of Bulk
@@ -51,8 +51,7 @@ class RedisCommand {
 
   // Construct a Redis command from a vector of parameters.
   template <class StringLike>
-  RedisCommand(const std::string_view& op,
-               const std::vector<StringLike>& args) {
+  RedisCommand(std::string_view op, const std::vector<StringLike>& args) {
     NoncontiguousBufferBuilder builder;
 
     builder.Append("*", std::to_string(1 + args.size()), "\r\n");
@@ -74,7 +73,7 @@ class RedisCommand {
       : buffer_(std::move(bytes)) {}
 
   // Append a command component as Bulk String.
-  static void AppendRedisCommandComponent(const std::string_view& component,
+  static void AppendRedisCommandComponent(std::string_view component,
                                           NoncontiguousBufferBuilder* builder);
 
   static void AppendRedisCommandComponent(const NoncontiguousBuffer& component,
@@ -90,7 +89,7 @@ class RedisCommandBuilder {
   RedisCommandBuilder();
 
   // Append a command component.
-  void Append(const std::string_view& component);
+  void Append(std::string_view component);
   void Append(const NoncontiguousBuffer& component);
 
   // Build a Redis command. Once called, this builder may not be used.

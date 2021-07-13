@@ -44,24 +44,23 @@ class ConditionVariable {
   // method to return `bool` instead.
   template <class Rep, class Period>
   std::cv_status wait_for(std::unique_lock<Mutex>& lock,
-                          const std::chrono::duration<Rep, Period>& expires_in);
+                          std::chrono::duration<Rep, Period> expires_in);
 
   // Wait until either `pred` is satisfied or `expires_in` has expired.
   template <class Rep, class Period, class Predicate>
   bool wait_for(std::unique_lock<Mutex>& lock,
-                const std::chrono::duration<Rep, Period>& expires_in,
-                Predicate pred);
+                std::chrono::duration<Rep, Period> expires_in, Predicate pred);
 
   // Wait until either someone notified us or `expires_at` is reached.
   template <class Clock, class Duration>
   std::cv_status wait_until(
       std::unique_lock<Mutex>& lock,
-      const std::chrono::time_point<Clock, Duration>& expires_at);
+      std::chrono::time_point<Clock, Duration> expires_at);
 
   // Wait until either `pred` is satisfied or `expires_at` is reached.
   template <class Clock, class Duration, class Pred>
   bool wait_until(std::unique_lock<Mutex>& lock,
-                  const std::chrono::time_point<Clock, Duration>& expires_at,
+                  std::chrono::time_point<Clock, Duration> expires_at,
                   Pred pred);
 
  private:
@@ -76,16 +75,16 @@ void ConditionVariable::wait(std::unique_lock<Mutex>& lock, Predicate pred) {
 template <class Rep, class Period>
 std::cv_status ConditionVariable::wait_for(
     std::unique_lock<Mutex>& lock,
-    const std::chrono::duration<Rep, Period>& expires_in) {
+    std::chrono::duration<Rep, Period> expires_in) {
   auto steady_timeout = ReadSteadyClock() + expires_in;
   return impl_.wait_until(lock, steady_timeout) ? std::cv_status::no_timeout
                                                 : std::cv_status::timeout;
 }
 
 template <class Rep, class Period, class Predicate>
-bool ConditionVariable::wait_for(
-    std::unique_lock<Mutex>& lock,
-    const std::chrono::duration<Rep, Period>& expires_in, Predicate pred) {
+bool ConditionVariable::wait_for(std::unique_lock<Mutex>& lock,
+                                 std::chrono::duration<Rep, Period> expires_in,
+                                 Predicate pred) {
   auto steady_timeout = ReadSteadyClock() + expires_in;
   return impl_.wait_until(lock, steady_timeout, pred);
 }
@@ -93,7 +92,7 @@ bool ConditionVariable::wait_for(
 template <class Clock, class Duration>
 std::cv_status ConditionVariable::wait_until(
     std::unique_lock<Mutex>& lock,
-    const std::chrono::time_point<Clock, Duration>& expires_at) {
+    std::chrono::time_point<Clock, Duration> expires_at) {
   auto steady_timeout = ReadSteadyClock() + (expires_at - Clock::now());
   return impl_.wait_until(lock, steady_timeout) ? std::cv_status::no_timeout
                                                 : std::cv_status::timeout;
@@ -102,7 +101,7 @@ std::cv_status ConditionVariable::wait_until(
 template <class Clock, class Duration, class Pred>
 bool ConditionVariable::wait_until(
     std::unique_lock<Mutex>& lock,
-    const std::chrono::time_point<Clock, Duration>& expires_at, Pred pred) {
+    std::chrono::time_point<Clock, Duration> expires_at, Pred pred) {
   auto steady_timeout = ReadSteadyClock() + (expires_at - Clock::now());
   return impl_.wait_until(lock, steady_timeout, pred);
 }

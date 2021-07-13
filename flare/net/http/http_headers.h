@@ -88,7 +88,7 @@ class HttpHeaders {
   iterator end() noexcept { return fields_.end(); }
   const_iterator end() const noexcept { return fields_.end(); }
 
-  bool contains(const std::string_view& key) const noexcept {
+  bool contains(std::string_view key) const noexcept {
     return header_idx_.contains(key);
   }
 
@@ -98,15 +98,14 @@ class HttpHeaders {
   //
   // > Each header field consists of a case-insensitive field name followed by a
   // > colon (":")
-  std::optional<std::string_view> TryGet(
-      const std::string_view& key) const noexcept {
+  std::optional<std::string_view> TryGet(std::string_view key) const noexcept {
     auto idx_opt = header_idx_.TryGet(key);
     return idx_opt ? std::make_optional(fields_[*idx_opt].second)
                    : std::nullopt;
   }
 
   template <class T>
-  std::optional<T> TryGet(const std::string_view& key) const noexcept {
+  std::optional<T> TryGet(std::string_view key) const noexcept {
     auto p = TryGet(key);
     if (p) {
       return TryParse<T>(*p);
@@ -120,7 +119,7 @@ class HttpHeaders {
   // believe) that there are multiple fields with the same name should you use
   // this one.
   std::vector<std::string_view> TryGetMultiple(
-      const std::string_view& key) const noexcept;
+      std::string_view key) const noexcept;
 
   // Set a header field. if it exists, overwrite the header value.
   //
@@ -131,13 +130,14 @@ class HttpHeaders {
   void Append(std::string key, std::string value);
 
   // Append a series of header fields.
-  void Append(const std::initializer_list<
-              std::pair<std::string_view, std::string_view>>& fields);
+  void Append(
+      std::initializer_list<std::pair<std::string_view, std::string_view>>
+          fields);
 
   // `key` is case-insensitive.
   // Always successfully remove the specified header.
   // Returns true if key originally exists in the header.
-  bool Remove(const std::string_view& key) noexcept;
+  bool Remove(std::string_view key) noexcept;
 
   // Primarily for debugging purpose. We do not use it for serializing due to
   // its performance penalty. (@sa: `HeaderWriter`)

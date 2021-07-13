@@ -126,7 +126,8 @@ class MonitoredGauge {
   struct State;
 
   void Report(std::int64_t value) noexcept;
-  void Report(std::int64_t value,
+  void Report(
+      std::int64_t value,
       std::initializer_list<std::pair<std::string_view, std::string_view>>
           tags) noexcept;
 
@@ -208,7 +209,7 @@ namespace monitoring {
 // KV-pairs) for latter inspection. These KV-pairs can be provided via parameter
 // `extra`. Note that you'd incur a perf. penalty if non-empty `extra` is
 // provided.
-void Report(Reading reading, const std::string_view& key,
+void Report(Reading reading, std::string_view key,
             std::uint64_t value,  // Do we support `double`?
             std::initializer_list<std::pair<std::string_view, std::string_view>>
                 tags = {});
@@ -219,7 +220,7 @@ void Report(Reading reading, const std::string_view& key,
 // Not all providers (notably ZhiYan does not) support this "generic" report
 // facility.
 inline void Report(
-    const std::string_view& key, std::uint64_t value,
+    std::string_view key, std::uint64_t value,
     std::initializer_list<std::pair<std::string_view, std::string_view>> tags =
         {}) {
   return Report(Reading::Inferred, key, value, tags);
@@ -230,7 +231,7 @@ inline void Report(
 // I'm not aware of any monitoring system we're using support this, so let's
 // defer our implementation.
 //
-// void Report(const std::string_view& key, std::string value);
+// void Report(std::string_view key, std::string value);
 
 }  // namespace monitoring
 
@@ -265,7 +266,7 @@ struct MonitoredCounter::State {
     std::uint64_t sum = 0;
     std::uint64_t times = 0;
 
-    void Clear() noexcept{
+    void Clear() noexcept {
       sum = 0;
       times = 0;
     }

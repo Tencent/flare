@@ -58,8 +58,8 @@ ComparableTags::ComparableTags(
           detail::TagArray{std::move(tags)})) {}
 
 bool ComparableTags::operator==(
-    const std::initializer_list<std::pair<std::string_view, std::string_view>>&
-        other) const noexcept {
+    std::initializer_list<std::pair<std::string_view, std::string_view>> other)
+    const noexcept {
   if (tags_->value.size() != other.size()) {
     return false;
   }

@@ -39,8 +39,8 @@ bool ProtoMessageToJson(
     std::string* error,
     const ProtoJsonFormatOptions& options = ProtoJsonFormatOptions());
 bool JsonToProtoMessage(
-    const std::string_view& json_string_piece,
-    google::protobuf::Message* message, std::string* error,
+    std::string_view json_string_piece, google::protobuf::Message* message,
+    std::string* error,
     const ProtoJsonFormatOptions& options = ProtoJsonFormatOptions());
 
 bool ProtoMessageToJsonValue(

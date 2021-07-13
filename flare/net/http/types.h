@@ -94,13 +94,13 @@ enum class HttpStatus {  // `HttpStatusCode`?
   NetworkAuthenticationRequired = 511
 };
 
-const std::string_view& ToStringView(HttpVersion method) noexcept;
-const std::string_view& ToStringView(HttpMethod method) noexcept;
-const std::string_view& ToStringView(HttpStatus status) noexcept;
+std::string_view ToStringView(HttpVersion method) noexcept;
+std::string_view ToStringView(HttpMethod method) noexcept;
+std::string_view ToStringView(HttpStatus status) noexcept;
 
 template <>
 struct TryParseTraits<HttpMethod> {
-  static std::optional<HttpMethod> TryParse(const std::string_view& s);
+  static std::optional<HttpMethod> TryParse(std::string_view s);
 };
 
 }  // namespace flare

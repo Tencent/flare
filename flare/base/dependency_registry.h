@@ -201,7 +201,7 @@ class ClassRegistry {
   // Returns factory for instantiating the class of the given name.
   //
   // An empty factory is returned if no class with the requested name is found.
-  Factory TryGetFactory(const std::string_view& name) const noexcept {
+  Factory TryGetFactory(std::string_view name) const noexcept {
     auto ptr = factories_.TryGet(name);
     if (ptr) {
       // We don't support deregistration, therefore holding a pointer to the
@@ -227,7 +227,7 @@ class ClassRegistry {
   // Instantiate an instance of the class with the given name.
   //
   // `nullptr` is returned if the name given is not recognized.
-  std::unique_ptr<Interface> TryNew(const std::string_view& name,
+  std::unique_ptr<Interface> TryNew(std::string_view name,
                                     FactoryArgs... args) const {
     auto ptr = factories_.TryGet(name);
     if (ptr) {
@@ -238,7 +238,7 @@ class ClassRegistry {
 
   // Same as `TryNew` except that this method aborts if the requested class is
   // not found.
-  std::unique_ptr<Interface> New(const std::string_view& name,
+  std::unique_ptr<Interface> New(std::string_view name,
                                  FactoryArgs... args) const {
     auto result = TryNew(name, std::forward<FactoryArgs>(args)...);
     FLARE_CHECK(result,
@@ -271,7 +271,7 @@ template <class Tag, class Interface>
 class ObjectRegistry {
  public:
   // Get object with the specified name.
-  Interface* TryGet(const std::string_view& name) const {
+  Interface* TryGet(std::string_view name) const {
     auto ptr = objects_.TryGet(name);
     if (ptr) {
       auto&& e = **ptr;
@@ -283,7 +283,7 @@ class ObjectRegistry {
 
   // Same as `TryGet` except that this method aborts if the requested object is
   // not found.
-  Interface* Get(const std::string_view& name) const {
+  Interface* Get(std::string_view name) const {
     auto result = TryGet(name);
     FLARE_CHECK(result,
                 "Object dependency [{}] implementing interface [{}] is not "

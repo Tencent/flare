@@ -45,7 +45,7 @@ struct RpcControllerMaster {
                             const Endpoint& remote_peer);
 
   static void SetTimeout(RpcServerController* ctlr,
-                         const std::chrono::steady_clock::time_point& timeout);
+                         std::chrono::steady_clock::time_point timeout);
 
   static void RunDone(RpcClientController* ctlr, rpc::Status status,
                       std::string reason);
@@ -66,7 +66,7 @@ void SetRpcClientRunDone(RpcClientController* ctlr, rpc::Status status,
 void SetRpcServerRemotePeer(RpcServerController* ctlr,
                             const Endpoint& remote_peer);
 void SetRpcServerTimeout(RpcServerController* ctlr,
-                         const std::chrono::steady_clock::time_point& timeout);
+                         std::chrono::steady_clock::time_point timeout);
 
 }  // namespace flare::testing
 

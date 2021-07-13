@@ -41,7 +41,7 @@ namespace {
 
 const auto kScheme = "hbase"s;
 
-bool ResolveAddress(const std::string_view& address, Endpoint* resolved) {
+bool ResolveAddress(std::string_view address, Endpoint* resolved) {
   static const std::string kPrefix = kScheme + "://";
 
   FLARE_CHECK(StartsWith(address, kPrefix),

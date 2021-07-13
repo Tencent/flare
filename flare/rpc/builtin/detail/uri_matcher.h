@@ -46,19 +46,18 @@ class UriMatcher {
   // a pain (`const char*` can't be implicitly converted to `UriMatcher` in that
   // case, as two implicit conversions are required.).
   /* implicit */ UriMatcher(const char* prefix);
-  /* implicit */ UriMatcher(const std::string_view& prefix);
+  /* implicit */ UriMatcher(std::string_view prefix);
 
   // Matches URIs using the regular expression given.
   /* implicit */ UriMatcher(std::regex uri_matcher);
 
   // Matches URIs with user provided callback.
-  /* implicit */ UriMatcher(
-      Function<bool(const std::string_view&)> uri_matcher);
+  /* implicit */ UriMatcher(Function<bool(std::string_view)> uri_matcher);
 
-  bool operator()(const std::string_view& uri) const { return matcher_(uri); }
+  bool operator()(std::string_view uri) const { return matcher_(uri); }
 
  private:
-  Function<bool(const std::string_view&)> matcher_;
+  Function<bool(std::string_view)> matcher_;
 };
 
 }  // namespace flare::detail

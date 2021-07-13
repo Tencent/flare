@@ -77,7 +77,7 @@ class BloomFilter {
   // Deserialize a Bloom Filter that was serialized via `GetBytes()`.
   //
   // @sa: Caution in comments of the class.
-  BloomFilter(const std::string_view& existing_filter, std::size_t k);
+  BloomFilter(std::string_view existing_filter, std::size_t k);
 
   // Parameter `k`. This parameter specifies how many iteration of double
   // hashing do we do internally to generate different hash values.
@@ -91,10 +91,10 @@ class BloomFilter {
   std::string_view GetBytes() const noexcept;
 
   // Add a new key to this filter.
-  void Add(const std::string_view& key) noexcept;
+  void Add(std::string_view key) noexcept;
 
   // Test if `value` was *possibly* added into this filter.
-  bool PossiblyContains(const std::string_view& key) const noexcept;
+  bool PossiblyContains(std::string_view key) const noexcept;
 
   // Merge another filter with this one. The new filter contains keys in both
   // filters.
@@ -140,7 +140,7 @@ namespace bloom_filter {
 namespace detail {
 
 struct Hash {
-  std::size_t operator()(const std::string_view& s) const noexcept;
+  std::size_t operator()(std::string_view s) const noexcept;
 };
 
 }  // namespace detail
@@ -156,8 +156,7 @@ struct Hash {
 template <class H>
 struct DoubleHashingHashGenerator {
   template <class F>
-  bool operator()(const std::string_view& s, std::size_t n,
-                  F&& f) const noexcept {
+  bool operator()(std::string_view s, std::size_t n, F&& f) const noexcept {
     auto h = H()(s);
     auto delta = (h >> 17) | (h << 15);
     for (int i = 0; i != n; ++i) {
@@ -180,8 +179,7 @@ struct SaltedHashGenerator {
   using SaltInteger = int;
 
   template <class F>
-  bool operator()(const std::string_view& s, std::size_t n,
-                  F&& f) const noexcept {
+  bool operator()(std::string_view s, std::size_t n, F&& f) const noexcept {
     char fast_buffer[128];
     std::unique_ptr<char[]> slow_buffer;
 
@@ -226,7 +224,7 @@ BloomFilter<HashGen>::BloomFilter(std::size_t n, double p, std::size_t k)
     : BloomFilter(GetOptimalBits(p, n, k), k) {}
 
 template <class HashGen>
-BloomFilter<HashGen>::BloomFilter(const std::string_view& existing_filter,
+BloomFilter<HashGen>::BloomFilter(std::string_view existing_filter,
                                   std::size_t k)
     : num_hashes_(k) {
   auto bits = existing_filter.size() * 8;
@@ -248,7 +246,7 @@ std::string_view BloomFilter<HashGen>::GetBytes() const noexcept {
 }
 
 template <class HashGen>
-void BloomFilter<HashGen>::Add(const std::string_view& key) noexcept {
+void BloomFilter<HashGen>::Add(std::string_view key) noexcept {
   HashGen()(key, num_hashes_, [&](auto h) {
     SetBit(h & hash_mask_);
     return true;
@@ -257,7 +255,7 @@ void BloomFilter<HashGen>::Add(const std::string_view& key) noexcept {
 
 template <class HashGen>
 bool BloomFilter<HashGen>::PossiblyContains(
-    const std::string_view& key) const noexcept {
+    std::string_view key) const noexcept {
   return HashGen()(key, num_hashes_,
                    [&](auto h) { return GetBit(h & hash_mask_); });
 }

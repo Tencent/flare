@@ -263,7 +263,7 @@ GetStringToStatusCodeMapping() {
 }
 
 std::optional<CosStatus> TryMapCodeErrorCode(HttpStatus status,
-                                             const std::string_view& str) {
+                                             std::string_view str) {
   if (auto iter = GetStringToStatusCodeMapping().find(std::pair(status, str));
       iter != GetStringToStatusCodeMapping().end()) {
     return iter->second;
