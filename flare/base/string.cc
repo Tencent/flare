@@ -79,8 +79,7 @@ std::optional<T> TryNarrowCast(U&& opt) {
 }
 
 template <class T>
-void JoinImpl(const T& parts, const std::string_view& delim,
-              std::string* result) {
+void JoinImpl(const T& parts, std::string_view delim, std::string* result) {
   auto size = 0;
   for (auto&& e : parts) {
     size += e.size() + delim.size();
@@ -102,17 +101,17 @@ void JoinImpl(const T& parts, const std::string_view& delim,
 
 }  // namespace
 
-bool StartsWith(const std::string_view& s, const std::string_view& prefix) {
+bool StartsWith(std::string_view s, std::string_view prefix) {
   return s.size() >= prefix.size() && s.substr(0, prefix.size()) == prefix;
 }
 
-bool EndsWith(const std::string_view& s, const std::string_view& suffix) {
+bool EndsWith(std::string_view s, std::string_view suffix) {
   return s.size() >= suffix.size() &&
          s.substr(s.size() - suffix.size()) == suffix;
 }
 
-void Replace(const std::string_view& from, const std::string_view& to,
-             std::string* str, std::size_t count) {
+void Replace(std::string_view from, std::string_view to, std::string* str,
+             std::size_t count) {
   FLARE_CHECK(!from.empty(), "`from` may not be empty.");
   auto p = str->find(from);
   while (p != std::string::npos && count--) {
@@ -121,14 +120,14 @@ void Replace(const std::string_view& from, const std::string_view& to,
   }
 }
 
-std::string Replace(const std::string_view& str, const std::string_view& from,
-                    const std::string_view& to, std::size_t count) {
+std::string Replace(std::string_view str, std::string_view from,
+                    std::string_view to, std::size_t count) {
   std::string cp(str);
   Replace(from, to, &cp, count);
   return cp;
 }
 
-std::string_view Trim(const std::string_view& str) {
+std::string_view Trim(std::string_view str) {
   std::size_t s = 0, e = str.size();
   if (str.empty()) {
     return {};
@@ -145,13 +144,12 @@ std::string_view Trim(const std::string_view& str) {
   return str.substr(s, e - s + 1);
 }
 
-std::vector<std::string_view> Split(const std::string_view& s, char delim,
+std::vector<std::string_view> Split(std::string_view s, char delim,
                                     bool keep_empty) {
   return Split(s, std::string_view(&delim, 1), keep_empty);
 }
 
-std::vector<std::string_view> Split(const std::string_view& s,
-                                    const std::string_view& delim,
+std::vector<std::string_view> Split(std::string_view s, std::string_view delim,
                                     bool keep_empty) {
   std::vector<std::string_view> splited;
   if (s.empty()) {
@@ -179,21 +177,21 @@ std::vector<std::string_view> Split(const std::string_view& s,
 }
 
 std::string Join(const std::vector<std::string_view>& parts,
-                 const std::string_view& delim) {
+                 std::string_view delim) {
   std::string result;
   JoinImpl(parts, delim, &result);
   return result;
 }
 
 std::string Join(const std::vector<std::string>& parts,
-                 const std::string_view& delim) {
+                 std::string_view delim) {
   std::string result;
   JoinImpl(parts, delim, &result);
   return result;
 }
 
 std::string Join(const std::initializer_list<std::string_view>& parts,
-                 const std::string_view& delim) {
+                 std::string_view delim) {
   std::string result;
   JoinImpl(parts, delim, &result);
   return result;
@@ -214,7 +212,7 @@ void ToLower(std::string* s) {
   }
 }
 
-std::string ToUpper(const std::string_view& s) {
+std::string ToUpper(std::string_view s) {
   std::string result;
   result.reserve(s.size());
   for (auto&& e : s) {
@@ -223,7 +221,7 @@ std::string ToUpper(const std::string_view& s) {
   return result;
 }
 
-std::string ToLower(const std::string_view& s) {
+std::string ToLower(std::string_view s) {
   std::string result;
   result.reserve(s.size());
   for (auto&& e : s) {
@@ -232,7 +230,7 @@ std::string ToLower(const std::string_view& s) {
   return result;
 }
 
-bool IEquals(const std::string_view& first, const std::string_view& second) {
+bool IEquals(std::string_view first, std::string_view second) {
   if (first.size() != second.size()) {
     return false;
   }
@@ -248,8 +246,7 @@ bool IEquals(const std::string_view& first, const std::string_view& second) {
 // support `std::string_view` efficiently).
 
 std::optional<bool> TryParseTraits<bool>::TryParse(
-    const std::string_view& s, bool recognizes_alphabet_symbol,
-    bool ignore_case) {
+    std::string_view s, bool recognizes_alphabet_symbol, bool ignore_case) {
   if (auto num_opt = flare::TryParse<int>(s); num_opt) {
     if (*num_opt == 0) {
       return false;
@@ -269,7 +266,7 @@ std::optional<bool> TryParseTraits<bool>::TryParse(
 template <class T>
 std::optional<T>
 TryParseTraits<T, std::enable_if_t<std::is_integral_v<T>>>::TryParse(
-    const std::string_view& s, int base) {
+    std::string_view s, int base) {
   // `strtoll` expects a terminating null, therefore we copy `s` into this
   // temporary buffer before calling that method.
   //
@@ -301,7 +298,7 @@ TryParseTraits<T, std::enable_if_t<std::is_integral_v<T>>>::TryParse(
 template <class T>
 std::optional<T>
 TryParseTraits<T, std::enable_if_t<std::is_floating_point_v<T>>>::TryParse(
-    const std::string_view& s) {
+    std::string_view s) {
   // For floating point types, there's no definitive limit on its length, so we
   // optimize for most common case and fallback to heap allocation for the rest.
   char temp_buffer[129];

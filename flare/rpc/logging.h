@@ -43,7 +43,7 @@ inline void AddLoggingItemToRpc(const std::string& s) {
 }
 
 template <class T>
-void AddLoggingTagToRpc(const std::string_view& key, const T& value) {
+void AddLoggingTagToRpc(std::string_view key, const T& value) {
   return fiber::AddLoggingTagToExecution(key, value);
 }
 

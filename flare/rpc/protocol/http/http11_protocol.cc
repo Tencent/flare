@@ -55,7 +55,7 @@ struct OnWireMessage : public Message {
 const std::string_view kClobberedStartLines[] = {"POST /rpc/"sv,
                                                  "POST /__rpc_service__"sv};
 
-bool IsMessageClobbered(const std::string_view& view) {
+bool IsMessageClobbered(std::string_view view) {
   for (auto&& e : kClobberedStartLines) {
     if (StartsWith(view, e)) {
       return true;
@@ -64,7 +64,7 @@ bool IsMessageClobbered(const std::string_view& view) {
   return false;
 }
 
-bool ExpectingContentLength(const std::string_view& view) {
+bool ExpectingContentLength(std::string_view view) {
   if (StartsWith(view, "GET"sv) || StartsWith(view, "HEAD"sv)) {
     return false;
   }

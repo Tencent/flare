@@ -113,7 +113,7 @@ void OutgoingCallReader::CaptureOutgoingPacket(const PacketDesc& packet) {
 }
 
 void OutgoingCallReader::SetStartTimestamp(
-    const std::chrono::steady_clock::time_point& ts) {
+    std::chrono::steady_clock::time_point ts) {
   start_ts_ = ts;
 }
 

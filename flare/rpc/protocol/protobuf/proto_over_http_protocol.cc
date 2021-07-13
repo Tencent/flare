@@ -214,7 +214,7 @@ void UpdateRpcMetaFromTrailer(std::string_view trailer, rpc::RpcMeta* meta) {
 // Per spec, `charset` is allowed for `application/json`. This method tests if
 // the given type string represents `application/json` with UTF-8 `charset`.
 // (For the moment we don't support UTF-16 or UTF-32, they're not widely used.)
-bool IsContentTypeApplicationJsonSlow(const std::string_view& type) {
+bool IsContentTypeApplicationJsonSlow(std::string_view type) {
   constexpr auto kApplicationJsonSemicolon = "application/json;"sv;
   if (!StartsWith(type, kApplicationJsonSemicolon)) {
     return false;

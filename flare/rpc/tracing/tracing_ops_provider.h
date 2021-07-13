@@ -70,7 +70,7 @@ using TracingOpsProviderFactory = Function<std::unique_ptr<TracingOpsProvider>(
 
 // Rest of the framework uses this method to create `TracingOps` instance.
 std::unique_ptr<TracingOpsProvider> MakeTracingOpsProvider(
-    const std::string_view& provider, const TracingOpsProviderOptions& options);
+    std::string_view provider, const TracingOpsProviderOptions& options);
 
 }  // namespace flare::tracing
 

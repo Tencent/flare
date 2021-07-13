@@ -43,10 +43,9 @@ class BasicCountingSemaphore {
 
   // `acquire` with timeout.
   template <class Rep, class Period>
-  bool try_acquire_for(const std::chrono::duration<Rep, Period>& expires_in);
+  bool try_acquire_for(std::chrono::duration<Rep, Period> expires_in);
   template <class Clock, class Duration>
-  bool try_acquire_until(
-      const std::chrono::time_point<Clock, Duration>& expires_at);
+  bool try_acquire_until(std::chrono::time_point<Clock, Duration> expires_at);
 
  private:
   std::mutex lock_;
@@ -110,7 +109,7 @@ bool BasicCountingSemaphore<Mutex, ConditionVariable,
 template <class Mutex, class ConditionVariable, std::ptrdiff_t kLeastMaxValue>
 template <class Rep, class Period>
 bool BasicCountingSemaphore<Mutex, ConditionVariable, kLeastMaxValue>::
-    try_acquire_for(const std::chrono::duration<Rep, Period>& expires_in) {
+    try_acquire_for(std::chrono::duration<Rep, Period> expires_in) {
   std::unique_lock lk(lock_);
   if (!cv_.wait_for(lk, expires_in, [&] { return current_ != 0; })) {
     return false;
@@ -122,8 +121,7 @@ bool BasicCountingSemaphore<Mutex, ConditionVariable, kLeastMaxValue>::
 template <class Mutex, class ConditionVariable, std::ptrdiff_t kLeastMaxValue>
 template <class Clock, class Duration>
 bool BasicCountingSemaphore<Mutex, ConditionVariable, kLeastMaxValue>::
-    try_acquire_until(
-        const std::chrono::time_point<Clock, Duration>& expires_at) {
+    try_acquire_until(std::chrono::time_point<Clock, Duration> expires_at) {
   std::unique_lock lk(lock_);
   if (!cv_.wait_for(lk, expires_at, [&] { return current_ != 0; })) {
     return false;

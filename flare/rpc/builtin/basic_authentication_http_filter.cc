@@ -26,7 +26,7 @@ using namespace std::literals;
 namespace flare {
 
 std::optional<std::pair<std::string, std::string>> ParseCredential(
-    const std::string_view& cred) {
+    std::string_view cred) {
   // Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l
   static constexpr auto kPrefix = "Basic "sv;
   if (!StartsWith(cred, kPrefix)) {

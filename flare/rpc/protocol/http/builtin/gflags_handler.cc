@@ -63,7 +63,7 @@ Json::Value GetFlags(const std::vector<std::string_view>& keys) {
 }
 
 // TODO(luobogao): We should use a dedicated class to parse query string.
-bool ParseFlagNames(const std::string_view& uri,
+bool ParseFlagNames(std::string_view uri,
                     std::vector<std::string_view>* flags) {
   flags->clear();
   auto pos = uri.find('?');

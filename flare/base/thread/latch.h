@@ -40,7 +40,7 @@ class Latch {
 
   // Extension to `std::latch`.
   template <class Rep, class Period>
-  bool wait_for(const std::chrono::duration<Rep, Period>& timeout) {
+  bool wait_for(std::chrono::duration<Rep, Period> timeout) {
     std::unique_lock lk(m_);
     FLARE_CHECK_GE(count_, 0);
     return cv_.wait_for(lk, timeout, [this] { return count_ == 0; });
@@ -48,7 +48,7 @@ class Latch {
 
   // Extension to `std::latch`.
   template <class Clock, class Duration>
-  bool wait_until(const std::chrono::time_point<Clock, Duration>& timeout) {
+  bool wait_until(std::chrono::time_point<Clock, Duration> timeout) {
     std::unique_lock lk(m_);
     FLARE_CHECK_GE(count_, 0);
     return cv_.wait_until(lk, timeout, [this] { return count_ == 0; });

@@ -52,7 +52,7 @@ static constexpr std::array<char, 256> kLowerChars = []() {
 constexpr char ToLower(char c) { return kLowerChars[c]; }
 
 struct CaseInsensitiveHash {
-  std::size_t operator()(const std::string_view& s) const noexcept {
+  std::size_t operator()(std::string_view s) const noexcept {
     uint64_t hash = 5381;
     for (auto&& c : s) {
       hash += ((hash << 5) + hash) + ToLower(c);
@@ -62,8 +62,7 @@ struct CaseInsensitiveHash {
 };
 
 struct CaseInsensitiveEqualTo {
-  bool operator()(const std::string_view& x,
-                  const std::string_view& y) const noexcept {
+  bool operator()(std::string_view x, std::string_view y) const noexcept {
     if (FLARE_UNLIKELY(x.size() != y.size())) {
       return false;
     }

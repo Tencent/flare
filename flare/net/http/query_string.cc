@@ -22,7 +22,7 @@
 namespace flare {
 
 std::optional<std::string_view> QueryString::TryGet(
-    const std::string_view& key) const noexcept {
+    std::string_view key) const noexcept {
   for (auto&& [k, v] : pairs_) {
     // Keys are case sensitive. Don't call `IEquals` here.
     //
@@ -38,7 +38,7 @@ std::optional<std::string_view> QueryString::TryGet(
 }
 
 std::vector<std::string_view> QueryString::TryGetMultiple(
-    const std::string_view& key) const {
+    std::string_view key) const {
   std::vector<std::string_view> result;
   for (auto&& [k, v] : pairs_) {
     if (k == key) {
@@ -49,7 +49,7 @@ std::vector<std::string_view> QueryString::TryGetMultiple(
 }
 
 std::optional<QueryString> TryParseTraits<QueryString, void>::TryParse(
-    const std::string_view& s) {
+    std::string_view s) {
   std::vector<std::pair<std::string, std::string>> pairs;
 
   auto parts = Split(s, "&");

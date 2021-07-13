@@ -80,7 +80,7 @@ bool ResolveDomainQuery(const std::string& hostname, std::uint16_t port,
   return true;
 }
 
-bool IsValidSegment(const std::string_view& segment) {
+bool IsValidSegment(std::string_view segment) {
   if (segment.empty() || segment.size() > 63U) return false;
   // Must start and ends with alpha or number
   if (!isalnum(segment[0]) || !isalnum(segment[segment.size() - 1]))
@@ -96,7 +96,7 @@ bool IsValidSegment(const std::string_view& segment) {
   return true;
 }
 
-bool IsValidLastSegment(const std::string_view& last) {
+bool IsValidLastSegment(std::string_view last) {
   if (last.size() < 2 || last.size() > 6)  // Longest TLD: museum and travel
     return false;
   // The last part must be all lower latter, such as 'com', 'net'

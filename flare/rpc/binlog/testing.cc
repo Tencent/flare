@@ -64,8 +64,8 @@ void NullDumpingCall::CaptureOutgoingPacket(
 void NullDumpingCall::SetCorrelationId(std::string cid) {}
 
 void NullDumpingCall::SetTimestamps(
-    const std::chrono::steady_clock::time_point& start_ts,
-    const std::chrono::steady_clock::time_point& finish_ts) {}
+    std::chrono::steady_clock::time_point start_ts,
+    std::chrono::steady_clock::time_point finish_ts) {}
 
 void NullDumpingCall::SetSystemTags(Tags tags) {}
 
@@ -88,8 +88,8 @@ const std::string& IdentityDumpingCall::GetCorrelationId() const noexcept {
 }
 
 void IdentityDumpingCall::SetTimestamps(
-    const std::chrono::steady_clock::time_point& start_ts,
-    const std::chrono::steady_clock::time_point& finish_ts) {
+    std::chrono::steady_clock::time_point start_ts,
+    std::chrono::steady_clock::time_point finish_ts) {
   start_ts_ = start_ts;
   finish_ts_ = finish_ts;
 }

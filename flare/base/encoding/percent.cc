@@ -30,7 +30,7 @@ namespace {
 
 // Alphabets / numeric characters need not to be listed in `unescaped_chars`.
 constexpr std::array<bool, 256> GenerateUnescapedCharBitmap(
-    const std::string_view& unescaped_chars) {
+    std::string_view unescaped_chars) {
   std::array<bool, 256> result{};
   for (auto&& e : unescaped_chars) {
     result[e] = true;
@@ -61,14 +61,14 @@ constexpr auto kUnescapedChars = [] {
 
 }  // namespace
 
-std::string EncodePercent(const std::string_view& from,
+std::string EncodePercent(std::string_view from,
                           const PercentEncodingOptions& options) {
   std::string result;
   EncodePercent(from, &result, options);
   return result;
 }
 
-std::optional<std::string> DecodePercent(const std::string_view& from,
+std::optional<std::string> DecodePercent(std::string_view from,
                                          bool decode_plus_sign_as_whitespace) {
   std::string result;
   if (DecodePercent(from, &result, decode_plus_sign_as_whitespace)) {
@@ -77,7 +77,7 @@ std::optional<std::string> DecodePercent(const std::string_view& from,
   return std::nullopt;
 }
 
-void EncodePercent(const std::string_view& from, std::string* to,
+void EncodePercent(std::string_view from, std::string* to,
                    const PercentEncodingOptions& options) {
   auto&& unescaped =
       kUnescapedChars[underlying_value(options.style)][options.escape_reserved];
@@ -95,7 +95,7 @@ void EncodePercent(const std::string_view& from, std::string* to,
   }
 }
 
-bool DecodePercent(const std::string_view& from, std::string* to,
+bool DecodePercent(std::string_view from, std::string* to,
                    bool decode_plus_sign_as_whitespace) {
   // We may over-allocate here, that won't hurt.
   to->reserve(from.size());

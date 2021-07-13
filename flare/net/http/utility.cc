@@ -26,7 +26,7 @@ namespace flare {
 namespace {
 
 // Determines if `ip` is a valid address, and construct an `Endpoint` for it.
-std::optional<Endpoint> TryParseIpAsEndpoint(const std::string_view& ip) {
+std::optional<Endpoint> TryParseIpAsEndpoint(std::string_view ip) {
   std::string fake_ep;
   if (ip.find(':') == std::string_view::npos) {
     fake_ep = Format("{}:0", ip);

@@ -37,9 +37,8 @@ class ProtoDumpingCall : public DumpingCall {
   const std::string& GetCorrelationId() const noexcept {
     return call_.correlation_id();
   }
-  void SetTimestamps(
-      const std::chrono::steady_clock::time_point& start_ts,
-      const std::chrono::steady_clock::time_point& finish_ts) override {
+  void SetTimestamps(std::chrono::steady_clock::time_point start_ts,
+                     std::chrono::steady_clock::time_point finish_ts) override {
     start_ts_ = start_ts;
     finish_ts_ = finish_ts;
   }

@@ -42,8 +42,7 @@ namespace flare::monitoring {
 namespace {
 
 template <class T>
-std::optional<std::string> TryRemapKey(const T& config,
-                                       const std::string_view& key) {
+std::optional<std::string> TryRemapKey(const T& config, std::string_view key) {
   if (!config.remap_keys) {
     return std::string(key);
   }

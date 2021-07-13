@@ -57,7 +57,7 @@ struct PercentEncodingOptions {
 
 // Encode string as pct-encoded.
 std::string EncodePercent(
-    const std::string_view& from,
+    std::string_view from,
     const PercentEncodingOptions& options =
         internal::EarlyInitConstant<PercentEncodingOptions>());
 
@@ -68,12 +68,12 @@ std::string EncodePercent(
 // (some implementation uses a legacy encoding scheme and encodes whitespace as
 // such).
 std::optional<std::string> DecodePercent(
-    const std::string_view& from, bool decode_plus_sign_as_whitespace = false);
+    std::string_view from, bool decode_plus_sign_as_whitespace = false);
 
-void EncodePercent(const std::string_view& from, std::string* to,
+void EncodePercent(std::string_view from, std::string* to,
                    const PercentEncodingOptions& options =
                        internal::EarlyInitConstant<PercentEncodingOptions>());
-bool DecodePercent(const std::string_view& from, std::string* to,
+bool DecodePercent(std::string_view from, std::string* to,
                    bool decode_plus_sign_as_whitespace = false);
 
 }  // namespace flare

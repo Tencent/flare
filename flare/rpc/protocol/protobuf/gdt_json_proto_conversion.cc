@@ -66,7 +66,7 @@ constexpr std::array<bool, 256> kHexChars = []() {
 
 inline char CharToHex(uint8_t x) { return "0123456789ABCDEF"[x]; }
 
-std::string PctEncoded(const std::string_view& input) {
+std::string PctEncoded(std::string_view input) {
   std::string result;
 
   for (size_t i = 0; i < input.size(); ++i) {
@@ -498,7 +498,7 @@ bool JsonValueToProtoMessage(const Json::Value& json_value,
   return true;
 }
 
-bool JsonToProtoMessage(const std::string_view& json_string_piece,
+bool JsonToProtoMessage(std::string_view json_string_piece,
                         google::protobuf::Message* message, std::string* error,
                         const ProtoJsonFormatOptions& options) {
   Json::Value root;

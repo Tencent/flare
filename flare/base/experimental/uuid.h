@@ -34,7 +34,7 @@ class Uuid {
   // If `from` is malformed, the program crashes.
   //
   // To parse UUID from untrusted source, use `TryParse<Uuid>(...)` instead.
-  constexpr explicit Uuid(const std::string_view& from);
+  constexpr explicit Uuid(std::string_view from);
 
   std::string ToString() const;
 
@@ -57,7 +57,7 @@ class Uuid {
 // Implementation goes below.         //
 ////////////////////////////////////////
 
-constexpr Uuid::Uuid(const std::string_view& from) {
+constexpr Uuid::Uuid(std::string_view from) {
   FLARE_CHECK_EQ(from.size(), 36);  // 8-4-4-4-12
   auto p = from.data();
 
@@ -133,7 +133,7 @@ struct TryParseTraits;
 
 template <>
 struct TryParseTraits<experimental::Uuid, void> {
-  static std::optional<experimental::Uuid> TryParse(const std::string_view& s);
+  static std::optional<experimental::Uuid> TryParse(std::string_view s);
 };
 
 }  // namespace flare

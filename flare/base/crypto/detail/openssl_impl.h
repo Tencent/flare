@@ -34,7 +34,7 @@ template <auto Init, auto Update, auto Fini, class Context,
 inline std::string MessageDigestWithCallbackImpl(F&& cb) {
   Context ctx;
   FLARE_CHECK_EQ(Init(&ctx), 1);
-  cb([&](const std::string_view& buffer) {
+  cb([&](std::string_view buffer) {
     FLARE_CHECK_EQ(Update(&ctx, buffer.data(), buffer.size()), 1);
   });
 
@@ -45,12 +45,12 @@ inline std::string MessageDigestWithCallbackImpl(F&& cb) {
 
 template <std::size_t kBufferSize, class F>
 inline std::string HmacWithCallbackImpl(const EVP_MD* evp_md,
-                                        const std::string_view& key, F&& cb) {
+                                        std::string_view key, F&& cb) {
   HMAC_CTX ctx;
   HMAC_CTX_init(&ctx);
   FLARE_CHECK_EQ(HMAC_Init_ex(&ctx, key.data(), key.size(), evp_md, nullptr),
                  1);
-  cb([&](const std::string_view& buffer) {
+  cb([&](std::string_view buffer) {
     auto ptr =
         reinterpret_cast<const unsigned char*>(buffer.data());  // NOLINT.
     FLARE_CHECK_EQ(HMAC_Update(&ctx, ptr, buffer.size()), 1);
@@ -64,7 +64,7 @@ inline std::string HmacWithCallbackImpl(const EVP_MD* evp_md,
 
 template <auto Init, auto Update, auto Fini, class Context,
           std::size_t kBufferSize>
-std::string MessageDigestImpl(const std::string_view& data) {
+std::string MessageDigestImpl(std::string_view data) {
   return MessageDigestWithCallbackImpl<Init, Update, Fini, Context,
                                        kBufferSize>(
       [&](auto&& cb) { cb(data); });
@@ -82,14 +82,14 @@ std::string MessageDigestImpl(const Buffers& data) {
 }
 
 template <std::size_t kBufferSize>
-std::string HmacImpl(const EVP_MD* evp_md, const std::string_view& key,
-                     const std::string_view& data) {
+std::string HmacImpl(const EVP_MD* evp_md, std::string_view key,
+                     std::string_view data) {
   return HmacWithCallbackImpl<kBufferSize>(evp_md, key,
                                            [&](auto&& cb) { cb(data); });
 }
 
 template <std::size_t kBufferSize, class Buffers>
-std::string HmacImpl(const EVP_MD* evp_md, const std::string_view& key,
+std::string HmacImpl(const EVP_MD* evp_md, std::string_view key,
                      const Buffers& data) {
   return HmacWithCallbackImpl<kBufferSize>(evp_md, key, [&](auto&& cb) {
     for (auto&& e : data) {
@@ -101,7 +101,7 @@ std::string HmacImpl(const EVP_MD* evp_md, const std::string_view& key,
 #define FLARE_DETAIL_CRYPTO_DEFINE_HASH_AND_HMAC_IMPL_FOR(                     \
     MethodName, OpenSSLMethodPrefix, OpenSSLContextPrefix,                     \
     OpenSSLOutputSizePrefix, EVPSuffix)                                        \
-  std::string MethodName(const std::string_view& data) {                       \
+  std::string MethodName(std::string_view data) {                              \
     return detail::MessageDigestImpl<                                          \
         OpenSSLMethodPrefix##_Init, OpenSSLMethodPrefix##_Update,              \
         OpenSSLMethodPrefix##_Final, OpenSSLContextPrefix##_CTX,               \
@@ -119,17 +119,16 @@ std::string HmacImpl(const EVP_MD* evp_md, const std::string_view& key,
         OpenSSLMethodPrefix##_Final, OpenSSLContextPrefix##_CTX,               \
         OpenSSLOutputSizePrefix##_DIGEST_LENGTH>(data);                        \
   }                                                                            \
-  std::string Hmac##MethodName(const std::string_view& key,                    \
-                               const std::string_view& data) {                 \
+  std::string Hmac##MethodName(std::string_view key, std::string_view data) {  \
     return detail::HmacImpl<OpenSSLOutputSizePrefix##_DIGEST_LENGTH>(          \
         EVP_##EVPSuffix(), key, data);                                         \
   }                                                                            \
-  std::string Hmac##MethodName(const std::string_view& key,                    \
+  std::string Hmac##MethodName(std::string_view key,                           \
                                std::initializer_list<std::string_view> data) { \
     return detail::HmacImpl<OpenSSLOutputSizePrefix##_DIGEST_LENGTH>(          \
         EVP_##EVPSuffix(), key, data);                                         \
   }                                                                            \
-  std::string Hmac##MethodName(const std::string_view& key,                    \
+  std::string Hmac##MethodName(std::string_view key,                           \
                                const NoncontiguousBuffer& data) {              \
     return detail::HmacImpl<OpenSSLOutputSizePrefix##_DIGEST_LENGTH>(          \
         EVP_##EVPSuffix(), key, data);                                         \

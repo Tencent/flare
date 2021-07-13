@@ -59,8 +59,8 @@ ReadStatus ReadHeader(const NoncontiguousBuffer& buffer, HeaderBlock* storage);
 // than others ("Content-Length", "Transfer-Encoding" (for "chunked" encoding),
 // to name a few). This method does a "dirty & quick" parse to read the header
 // field.
-std::string_view ReadFieldFromRawBytes(const std::string_view& view,
-                                       const std::string_view& name);
+std::string_view ReadFieldFromRawBytes(std::string_view view,
+                                       std::string_view name);
 
 // Parse start-line and header-fields from `buffer`, which should be cut by
 // `ReadHeader`.
@@ -72,9 +72,9 @@ bool ParseMessagePartial(HeaderBlock&& storage, std::string_view* start_line,
                          HttpHeaders* headers);
 
 // Parse Start-Line.
-bool ParseRequestStartLine(const std::string_view& s, HttpVersion* version,
+bool ParseRequestStartLine(std::string_view s, HttpVersion* version,
                            HttpMethod* method, std::string_view* uri);
-bool ParseResponseStartLine(const std::string_view& s, HttpStatus* code);
+bool ParseResponseStartLine(std::string_view s, HttpStatus* code);
 
 // Write entire message into buffer builder.
 void WriteMessage(const HttpRequest& msg, NoncontiguousBufferBuilder* builder);

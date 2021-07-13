@@ -39,7 +39,7 @@ std::string Uuid::ToString() const {
 namespace flare {
 
 std::optional<experimental::Uuid> TryParseTraits<experimental::Uuid>::TryParse(
-    const std::string_view& s) {
+    std::string_view s) {
   static constexpr auto kExpectedLength = 36;
   static constexpr std::array<bool, kExpectedLength> kHexExpected = [&]() {
     std::array<bool, kExpectedLength> ary{};

@@ -111,8 +111,8 @@ std::string HttpResponse::ToString() const {
 }
 
 void GenerateDefaultResponsePage(HttpStatus status, HttpResponse* response,
-                                 const std::string_view& title,
-                                 const std::string_view& body) {
+                                 std::string_view title,
+                                 std::string_view body) {
   response->set_status(status);
   response->headers()->Append("Content-Type", "text/html");
   std::string html_body;
@@ -137,8 +137,7 @@ void GenerateDefaultResponsePage(HttpStatus status, HttpResponse* response,
 
 namespace http {
 
-const std::string_view& GetStatusCodeWithDescString(
-    HttpStatus status) noexcept {
+std::string_view GetStatusCodeWithDescString(HttpStatus status) noexcept {
   auto v = underlying_value(status);
   if (FLARE_UNLIKELY(v < 0 || v > std::size(kStatusCodeWithDesc))) {
     return internal::EarlyInitConstant<std::string_view>();

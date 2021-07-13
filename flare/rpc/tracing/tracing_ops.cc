@@ -146,7 +146,7 @@ void QuickerSpan::ReportViaDpc() {
   FLARE_CHECK(!Tracing());
 }
 
-TracingOps* GetTracingOps(const std::string_view& service) {
+TracingOps* GetTracingOps(std::string_view service) {
   // `std::shared_ptr<T>` is used below because `ThreadCached` requires `T` to
   // be `CopyConstructible`.
   //

@@ -52,13 +52,13 @@ class HttpResponse : private http::HttpMessage {
 };
 
 void GenerateDefaultResponsePage(HttpStatus status, HttpResponse* response,
-                                 const std::string_view& title = "",
-                                 const std::string_view& body = "");
+                                 std::string_view title = "",
+                                 std::string_view body = "");
 
 namespace http {
 
 // FOR INTERNAL USE.
-const std::string_view& GetStatusCodeWithDescString(HttpStatus status) noexcept;
+std::string_view GetStatusCodeWithDescString(HttpStatus status) noexcept;
 
 }  // namespace http
 

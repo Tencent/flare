@@ -28,20 +28,20 @@ namespace flare::this_fiber {
 void Yield();
 
 // Block calling fiber until `expires_at`.
-void SleepUntil(const std::chrono::steady_clock::time_point& expires_at);
+void SleepUntil(std::chrono::steady_clock::time_point expires_at);
 
 // Block calling fiber for `expires_in`.
-void SleepFor(const std::chrono::nanoseconds& expires_in);
+void SleepFor(std::chrono::nanoseconds expires_in);
 
 // `SleepUntil` for clocks other than `std::steady_clock`.
 template <class Clock, class Duration>
-void SleepUntil(const std::chrono::time_point<Clock, Duration>& expires_at) {
+void SleepUntil(std::chrono::time_point<Clock, Duration> expires_at) {
   return SleepUntil(ReadSteadyClock() + (expires_at - Clock::now()));
 }
 
 // `SleepFor` for durations other than `std::chrono::nanoseconds`.
 template <class Rep, class Period>
-void SleepFor(const std::chrono::duration<Rep, Period>& expires_in) {
+void SleepFor(std::chrono::duration<Rep, Period> expires_in) {
   return SleepFor(static_cast<std::chrono::nanoseconds>(expires_in));
 }
 

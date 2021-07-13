@@ -44,20 +44,18 @@ class QueryString {
 
   // Get value of the first occurrence of the given key, or `std::nullopt` if
   // none.
-  std::optional<std::string_view> TryGet(
-      const std::string_view& key) const noexcept;
+  std::optional<std::string_view> TryGet(std::string_view key) const noexcept;
 
   // Same as `TryGet` except that `std::nullopt` is returned on conversion
   // failure .
   template <class T>
-  std::optional<T> TryGet(const std::string_view& key) const {
+  std::optional<T> TryGet(std::string_view key) const {
     auto value = TryGet(key);
     return value ? TryParse<T>(*value) : std::nullopt;
   }
 
   // Get all occurrences of the given key.
-  std::vector<std::string_view> TryGetMultiple(
-      const std::string_view& key) const;
+  std::vector<std::string_view> TryGetMultiple(std::string_view key) const;
 
   // For iterating through KV-pairs.
   auto begin() const noexcept { return pairs_.begin(); }
@@ -90,7 +88,7 @@ class QueryString {
 //
 // Defined implicitly in `flare/base/string.h`.
 //
-// std::optional<QueryString> TryParse<QueryString>(const std::string_view&);
+// std::optional<QueryString> TryParse<QueryString>(std::string_view);
 
 // This method allows you to parse query string from URI.
 std::optional<QueryString> TryParseQueryStringFromUri(const std::string& uri);
@@ -112,7 +110,7 @@ std::optional<QueryString> TryParseQueryStringFromHttpRequest(
 
 template <>
 struct TryParseTraits<QueryString, void> {
-  static std::optional<QueryString> TryParse(const std::string_view& s);
+  static std::optional<QueryString> TryParse(std::string_view s);
 };
 
 }  // namespace flare

@@ -126,8 +126,7 @@ class RpcControllerCommon : public google::protobuf::RpcController {
   // TODO(luobogao): I'd like to remove these two methods. For client side, the
   // timeout timer can be set in `RpcChannel`, for server-side, it can be set
   // prior to calling user's code (and, possibly later, by user's code itself).
-  void SetStreamTimeout(
-      const std::chrono::steady_clock::time_point& timeout) noexcept;
+  void SetStreamTimeout(std::chrono::steady_clock::time_point timeout) noexcept;
   std::chrono::steady_clock::time_point GetStreamTimeout() const noexcept;
 
   void SetIsStreaming() noexcept { streaming_call_ = true; }

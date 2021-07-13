@@ -55,11 +55,11 @@ class IncomingCallWriter {
 
   // Timestamps.
   void SetStartTimestamp(
-      const std::chrono::steady_clock::time_point& ts) noexcept {
+      std::chrono::steady_clock::time_point ts) noexcept {
     start_ts_ = ts;
   }
   void SetFinishTimestamp(
-      const std::chrono::steady_clock::time_point& ts) noexcept {
+      std::chrono::steady_clock::time_point ts) noexcept {
     finish_ts_ = ts;
   }
 
@@ -160,11 +160,11 @@ class OutgoingCallWriter {
   }
   void SetUri(std::string uri) noexcept { uri_ = std::move(uri); }
   void SetStartTimestamp(
-      const std::chrono::steady_clock::time_point& ts) noexcept {
+      std::chrono::steady_clock::time_point ts) noexcept {
     start_ts_ = ts;
   }
   void SetFinishTimestamp(
-      const std::chrono::steady_clock::time_point& ts) noexcept {
+      std::chrono::steady_clock::time_point ts) noexcept {
     finish_ts_ = ts;
   }
   void SetInvocationStatus(std::string invocation_status) noexcept {

@@ -24,13 +24,13 @@
 
 namespace flare {
 
-std::string EncodeBase64(const std::string_view& from) {
+std::string EncodeBase64(std::string_view from) {
   std::string result;
   EncodeBase64(from, &result);
   return result;
 }
 
-std::optional<std::string> DecodeBase64(const std::string_view& from) {
+std::optional<std::string> DecodeBase64(std::string_view from) {
   std::string result;
   if (!DecodeBase64(from, &result)) {
     return std::nullopt;
@@ -38,7 +38,7 @@ std::optional<std::string> DecodeBase64(const std::string_view& from) {
   return result;
 }
 
-void EncodeBase64(const std::string_view& from, std::string* to) {
+void EncodeBase64(std::string_view from, std::string* to) {
   FLARE_CHECK(from.size() < std::numeric_limits<int>::max(),
               "Not implemented: Source bytes too long.");
 
@@ -53,7 +53,7 @@ void EncodeBase64(const std::string_view& from, std::string* to) {
   to->pop_back();  // Terminating null.
 }
 
-bool DecodeBase64(const std::string_view& from, std::string* to) {
+bool DecodeBase64(std::string_view from, std::string* to) {
   if (from.size() < 3) {
     if (from.empty()) {
       to->clear();

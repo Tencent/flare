@@ -19,7 +19,7 @@
 namespace flare {
 
 void RedisCommand::AppendRedisCommandComponent(
-    const std::string_view& component, NoncontiguousBufferBuilder* builder) {
+    std::string_view component, NoncontiguousBufferBuilder* builder) {
   builder->Append("$", std::to_string(component.size()), "\r\n", component,
                   "\r\n");
 }
@@ -35,7 +35,7 @@ RedisCommandBuilder::RedisCommandBuilder() {
   reserved_header_ = builder_.Reserve(kReservedHdrSize);
 }
 
-void RedisCommandBuilder::Append(const std::string_view& component) {
+void RedisCommandBuilder::Append(std::string_view component) {
   ++components_;
   builder_.Append("$", std::to_string(component.size()), "\r\n", component,
                   "\r\n");

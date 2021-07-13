@@ -239,11 +239,9 @@ struct TryParseTraits;
 
 template <>
 struct TryParseTraits<Endpoint, void> {
-  static std::optional<Endpoint> TryParse(const std::string_view& s,
-                                          from_ipv4_t);
-  static std::optional<Endpoint> TryParse(const std::string_view& s,
-                                          from_ipv6_t);
-  static std::optional<Endpoint> TryParse(const std::string_view& s);
+  static std::optional<Endpoint> TryParse(std::string_view s, from_ipv4_t);
+  static std::optional<Endpoint> TryParse(std::string_view s, from_ipv6_t);
+  static std::optional<Endpoint> TryParse(std::string_view s);
 };
 
 // DEPRECATED. Use `flare::TryParse<Endpoint>` instead.

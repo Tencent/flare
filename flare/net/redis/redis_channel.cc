@@ -42,7 +42,7 @@ redis::detail::MockChannel* mock_channel = nullptr;
 namespace {
 
 std::unique_ptr<MessageDispatcher> CreateMessageDispatcherFrom(
-    const std::string_view& address) {
+    std::string_view address) {
   std::unique_ptr<MessageDispatcher> disp;
 
   if (address.find(':') == std::string::npos /* Not an IP:port address. */ ||
@@ -109,8 +109,9 @@ bool RedisChannel::Open(const std::string& address, const Options& options) {
   }
   // To avoid possible ambiguity introduced by colon in username / password, we
   // encode them before building "call gate pool" key.
-  impl_->call_gate_pool = rpc::internal::GetGlobalStreamCallGatePool(Format(
-      "redis:{}:{})", EncodeHex(options.username), EncodeHex(options.password)));
+  impl_->call_gate_pool = rpc::internal::GetGlobalStreamCallGatePool(
+      Format("redis:{}:{})", EncodeHex(options.username),
+             EncodeHex(options.password)));
 
   impl_->opened = true;
   return true;

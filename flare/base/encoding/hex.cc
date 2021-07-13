@@ -22,19 +22,19 @@
 
 namespace flare {
 
-std::string EncodeHex(const std::string_view& from, bool uppercase) {
+std::string EncodeHex(std::string_view from, bool uppercase) {
   std::string result;
   EncodeHex(from, &result, uppercase);
   return result;
 }
 
-std::optional<std::string> DecodeHex(const std::string_view& from) {
+std::optional<std::string> DecodeHex(std::string_view from) {
   std::string result;
   DecodeHex(from, &result);
   return result;
 }
 
-void EncodeHex(const std::string_view& from, std::string* to, bool uppercase) {
+void EncodeHex(std::string_view from, std::string* to, bool uppercase) {
   to->reserve(from.size() * 2);
   for (auto&& e : from) {
     auto index = static_cast<std::uint8_t>(e);
@@ -48,7 +48,7 @@ void EncodeHex(const std::string_view& from, std::string* to, bool uppercase) {
   }
 }
 
-bool DecodeHex(const std::string_view& from, std::string* to) {
+bool DecodeHex(std::string_view from, std::string* to) {
   if (from.size() % 2 != 0) {
     return false;
   }

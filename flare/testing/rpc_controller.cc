@@ -47,8 +47,7 @@ void RpcControllerMaster::SetRemotePeer(RpcServerController* ctlr,
 }
 
 void RpcControllerMaster::SetTimeout(
-    RpcServerController* ctlr,
-    const std::chrono::steady_clock::time_point& timeout) {
+    RpcServerController* ctlr, std::chrono::steady_clock::time_point timeout) {
   ctlr->SetTimeout(timeout);
 }
 
@@ -90,7 +89,7 @@ void SetRpcServerRemotePeer(RpcServerController* ctlr,
 }
 
 void SetRpcServerTimeout(RpcServerController* ctlr,
-                         const std::chrono::steady_clock::time_point& timeout) {
+                         std::chrono::steady_clock::time_point timeout) {
   detail::RpcControllerMaster::SetTimeout(ctlr, timeout);
 }
 

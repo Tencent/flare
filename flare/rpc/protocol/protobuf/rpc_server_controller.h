@@ -267,7 +267,7 @@ class RpcServerController : public protobuf::RpcControllerCommon {
   friend struct testing::detail::RpcControllerMaster;
 
   // Used by `protobuf::Service`.
-  void SetTimeout(const std::chrono::steady_clock::time_point& timeout) {
+  void SetTimeout(std::chrono::steady_clock::time_point timeout) {
     timeout_from_caller_ = timeout;
   }
   void SetAcceptableCompressionAlgorithm(std::uint64_t mask) {

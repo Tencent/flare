@@ -33,12 +33,12 @@ void AddLoggingItemToExecution(const std::string& s);
 // Same as above, except that what's actually get added is in form of `key:
 // value`.
 template <class T>
-void AddLoggingTagToFiber(const std::string_view& key, const T& value) {
+void AddLoggingTagToFiber(std::string_view key, const T& value) {
   return AddLoggingItemToFiber(Format("{}: {}", key, value));
 }
 
 template <class T>
-void AddLoggingTagToExecution(const std::string_view& key, const T& value) {
+void AddLoggingTagToExecution(std::string_view key, const T& value) {
   return AddLoggingItemToExecution(Format("{}: {}", key, value));
 }
 

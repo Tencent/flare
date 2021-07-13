@@ -146,8 +146,8 @@ ReadStatus ReadHeader(const NoncontiguousBuffer& buffer, HeaderBlock* header) {
   return ReadStatus::OK;
 }
 
-std::string_view ReadFieldFromRawBytes(const std::string_view& view,
-                                       const std::string_view& key) {
+std::string_view ReadFieldFromRawBytes(std::string_view view,
+                                       std::string_view key) {
   // https://tools.ietf.org/html/rfc7230#section-3.5
   //
   // Although the line terminator for the start-line and header fields is the
@@ -236,7 +236,7 @@ bool ParseMessagePartial(HeaderBlock&& storage, std::string_view* start_line,
   return true;
 }
 
-bool ParseRequestStartLine(const std::string_view& s, HttpVersion* version,
+bool ParseRequestStartLine(std::string_view s, HttpVersion* version,
                            HttpMethod* method, std::string_view* uri) {
   // TODO(luobogao): Detect HTTP version.
   auto splitted = Split(s, " ");
@@ -262,7 +262,7 @@ bool ParseRequestStartLine(const std::string_view& s, HttpVersion* version,
   return true;
 }
 
-bool ParseResponseStartLine(const std::string_view& s, HttpStatus* code) {
+bool ParseResponseStartLine(std::string_view s, HttpStatus* code) {
   // TODO(luobogao): Detect HTTP version.
   auto splitted = Split(s, " ");
   if (splitted.size() < 2) {  // HTTP/1.1 301 Moved Permanently

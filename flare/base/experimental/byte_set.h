@@ -29,7 +29,7 @@ class ByteSet {
   constexpr ByteSet() : rep_{} {}
   constexpr explicit ByteSet(const char* str) : rep_(FromString(str)) {}
 
-  constexpr explicit ByteSet(const std::string_view& bytes) : ByteSet() {
+  constexpr explicit ByteSet(std::string_view bytes) : ByteSet() {
     insert(bytes);
   }
 
@@ -69,7 +69,7 @@ class ByteSet {
   }
 
   // insert any bytes in str into set
-  void insert(const std::string_view& bytes) {
+  void insert(std::string_view bytes) {
     for (auto&& e : bytes) {
       insert(e);
     }
@@ -84,7 +84,7 @@ class ByteSet {
   }
 
   // remove all bytes in str from the set
-  void erase(const std::string_view& bytes) {
+  void erase(std::string_view bytes) {
     for (auto&& e : bytes) {
       erase(e);
     }

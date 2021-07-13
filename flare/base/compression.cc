@@ -22,11 +22,11 @@
 
 namespace flare {
 
-std::unique_ptr<Compressor> MakeCompressor(const std::string_view& name) {
+std::unique_ptr<Compressor> MakeCompressor(std::string_view name) {
   return compressor_registry.TryNew(name);
 }
 
-std::unique_ptr<Decompressor> MakeDecompressor(const std::string_view& name) {
+std::unique_ptr<Decompressor> MakeDecompressor(std::string_view name) {
   return decompressor_registry.TryNew(name);
 }
 
@@ -40,7 +40,7 @@ std::optional<NoncontiguousBuffer> Decompress(Decompressor* decompressor,
 }
 
 std::optional<NoncontiguousBuffer> Decompress(Decompressor* decompressor,
-                                              const std::string_view& body) {
+                                              std::string_view body) {
   NoncontiguousBufferBuilder builder;
   if (!Decompress(decompressor, body, &builder)) {
     return std::nullopt;
@@ -58,7 +58,7 @@ bool Decompress(Decompressor* decompressor, const NoncontiguousBuffer& nb,
   return decompressor->Decompress(nb, &out);
 }
 
-bool Decompress(Decompressor* decompressor, const std::string_view& body,
+bool Decompress(Decompressor* decompressor, std::string_view body,
                 NoncontiguousBufferBuilder* builder) {
   if (!decompressor) {
     FLARE_LOG_WARNING_EVERY_SECOND("Compressor nullptr");
@@ -88,7 +88,7 @@ bool Compress(Compressor* compressor, const NoncontiguousBuffer& nb,
 }
 
 std::optional<NoncontiguousBuffer> Compress(Compressor* compressor,
-                                            const std::string_view& body) {
+                                            std::string_view body) {
   NoncontiguousBufferBuilder builder;
   if (!Compress(compressor, body, &builder)) {
     return std::nullopt;
@@ -96,7 +96,7 @@ std::optional<NoncontiguousBuffer> Compress(Compressor* compressor,
   return builder.DestructiveGet();
 }
 
-bool Compress(Compressor* compressor, const std::string_view& body,
+bool Compress(Compressor* compressor, std::string_view body,
               NoncontiguousBufferBuilder* builder) {
   if (!compressor) {
     FLARE_LOG_WARNING_EVERY_SECOND("Compressor nullptr");

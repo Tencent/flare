@@ -27,7 +27,7 @@ UriMatcher::UriMatcher() : matcher_([](auto&&) { return true; }) {}
 
 UriMatcher::UriMatcher(const char* prefix) : UriMatcher(std::string(prefix)) {}
 
-UriMatcher::UriMatcher(const std::string_view& prefix)
+UriMatcher::UriMatcher(std::string_view prefix)
     : UriMatcher(std::string(prefix)) {}
 
 UriMatcher::UriMatcher(std::string prefix)
@@ -40,7 +40,7 @@ UriMatcher::UriMatcher(std::regex uri_matcher)
         return std::regex_match(s.begin(), s.end(), uri_matcher);
       }) {}
 
-UriMatcher::UriMatcher(Function<bool(const std::string_view&)> uri_matcher)
+UriMatcher::UriMatcher(Function<bool(std::string_view)> uri_matcher)
     : matcher_(std::move(uri_matcher)) {}
 
 }  // namespace flare::detail

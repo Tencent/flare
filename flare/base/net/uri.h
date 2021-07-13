@@ -36,7 +36,7 @@ class Uri {
   // If `from` is malformed, the program crashes.
   //
   // To parse URI from untrusted source, use `TryParse<Uri>(...)` instead.
-  explicit Uri(const std::string_view& from);
+  explicit Uri(std::string_view from);
 
   // Accessors.
   std::string_view scheme() const noexcept { return GetComponent(kScheme); }
@@ -88,7 +88,7 @@ class Uri {
 
 // TODO(luobogao): `UriBuilder`.
 
-// `std::optional<Uri> TryParse<Uri>(const std::string_view&)` is defined
+// `std::optional<Uri> TryParse<Uri>(std::string_view)` is defined
 // implicitly so long as `base/string.h` is included.
 //
 // Note that components in URI are NOT decoded as pct-encoding.
@@ -101,10 +101,10 @@ template <>
 struct TryParseTraits<Uri, void> {
   // Should we decode pct-encoded automatically?
   //
-  // static std::optional<Uri> TryParse(const std::string_view& s, bool
+  // static std::optional<Uri> TryParse(std::string_view s, bool
   // decode_pct);
 
-  static std::optional<Uri> TryParse(const std::string_view& s);
+  static std::optional<Uri> TryParse(std::string_view s);
 };
 
 }  // namespace flare

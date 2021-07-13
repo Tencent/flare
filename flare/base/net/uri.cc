@@ -627,8 +627,7 @@ class UriParser {
   UriParseResultReceiver* m_result;
 };
 
-std::optional<Uri> TryParseTraits<Uri, void>::TryParse(
-    const std::string_view& s) {
+std::optional<Uri> TryParseTraits<Uri, void>::TryParse(std::string_view s) {
   if (s.size() > std::numeric_limits<std::uint16_t>::max()) {
     FLARE_LOG_ERROR_ONCE("Unexpected: URI is too long.");
     return std::nullopt;
