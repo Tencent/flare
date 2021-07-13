@@ -16,6 +16,7 @@
 #define FLARE_RPC_LOAD_BALANCER_LOAD_BALANCER_H_
 
 #include <chrono>
+#include <cstdint>
 #include <vector>
 
 #include "flare/base/dependency_registry.h"

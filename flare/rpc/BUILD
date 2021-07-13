@@ -143,6 +143,35 @@ cc_library(
   visibility = 'PUBLIC',
 )
 
+cc_library(
+  name = 'message_dispatcher_factory',
+  hdrs = 'message_dispatcher_factory.h',
+  srcs = 'message_dispatcher_factory.cc',
+  deps = [
+    '//flare/base:function',
+    '//flare/base:never_destroyed',
+    '//flare/base/internal:hash_map',
+    '//flare/base/internal:macro',
+    '//flare/rpc/load_balancer:load_balancer',
+    '//flare/rpc/message_dispatcher:composited',
+    '//flare/rpc/message_dispatcher:message_dispatcher',
+    '//flare/rpc/name_resolver:name_resolver',
+  ]
+)
+
+cc_test(
+  name = 'message_dispatcher_factory_test',
+  srcs = 'message_dispatcher_factory_test.cc',
+  deps = [
+    ':message_dispatcher_factory',
+    '//flare/base:string',
+    '//flare/rpc/name_resolver:name_resolver',
+    '//flare/rpc/load_balancer:load_balancer',
+    '//flare/rpc/message_dispatcher:message_dispatcher',
+    '//flare/rpc/message_dispatcher:composited',
+  ]
+)
+
 #############################################
 # TARGET BELOW ARE FOR INTERNAL USE.        #
 #                                           #
