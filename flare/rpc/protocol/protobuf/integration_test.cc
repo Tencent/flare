@@ -20,7 +20,6 @@
 #include "flare/base/string.h"
 #include "flare/base/thread/latch.h"
 #include "flare/init/override_flag.h"
-#include "flare/rpc/load_balancer/round_robin.h"
 #include "flare/rpc/rpc_channel.h"
 #include "flare/rpc/rpc_client_controller.h"
 #include "flare/rpc/rpc_server_controller.h"

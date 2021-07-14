@@ -28,19 +28,8 @@
 
 namespace dummy {
 
+template <int X>
 class DummyMessageDispatcher : public flare::MessageDispatcher {
- public:
-  bool Open(const std::string& name) override { return true; }
-  bool GetPeer(std::uint64_t key, flare::Endpoint* addr,
-               std::uintptr_t* ctx) override {
-    return false;
-  }
-  void Report(const flare::Endpoint& addr, Status status,
-              std::chrono::nanoseconds time_cost, std::uintptr_t ctx) override {
-  }
-};
-
-class DummyMessageDispatcher2 : public flare::MessageDispatcher {
  public:
   bool Open(const std::string& name) override { return true; }
   bool GetPeer(std::uint64_t key, flare::Endpoint* addr,
@@ -61,7 +50,8 @@ class DummyLoadBalancer : public flare::LoadBalancer {
     return false;
   }
   void Report(const flare::Endpoint& addr, Status status,
-              std::chrono::nanoseconds time_cost, std::uintptr_t ctx) {}
+              std::chrono::nanoseconds time_cost, std::uintptr_t ctx) override {
+  }
 
   inline static int instances;
 };
@@ -77,6 +67,48 @@ class DummyNameResolver : public flare::NameResolver {
   inline static int instances;
 };
 
+[[gnu::constructor]] void InitializeFactories() {
+  flare::RegisterMessageDispatcherFactoryFor(
+      "boring-subsys", "scheme1", 0,
+      [](auto&& uri) -> std::unique_ptr<flare::MessageDispatcher> {
+        if (flare::StartsWith(uri, "first:")) {
+          return std::make_unique<dummy::DummyMessageDispatcher<0>>();
+        }
+        return nullptr;
+      });
+
+  // Never used. It's added later than the factory above, and both handle prefix
+  // `scheme1://first:`.
+  flare::RegisterMessageDispatcherFactoryFor(
+      "boring-subsys", "scheme1", 0,
+      [](auto&& uri) -> std::unique_ptr<flare::MessageDispatcher> {
+        if (flare::StartsWith(uri, "first:")) {
+          return std::make_unique<dummy::DummyMessageDispatcher<1>>();
+        }
+        return nullptr;
+      });
+
+  flare::RegisterMessageDispatcherFactoryFor(
+      "boring-subsys", "scheme1",
+      0 /* Doesn't matter as it handles a different prefix. */,
+      [](auto&& uri) -> std::unique_ptr<flare::MessageDispatcher> {
+        if (flare::StartsWith(uri, "second:")) {
+          return std::make_unique<dummy::DummyMessageDispatcher<1>>();
+        }
+        return nullptr;
+      });
+
+  flare::SetCatchAllMessageDispatcherFor(
+      "boring-subsys",
+      [](auto&& scheme,
+         auto&& address) -> std::unique_ptr<flare::MessageDispatcher> {
+        if (scheme == "catch-all") {
+          return std::make_unique<dummy::DummyMessageDispatcher<2>>();
+        }
+        return nullptr;
+      });
+}
+
 }  // namespace dummy
 
 FLARE_RPC_REGISTER_LOAD_BALANCER("dummy", dummy::DummyLoadBalancer);
@@ -87,24 +119,29 @@ namespace flare {
 TEST(MessageDispatcherFactory, DefaultFactory) {
   int x = 0;
 
-  SetDefaultMessageDispatcherFactory([&](auto&&...) {
-    x = 1;
-    return nullptr;
-  });
+  SetDefaultMessageDispatcherFactory(
+      [&](auto&& subsys, auto&& scheme, auto&& addr) {
+        x = 1;
+        EXPECT_EQ("something", subsys);
+        EXPECT_EQ("x", scheme);
+        EXPECT_EQ("something-else", addr);
+        return nullptr;
+      });
   ASSERT_EQ(0, x);
-  MakeMessageDispatcher("something", "x://something else");
+  MakeMessageDispatcher("something", "x://something-else");
   ASSERT_EQ(1, x);
 }
 
 TEST(MessageDispatcherFactory, PreinstalledFactory) {
   SetDefaultMessageDispatcherFactory([&](auto&&...) { return nullptr; });
 
-  EXPECT_TRUE(dynamic_cast<dummy::DummyMessageDispatcher2*>(
+  EXPECT_TRUE(dynamic_cast<dummy::DummyMessageDispatcher<1>*>(
       MakeMessageDispatcher("boring-subsys", "scheme1://second:123").get()));
-  EXPECT_TRUE(dynamic_cast<dummy::DummyMessageDispatcher*>(
+  EXPECT_TRUE(dynamic_cast<dummy::DummyMessageDispatcher<0>*>(
       MakeMessageDispatcher("boring-subsys", "scheme1://first:123").get()));
-  EXPECT_TRUE(MakeMessageDispatcher("boring-subsys", "scheme2://first:123") ==
-              nullptr);
+  EXPECT_TRUE(dynamic_cast<dummy::DummyMessageDispatcher<2>*>(
+      MakeMessageDispatcher("boring-subsys", "catch-all://first:123").get()));
+  EXPECT_TRUE(MakeMessageDispatcher("boring-subsys2", "x://y") == nullptr);
 }
 
 TEST(MessageDispatcherFactory, MakeComposited) {
@@ -114,33 +151,3 @@ TEST(MessageDispatcherFactory, MakeComposited) {
 }
 
 }  // namespace flare
-
-FLARE_RPC_REGISTER_MESSAGE_DISPATCHER_FACTORY_FOR(
-    "boring-subsys", "scheme1", 0,
-    [](auto&& uri) -> std::unique_ptr<flare::MessageDispatcher> {
-      if (flare::StartsWith(uri, "scheme1://first:")) {
-        return std::make_unique<dummy::DummyMessageDispatcher>();
-      }
-      return nullptr;
-    });
-
-// Never used. It's added later than the factory above, and both handle prefix
-// `scheme1://first:`.
-FLARE_RPC_REGISTER_MESSAGE_DISPATCHER_FACTORY_FOR(
-    "boring-subsys", "scheme1", 0,
-    [](auto&& uri) -> std::unique_ptr<flare::MessageDispatcher> {
-      if (flare::StartsWith(uri, "scheme1://first:")) {
-        return std::make_unique<dummy::DummyMessageDispatcher2>();
-      }
-      return nullptr;
-    });
-
-FLARE_RPC_REGISTER_MESSAGE_DISPATCHER_FACTORY_FOR(
-    "boring-subsys", "scheme1",
-    0 /* Doesn't matter as it handles a different prefix. */,
-    [](auto&& uri) -> std::unique_ptr<flare::MessageDispatcher> {
-      if (flare::StartsWith(uri, "scheme1://second:")) {
-        return std::make_unique<dummy::DummyMessageDispatcher2>();
-      }
-      return nullptr;
-    });

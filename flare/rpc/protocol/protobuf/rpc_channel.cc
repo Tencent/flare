@@ -46,10 +46,7 @@
 #include "flare/rpc/internal/error_stream_provider.h"
 #include "flare/rpc/internal/session_context.h"
 #include "flare/rpc/internal/stream_call_gate.h"
-#include "flare/rpc/load_balancer/load_balancer.h"
-#include "flare/rpc/message_dispatcher/composited.h"
-#include "flare/rpc/message_dispatcher/message_dispatcher.h"
-#include "flare/rpc/name_resolver/name_resolver.h"
+#include "flare/rpc/message_dispatcher_factory.h"
 #include "flare/rpc/protocol/protobuf/binlog.pb.h"
 #include "flare/rpc/protocol/protobuf/message.h"
 #include "flare/rpc/protocol/protobuf/mock_channel.h"
@@ -137,107 +134,10 @@ void NormalizeUriScheme(std::string* uri) {
   }
 }
 
-// These "IsResolvableXxx" does not looks right to me though. Could we just use
-// `NameResolver::StartResolving` to check the address instead?
-
-bool IsResolvableCl5(const std::string& address) {
-  return StartsWith(address, "l5:");  // qzone://l5:123-456
-}
-
-// This one treats anything that doesn't look like a IP:port address as polaris
-// address.
-bool IsResolvablePolarisPreferred(const std::string& address) {
-  return address.find(':') == std::string::npos;  // flare://polaris.uri.xxx
-}
-
-// This one only accepts polaris addresses starting with `polaris:`, that's why
-// it's "strict".
-bool IsResolvablePolarisStrict(const std::string& address) {
-  return StartsWith(address, "polaris:");
-}
-
-bool IsResolvableCatchAll(const std::string& address) { return true; }
-
-// For each scheme, different priority of NSLBs (for resolving address) may
-// apply. This method determines which NSLB should be used for the given
-// `scheme` and `address`.
-//
-// @sa: https://tools.ietf.org/html/rfc3986#page-19
-//
-// > A host identified by a registered name is a sequence of characters
-// > usually intended for lookup within a locally defined host or service
-// > name registry, though the URI's scheme-specific semantics may require
-// > that a specific registry (or fixed name table) be used instead.  The
-// > most common name registry mechanism is the Domain Name System (DNS).
-// > A registered name intended for lookup in the DNS uses the syntax
-const std::string& DetermineNSLB(const std::string& scheme,
-                                 const std::string& address) {
-  // If the address given to the callback (`.second`) is resolvable by the NSLB
-  // specified in `.first`, the callback returns `true`.
-  using Determiner = std::pair<std::string, bool (*)(const std::string&)>;
-
-  static const Determiner kCl5{"cl5", IsResolvableCl5};
-  static const Determiner kPolarisPreferred{"polaris",
-                                            IsResolvablePolarisPreferred};
-  static const Determiner kPolarisStrict{"polaris", IsResolvablePolarisStrict};
-  static const Determiner kListRR{"list+rr", IsResolvableCatchAll};
-
-  // For each scheme, a list of determiner is provided to check if a given NSLB
-  // could resolve the address provided.
-  //
-  // Note that it's possible a given `Determiner` is used for multiple scheme,
-  // but the order between `Determiner`s for different scheme can be different.
-  static const std::unordered_map<std::string_view,
-                                  std::vector<const Determiner*>>
-      kDeterminers{
-          {"flare", {&kPolarisPreferred, &kPolarisStrict, &kListRR}},
-          {"baidu-std", {&kPolarisPreferred, &kPolarisStrict, &kListRR}},
-          {"qzone-pb", {&kPolarisStrict, &kCl5, &kListRR}},
-          {"http+pb", {&kPolarisStrict, &kCl5, &kListRR}},
-          {"http+gdt-json", {&kPolarisStrict, &kCl5, &kListRR}},
-          {"http+pb-text", {&kPolarisStrict, &kCl5, &kListRR}},
-          {"http+proto3-json", {&kPolarisStrict, &kCl5, &kListRR}},
-      };
-  static const std::vector<const Determiner*> kNonBuiltinSchemeDeterminers{
-      &kListRR};  // Be conservative.
-
-  // Find the list of determiners of the requesting scheme.
-  const std::vector<const Determiner*>* determiners = nullptr;
-  if (auto iter = kDeterminers.find(scheme); iter != kDeterminers.end()) {
-    determiners = &iter->second;
-  } else {
-    determiners = &kNonBuiltinSchemeDeterminers;
-  }
-
-  // Enumerates NSLBs. The first one who can resolve `address` is choosen.
-  for (auto&& e : *determiners) {
-    if (e->second(address)) {
-      return e->first;
-    }
-  }
-  FLARE_CHECK(0, "Unexpected: No catch-all NSLB for address [{}].", address);
-}
-
-std::unique_ptr<MessageDispatcher> NewMessageDispatcher(
-    const std::string& name) {
-  auto pos = name.find_first_of('+');
-  if (pos == std::string::npos) {
-    return message_dispatcher_registry.TryNew(name);
-  }
-  auto resolver = name.substr(0, pos), lb = name.substr(pos + 1);
-  auto rsvr_inst = name_resolver_registry.TryGet(resolver);
-  auto load_balancer = load_balancer_registry.TryNew(lb);
-  if (!rsvr_inst || !load_balancer) {
-    return nullptr;
-  }
-  return std::make_unique<message_dispatcher::Composited>(
-      rsvr_inst, std::move(load_balancer));
-}
-
-// Returns: scheme, NSLB, address.
-std::optional<std::tuple<std::string, std::string, std::string>> InspectUri(
+// Returns: scheme, address.
+std::optional<std::pair<std::string, std::string>> InspectUri(
     const std::string& uri) {
-  static const auto kSep = "://"sv;
+  static constexpr auto kSep = "://"sv;
 
   auto colon = uri.find(':');
   if (colon == std::string::npos) {
@@ -249,8 +149,17 @@ std::optional<std::tuple<std::string, std::string, std::string>> InspectUri(
   }
   auto scheme = uri.substr(0, colon);
   auto address = uri.substr(colon + kSep.size());
-  auto nslb = DetermineNSLB(scheme, address);
-  return std::tuple(scheme, nslb, address);
+  return std::pair(scheme, address);
+}
+
+std::unique_ptr<MessageDispatcher> NewMessageDispatcherFromName(
+    std::string_view name) {
+  if (auto pos = name.find_first_of('+'); pos != std::string_view::npos) {
+    return MakeCompositedMessageDispatcher(name.substr(0, pos),
+                                           name.substr(pos + 1));
+  } else {
+    return message_dispatcher_registry.TryNew(name);
+  }
 }
 
 // `Random()` does not perform quite well, besides, we don't need a "real"
@@ -379,11 +288,15 @@ bool RpcChannel::Open(std::string address, const Options& options) {
   }
 
   // Initialize NSLB, etc.
-  auto&& [scheme, nslb, addr] = *inspection_result;
+  auto&& [scheme, addr] = *inspection_result;
   impl_->protocol_factory =
       client_side_stream_protocol_registry.GetFactory(scheme);
-  impl_->message_dispatcher = NewMessageDispatcher(
-      options.override_nslb.empty() ? nslb : options.override_nslb);
+  if (!options.override_nslb.empty()) {
+    impl_->message_dispatcher =
+        NewMessageDispatcherFromName(options.override_nslb);
+  } else {
+    impl_->message_dispatcher = MakeMessageDispatcher("rpc", address);
+  }
   if (!impl_->message_dispatcher || !impl_->message_dispatcher->Open(addr)) {
     FLARE_LOG_WARNING_EVERY_SECOND("URI [{}] is not resolvable.", address);
     return false;

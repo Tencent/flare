@@ -29,8 +29,7 @@
 #include "flare/net/redis/redis_protocol.h"
 #include "flare/rpc/internal/stream_call_gate.h"
 #include "flare/rpc/internal/stream_call_gate_pool.h"
-#include "flare/rpc/message_dispatcher/composited.h"
-#include "flare/rpc/message_dispatcher/message_dispatcher.h"
+#include "flare/rpc/message_dispatcher_factory.h"
 
 using namespace std::literals;
 using flare::rpc::internal::StreamCallGate;
@@ -40,27 +39,6 @@ namespace flare {
 redis::detail::MockChannel* mock_channel = nullptr;
 
 namespace {
-
-std::unique_ptr<MessageDispatcher> CreateMessageDispatcherFrom(
-    std::string_view address) {
-  std::unique_ptr<MessageDispatcher> disp;
-
-  if (address.find(':') == std::string::npos /* Not an IP:port address. */ ||
-      StartsWith(address, "polaris:") /* Asked explicitly. */) {
-    // Connecting using Polaris. Are we using CKV+?
-    disp = message_dispatcher_registry.New("polaris");
-  } else {
-    // Connecting via IP:port.
-    disp = std::make_unique<message_dispatcher::Composited>(
-        name_resolver_registry.Get("list"), load_balancer_registry.New("rr"));
-  }
-  if (!disp->Open(std::string(address))) {
-    FLARE_LOG_WARNING_EVERY_SECOND("Failed to open Redis cluster [{}].",
-                                   address);
-    return nullptr;
-  }
-  return disp;
-}
 
 RedisError TranslateError(StreamCallGate::CompletionStatus status) {
   FLARE_CHECK(status != StreamCallGate::CompletionStatus::Success);
@@ -103,8 +81,11 @@ bool RedisChannel::Open(const std::string& address, const Options& options) {
   FLARE_CHECK(StartsWith(address, kUriPrefix));
 
   auto rest = std::string_view(address).substr(kUriPrefix.size());
-  impl_->msg_dispatcher = CreateMessageDispatcherFrom(rest);
-  if (!impl_->msg_dispatcher) {
+  impl_->msg_dispatcher = MakeMessageDispatcher("redis", address);
+  if (!impl_->msg_dispatcher ||
+      !impl_->msg_dispatcher->Open(std::string(rest))) {
+    FLARE_LOG_WARNING_EVERY_SECOND("Failed to open Redis cluster [{}].",
+                                   address);
     return false;
   }
   // To avoid possible ambiguity introduced by colon in username / password, we
