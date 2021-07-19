@@ -226,8 +226,6 @@ cc_test(
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/rpc:rpc',
-    '//flare/rpc/name_resolver:list',
-    '//flare/rpc/load_balancer:round_robin',
   ]
 )
 
@@ -280,8 +278,6 @@ cc_test(
     '//flare/testing:endpoint',
     '//flare/testing:echo_service_proto_flare',
     '//flare/rpc:rpc',
-    '//flare/rpc/name_resolver:list',
-    '//flare/rpc/load_balancer:round_robin',
   ],
 )
 
@@ -337,8 +333,6 @@ cc_test(
     '//flare/testing:endpoint',
     '//flare/testing:echo_service_proto_flare',
     '//flare/rpc:rpc',
-    '//flare/rpc/name_resolver:list',
-    '//flare/rpc/load_balancer:round_robin',
   ],
 )
 
@@ -486,6 +480,7 @@ cc_library(
     ':binlog_proto',
     ':message',
     ':mock_channel',
+    ':nslb_registration',
     ':rpc_client_controller',
     ':rpc_options',
     ':service_method_locator',
@@ -501,15 +496,13 @@ cc_library(
     '//flare/base/internal:lazy_init',
     '//flare/base/net:endpoint',
     '//flare/fiber:fiber',
+    '//flare/rpc:message_dispatcher_factory',
     '//flare/rpc/binlog:binlog',
     '//flare/rpc/internal:correlation_id',
     '//flare/rpc/internal:error_stream_provider',
     '//flare/rpc/internal:fast_latch',
     '//flare/rpc/internal:session_context',
     '//flare/rpc/internal:stream_call_gate',
-    '//flare/rpc/load_balancer:load_balancer',
-    '//flare/rpc/message_dispatcher:composited',
-    '//flare/rpc/name_resolver:name_resolver',
     '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
@@ -530,8 +523,6 @@ cc_test(
     '//flare/testing:echo_service_proto_flare',
     '//flare/fiber:fiber',
     '//flare/rpc:rpc',
-    '//flare/rpc/name_resolver:list',
-    '//flare/rpc/load_balancer:round_robin',
   ],
   testdata = [
     ('testdata/', 'conf/'),
@@ -568,8 +559,6 @@ for block_size in ['4K', '64K', '1M']:
       '//flare/base/thread:latch',
       '//flare/init:override_flag',
       '//flare/rpc:rpc',
-      '//flare/rpc/load_balancer:round_robin',
-      '//flare/rpc/name_resolver:list',
       '//flare/testing:echo_service_proto_flare',
       '//flare/testing:endpoint',
       '//flare/testing:main',
@@ -712,4 +701,21 @@ proto_library(
     '//flare/rpc/binlog:binlog_dry_runner_integration_test',
     '//flare/rpc/binlog:dry_runner_integration_test',
   ],
+)
+
+cc_library(
+  name = 'nslb_registration',
+  hdrs = [],
+  srcs = 'nslb_registration.cc',
+  deps = [
+    '//flare/base:string',
+    '//flare/init:on_init',
+    '//flare/rpc:message_dispatcher_factory',
+    '//flare/rpc/load_balancer:load_balancer',
+    '//flare/rpc/load_balancer:round_robin',
+    '//flare/rpc/message_dispatcher:message_dispatcher',
+    '//flare/rpc/name_resolver:list',
+    '//flare/rpc/name_resolver:name_resolver',
+  ],
+  link_all_symbols = True,
 )

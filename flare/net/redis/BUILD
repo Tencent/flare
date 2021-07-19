@@ -132,6 +132,7 @@ cc_library(
   deps = [
     ':message',
     ':mock_channel',
+    ':nslb_registration',
     ':redis_command',
     ':redis_object',
     ':redis_protocol',
@@ -141,11 +142,9 @@ cc_library(
     '//flare/base/encoding:hex',
     '//flare/base/internal:early_init',
     '//flare/base/internal:lazy_init',
+    '//flare/rpc:message_dispatcher_factory',
     '//flare/rpc/internal:stream_call_gate_pool',
     '//flare/rpc/internal:stream_call_gate',
-    '//flare/rpc/load_balancer:round_robin',
-    '//flare/rpc/message_dispatcher:composited',
-    '//flare/rpc/name_resolver:list',
   ],
   visibility = 'PUBLIC',
 )
@@ -181,4 +180,19 @@ cc_test(
     '//flare/testing:main',
     '//flare/testing:naked_server',
   ]
+)
+
+cc_library(
+  name = 'nslb_registration',
+  hdrs = [],
+  srcs = 'nslb_registration.cc',
+  deps = [
+    '//flare/base:string',
+    '//flare/init:on_init',
+    '//flare/rpc:message_dispatcher_factory',
+    '//flare/rpc/load_balancer:round_robin',
+    '//flare/rpc/message_dispatcher:message_dispatcher',
+    '//flare/rpc/name_resolver:list',
+  ],
+  link_all_symbols = True,
 )

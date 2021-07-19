@@ -32,50 +32,63 @@ namespace flare {
 //
 // It's still the caller's responsibility to call `Open` on the resulting
 // message dispatcher.
+//
+// FIXME:Perhaps using `TypeIndex` for differentiate subsystems is better?
 std::unique_ptr<MessageDispatcher> MakeMessageDispatcher(
     std::string_view subsys, std::string_view uri);
 
-// Register a factory for a given (`subsys`, `scheme` (of `uri` above))
-// combination.
+// Register a factory for a given (`subsys`, `scheme` (of `uri`)) combination.
+//
+// Note that `address` passed to `factory` is the `host` part of `uri`
+// (https://tools.ietf.org/html/rfc3986#page-19). If you need `scheme` in
+// `factory`, you should capture it on registration yourself.
 //
 // Factories with smaller `priority` take precedence. If `factory` does not
-// recognizes `uri` provided, it should return `nullptr`, and the factory with
-// the next lower priority is tried.
+// recognizes `address` provided, it should return `nullptr`, and the factory
+// with the next lower priority is tried.
 //
-// This method may only be called upon startup.
+// This method may only be called upon startup. (c.f. `FLARE_ON_INIT`)
 void RegisterMessageDispatcherFactoryFor(
     const std::string& subsys, const std::string& scheme, int priority,
-    Function<std::unique_ptr<MessageDispatcher>(std::string_view uri)> factory);
+    Function<std::unique_ptr<MessageDispatcher>(std::string_view address)>
+        factory);
+
+// Register a catch-all factory for a given `subsys`. If no factory more
+// specific (registered by method above) returns a non-nullptr, this factory is
+// used if one is registered.
+//
+// If the given `scheme` or `address` is not recognized to the factory,
+// `nullptr` should be returned (and the global default factory will be tried.).
+//
+// This method may only be called upon startup. (c.f. `FLARE_ON_INIT`)
+void SetCatchAllMessageDispatcherFor(
+    const std::string& subsys,
+    Function<std::unique_ptr<MessageDispatcher>(std::string_view scheme,
+                                                std::string_view address)>
+        factory);
 
 // This allows you to override default factory for `MakeMessageDispatcher`. The
-// default factory is use when no factory is registered for a given (`subsys`,
-// `scheme`) combination, or all factories registered returned `nullptr`.
+// default factory is use when no factory (including a default one) is
+// registered for a given (`subsys`, `scheme`) combination, or all factories
+// registered returned `nullptr`.
 //
-// This method may only be called upon startup.
+// The behavior of the default factory is to return a `nullptr`.
+//
+// This method may only be called upon startup. (c.f. `FLARE_ON_INIT`)
 void SetDefaultMessageDispatcherFactory(
     Function<std::unique_ptr<MessageDispatcher>(std::string_view subsys,
-                                                std::string_view uri)>
+                                                std::string_view scheme,
+                                                std::string_view address)>
         factory);
 
 // Make a message dispatcher from the given name resolver and load balancer.
 // This method is provided to ease factory implementer's life.
+//
+// `nullptr` is returned if either `resolver` or `load_balancer` is not
+// recognized.
 std::unique_ptr<MessageDispatcher> MakeCompositedMessageDispatcher(
     std::string_view resolver, std::string_view load_balancer);
 
 }  // namespace flare
-
-// Register message dispatcher factory for the given `Subsystem` and `Scheme`.
-// Lower priority takes precedence.
-//
-// Multiple `Factory`-ies may be registered for the same scheme. If `Factory`
-// does not recognize `uri` given to it, `nullptr` should be returned. In this
-// case the next lower priority `Factory` is tried (and so on.).
-#define FLARE_RPC_REGISTER_MESSAGE_DISPATCHER_FACTORY_FOR(Subsystem, Scheme,  \
-                                                          Priority, Factory)  \
-  [[gnu::constructor]] static void FLARE_INTERNAL_PP_CAT(                     \
-      flare_reserved_registry_message_dispatcher_for_, __COUNTER__)() {       \
-    ::flare::RegisterMessageDispatcherFactoryFor(Subsystem, Scheme, Priority, \
-                                                 Factory);                    \
-  }
 
 #endif  // FLARE_RPC_MESSAGE_DISPATCHER_FACTORY_H_

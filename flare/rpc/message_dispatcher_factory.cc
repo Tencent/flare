@@ -27,6 +27,8 @@
 #include "flare/rpc/message_dispatcher/composited.h"
 #include "flare/rpc/name_resolver/name_resolver.h"
 
+using namespace std::literals;
+
 namespace flare {
 
 namespace {
@@ -37,19 +39,28 @@ using Factories = std::vector<std::pair<
 
 using MessageDispatcherFactory =
     Function<std::unique_ptr<MessageDispatcher>(std::string_view)>;
-using DefaultMessageDispatcherFactory =
+using CatchAllMessageDispatcherFactory =
     Function<std::unique_ptr<MessageDispatcher>(std::string_view,
                                                 std::string_view)>;
+using DefaultMessageDispatcherFactory =
+    Function<std::unique_ptr<MessageDispatcher>(
+        std::string_view, std::string_view, std::string_view)>;
 
-Factories* GetOrCreateFactoriesFor(std::string_view subsys,
-                                   std::string_view scheme) {
-  // I don't expect too many different factories for a given scheme. In this
-  // case linear-scan on a vector should perform better than (unordered_)map
-  // lookup.
+// I don't expect too many different factories for a given scheme. In this case
+// linear-scan on a vector should perform better than (unordered_)map lookup.
+internal::HashMap<std::string, std::vector<std::pair<std::string, Factories>>>*
+GetFactoryRegistry() {
   static NeverDestroyed<internal::HashMap<
       std::string, std::vector<std::pair<std::string, Factories>>>>
       registry;
-  auto&& per_subsys = (*registry)[subsys];
+  return registry.Get();
+}
+
+// Usable only at startup. If the given subsystem or scheme is not recognized,
+// it's added.
+Factories* GetOrCreateFactoriesForWriteUnsafe(std::string_view subsys,
+                                              std::string_view scheme) {
+  auto&& per_subsys = (*GetFactoryRegistry())[subsys];
 
   for (auto&& [k, factories] : per_subsys) {
     if (k == scheme) {
@@ -61,13 +72,37 @@ Factories* GetOrCreateFactoriesFor(std::string_view subsys,
   return &added.second;
 }
 
+// If the given subsystem or scheme is not recognized, `nullptr` is returned.
+const Factories* GetFactoriesForRead(std::string_view subsys,
+                                     std::string_view scheme) {
+  auto ptr = GetFactoryRegistry()->TryGet(subsys);
+  if (!ptr) {
+    return nullptr;
+  }
+  for (auto&& [k, factories] : *ptr) {
+    if (k == scheme) {
+      return &factories;
+    }
+  }
+  return nullptr;
+}
+
+CatchAllMessageDispatcherFactory* GetCatchAllMessageDispatcherFactoryFor(
+    std::string_view subsys) {
+  static NeverDestroyed<
+      internal::HashMap<std::string, CatchAllMessageDispatcherFactory>>
+      registry;
+  return &(*registry)[subsys];
+}
+
 DefaultMessageDispatcherFactory* GetDefaultMessageDispatcherFactory() {
   static DefaultMessageDispatcherFactory factory =
-      [](auto&& subsys, auto&& uri) -> std::unique_ptr<MessageDispatcher> {
-    FLARE_NOT_IMPLEMENTED(
+      [](auto&& subsys, auto&& scheme,
+         auto&& address) -> std::unique_ptr<MessageDispatcher> {
+    FLARE_LOG_ERROR_EVERY_SECOND(
         "No message dispatcher factory is provided for subsystem [{}], uri "
-        "[{}].",
-        subsys, uri);
+        "[{}://{}].",
+        subsys, scheme, address);
     return nullptr;
   };
   return &factory;
@@ -77,24 +112,32 @@ DefaultMessageDispatcherFactory* GetDefaultMessageDispatcherFactory() {
 
 std::unique_ptr<MessageDispatcher> MakeMessageDispatcher(
     std::string_view subsys, std::string_view uri) {
-  auto pos = uri.find_first_of("://");
+  static constexpr auto kSep = "://"sv;
+
+  auto pos = uri.find_first_of(kSep);
   FLARE_CHECK_NE(pos, std::string_view::npos, "No `scheme` found in URI [{}].",
                  uri);
   auto scheme = uri.substr(0, pos);
-  auto&& factories = *GetOrCreateFactoriesFor(subsys, scheme);
-  for (auto&& [_ /* priority */, e] : factories) {
-    if (auto ptr = e(uri)) {
+  auto address = uri.substr(pos + kSep.size());
+  if (auto factories = GetFactoriesForRead(subsys, scheme)) {
+    for (auto&& [_ /* priority */, e] : *factories) {
+      if (auto ptr = e(address)) {
+        return ptr;
+      }
+    }
+  }
+  if (auto&& catch_all = *GetCatchAllMessageDispatcherFactoryFor(subsys)) {
+    if (auto ptr = catch_all(scheme, address)) {
       return ptr;
     }
   }
-  return (*GetDefaultMessageDispatcherFactory())(subsys, uri);
+  return (*GetDefaultMessageDispatcherFactory())(subsys, scheme, address);
 }
 
 void RegisterMessageDispatcherFactoryFor(
     const std::string& subsys, const std::string& scheme, int priority,
-    Function<std::unique_ptr<MessageDispatcher>(std::string_view uri)>
-        factory) {
-  auto&& factories = GetOrCreateFactoriesFor(subsys, scheme);
+    Function<std::unique_ptr<MessageDispatcher>(std::string_view)> factory) {
+  auto&& factories = GetOrCreateFactoriesForWriteUnsafe(subsys, scheme);
   factories->emplace_back(priority, std::move(factory));
 
   // If multiple factories with the same priority present, we'd like to make
@@ -103,18 +146,30 @@ void RegisterMessageDispatcherFactoryFor(
                    [](auto&& x, auto&& y) { return x.first < y.first; });
 }
 
+void SetCatchAllMessageDispatcherFor(
+    const std::string& subsys,
+    Function<std::unique_ptr<MessageDispatcher>(std::string_view,
+                                                std::string_view)>
+        factory) {
+  *GetCatchAllMessageDispatcherFactoryFor(subsys) = std::move(factory);
+  // I'm not sure if we should return the old factory. Is it of any use?
+}
+
 void SetDefaultMessageDispatcherFactory(
-    Function<std::unique_ptr<MessageDispatcher>(std::string_view subsys,
-                                                std::string_view uri)>
+    Function<std::unique_ptr<MessageDispatcher>(
+        std::string_view, std::string_view, std::string_view)>
         factory) {
   *GetDefaultMessageDispatcherFactory() = std::move(factory);
 }
 
 std::unique_ptr<MessageDispatcher> MakeCompositedMessageDispatcher(
     std::string_view resolver, std::string_view load_balancer) {
-  return std::make_unique<message_dispatcher::Composited>(
-      name_resolver_registry.Get(resolver),
-      load_balancer_registry.New(load_balancer));
+  auto r = name_resolver_registry.TryGet(resolver);
+  auto lb = load_balancer_registry.TryNew(load_balancer);
+  if (!r || !lb) {
+    return nullptr;
+  }
+  return std::make_unique<message_dispatcher::Composited>(r, std::move(lb));
 }
 
 }  // namespace flare

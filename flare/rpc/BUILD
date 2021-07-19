@@ -156,7 +156,8 @@ cc_library(
     '//flare/rpc/message_dispatcher:composited',
     '//flare/rpc/message_dispatcher:message_dispatcher',
     '//flare/rpc/name_resolver:name_resolver',
-  ]
+  ],
+  visibility = 'PUBLIC',
 )
 
 cc_test(
