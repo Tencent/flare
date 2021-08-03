@@ -20,7 +20,6 @@
 #include "jsoncpp/json.h"
 
 #include "flare/base/buffer.h"
-#include "flare/base/crypto/blake3.h"
 #include "flare/base/deferred.h"
 #include "flare/base/down_cast.h"
 #include "flare/base/encoding/hex.h"
@@ -118,7 +117,7 @@ class DummyDryRunContext : public binlog::DryRunContext {
 
   Expected<binlog::DryRunOutgoingCall*, Status> TryGetOutgoingCall(
       const std::string& correlation_id) override {
-    return &outgoings_.at(EncodeHex(Blake3(correlation_id)));
+    return &outgoings_.at(EncodeHex(correlation_id));
   }
 
   void SetInvocationStatus(std::string s) override { EXPECT_EQ("200", s); }

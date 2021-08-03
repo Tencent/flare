@@ -206,7 +206,6 @@ cc_test(
     '//flare/base:deferred',
     '//flare/base:down_cast',
     '//flare/base:string',
-    '//flare/base/crypto:blake3',
     '//flare/base/encoding:hex',
     '//flare/base/experimental:uuid',
     '//flare/base/internal:curl',

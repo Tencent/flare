@@ -23,7 +23,6 @@
 #include "jsoncpp/json.h"
 
 #include "flare/base/buffer.h"
-#include "flare/base/crypto/blake3.h"
 #include "flare/base/deferred.h"
 #include "flare/base/down_cast.h"
 #include "flare/base/encoding/hex.h"
@@ -100,9 +99,9 @@ Log CreateNewLog() {
       CreateServerCall().SerializeAsString());
 
   // @sa: `RpcChannel::GetBinlogCorrelationId`.
-  outgoing.set_correlation_id(EncodeHex(
-      Blake3(Format("rpc-{}-{}-{}-{}", 1, "flare.testing.EchoService.Echo",
-                    kDummyChannel, ""))));
+  outgoing.set_correlation_id(
+      EncodeHex(Format("rpc-{}-{}-{}-{}", 1, "flare.testing.EchoService.Echo",
+                       kDummyChannel, "")));
 
   outgoing.add_outgoing_pkts()->set_time_since_start(0);
   auto&& resp = *outgoing.add_incoming_pkts();
@@ -169,7 +168,7 @@ class DummyDryRunContext : public DryRunContext {
 
   Expected<DryRunOutgoingCall*, Status> TryGetOutgoingCall(
       const std::string& correlation_id) override {
-    return &outgoings_.at(EncodeHex(Blake3(correlation_id)));
+    return &outgoings_.at(EncodeHex(correlation_id));
   }
 
   void SetInvocationStatus(std::string s) override {
