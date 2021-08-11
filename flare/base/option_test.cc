@@ -49,41 +49,53 @@ class AlwaysFailedProvider : public OptionPassiveProvider {
   bool GetAll(const std::vector<const option::MultiKey*>& names) override {
     return false;
   }
-  bool GetBool(const option::MultiKey& name, bool* value) override {
-    return false;
+  Status GetBool(const option::MultiKey& name,
+                 std::optional<bool>* value) override {
+    return Status(-1);
   }
-  bool GetInt8(const option::MultiKey& name, std::int8_t* value) override {
-    return false;
+  Status GetInt8(const option::MultiKey& name,
+                 std::optional<std::int8_t>* value) override {
+    return Status(-1);
   }
-  bool GetUInt8(const option::MultiKey& name, std::uint8_t* value) override {
-    return false;
+  Status GetUInt8(const option::MultiKey& name,
+                  std::optional<std::uint8_t>* value) override {
+    return Status(-1);
   }
-  bool GetInt16(const option::MultiKey& name, std::int16_t* value) override {
-    return false;
+  Status GetInt16(const option::MultiKey& name,
+                  std::optional<std::int16_t>* value) override {
+    return Status(-1);
   }
-  bool GetUInt16(const option::MultiKey& name, std::uint16_t* value) override {
-    return false;
+  Status GetUInt16(const option::MultiKey& name,
+                   std::optional<std::uint16_t>* value) override {
+    return Status(-1);
   }
-  bool GetInt32(const option::MultiKey& name, std::int32_t* value) override {
-    return false;
+  Status GetInt32(const option::MultiKey& name,
+                  std::optional<std::int32_t>* value) override {
+    return Status(-1);
   }
-  bool GetUInt32(const option::MultiKey& name, std::uint32_t* value) override {
-    return false;
+  Status GetUInt32(const option::MultiKey& name,
+                   std::optional<std::uint32_t>* value) override {
+    return Status(-1);
   }
-  bool GetInt64(const option::MultiKey& name, std::int64_t* value) override {
-    return false;
+  Status GetInt64(const option::MultiKey& name,
+                  std::optional<std::int64_t>* value) override {
+    return Status(-1);
   }
-  bool GetUInt64(const option::MultiKey& name, std::uint64_t* value) override {
-    return false;
+  Status GetUInt64(const option::MultiKey& name,
+                   std::optional<std::uint64_t>* value) override {
+    return Status(-1);
   }
-  bool GetFloat(const option::MultiKey& name, float* value) override {
-    return false;
+  Status GetFloat(const option::MultiKey& name,
+                  std::optional<float>* value) override {
+    return Status(-1);
   }
-  bool GetDouble(const option::MultiKey& name, double* value) override {
-    return false;
+  Status GetDouble(const option::MultiKey& name,
+                   std::optional<double>* value) override {
+    return Status(-1);
   }
-  bool GetString(const option::MultiKey& name, std::string* value) override {
-    return false;
+  Status GetString(const option::MultiKey& name,
+                   std::optional<std::string>* value) override {
+    return Status(-1);
   }
 };
 

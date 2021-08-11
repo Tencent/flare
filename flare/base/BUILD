@@ -572,6 +572,7 @@ cc_library(
     ':logging',
     ':never_destroyed',
     ':string',
+    '//flare/base:status',
     '//flare/base/internal:time_keeper',
     '//flare/base/option:key',
     '//flare/base/thread:thread_cached',

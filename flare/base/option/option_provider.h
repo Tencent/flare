@@ -18,11 +18,13 @@
 #include <cstdint>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "flare/base/dependency_registry.h"
 #include "flare/base/option/key.h"
+#include "flare/base/status.h"
 
 namespace flare {
 
@@ -46,21 +48,30 @@ class OptionPassiveProvider {
   // without performing actual operations.
   virtual bool GetAll(const std::vector<const option::MultiKey*>& names) = 0;
 
-  virtual bool GetBool(const option::MultiKey& name, bool* value) = 0;
-  virtual bool GetInt8(const option::MultiKey& name, std::int8_t* value) = 0;
-  virtual bool GetUInt8(const option::MultiKey& name, std::uint8_t* value) = 0;
-  virtual bool GetInt16(const option::MultiKey& name, std::int16_t* value) = 0;
-  virtual bool GetUInt16(const option::MultiKey& name,
-                         std::uint16_t* value) = 0;
-  virtual bool GetInt32(const option::MultiKey& name, std::int32_t* value) = 0;
-  virtual bool GetUInt32(const option::MultiKey& name,
-                         std::uint32_t* value) = 0;
-  virtual bool GetInt64(const option::MultiKey& name, std::int64_t* value) = 0;
-  virtual bool GetUInt64(const option::MultiKey& name,
-                         std::uint64_t* value) = 0;
-  virtual bool GetFloat(const option::MultiKey& name, float* value) = 0;
-  virtual bool GetDouble(const option::MultiKey& name, double* value) = 0;
-  virtual bool GetString(const option::MultiKey& name, std::string* value) = 0;
+  virtual Status GetBool(const option::MultiKey& name,
+                         std::optional<bool>* value) = 0;
+  virtual Status GetInt8(const option::MultiKey& name,
+                         std::optional<std::int8_t>* value) = 0;
+  virtual Status GetUInt8(const option::MultiKey& name,
+                          std::optional<std::uint8_t>* value) = 0;
+  virtual Status GetInt16(const option::MultiKey& name,
+                          std::optional<std::int16_t>* value) = 0;
+  virtual Status GetUInt16(const option::MultiKey& name,
+                           std::optional<std::uint16_t>* value) = 0;
+  virtual Status GetInt32(const option::MultiKey& name,
+                          std::optional<std::int32_t>* value) = 0;
+  virtual Status GetUInt32(const option::MultiKey& name,
+                           std::optional<std::uint32_t>* value) = 0;
+  virtual Status GetInt64(const option::MultiKey& name,
+                          std::optional<std::int64_t>* value) = 0;
+  virtual Status GetUInt64(const option::MultiKey& name,
+                           std::optional<std::uint64_t>* value) = 0;
+  virtual Status GetFloat(const option::MultiKey& name,
+                          std::optional<float>* value) = 0;
+  virtual Status GetDouble(const option::MultiKey& name,
+                           std::optional<double>* value) = 0;
+  virtual Status GetString(const option::MultiKey& name,
+                           std::optional<std::string>* value) = 0;
   // `(unsigned) char`?
   // `long double`?
 

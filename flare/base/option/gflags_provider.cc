@@ -14,8 +14,11 @@
 
 #include "flare/base/option/option_provider.h"
 
+#include <optional>
+
 #include "gflags/gflags.h"
 
+#include "flare/base/status.h"
 #include "flare/base/string.h"
 
 namespace flare::option {
@@ -29,7 +32,8 @@ class GFlagsProvider : public OptionPassiveProvider {
   }
 
 #define DEFINE_GFLAGS_PROVIDER_IMPL_FOR(Type, TypeName, GFlagTypeName)      \
-  bool Get##TypeName(const option::MultiKey& name, Type* value) override {  \
+  Status Get##TypeName(const option::MultiKey& name,                        \
+                       std::optional<Type>* value) override {               \
     auto&& info =                                                           \
         google::GetCommandLineFlagInfoOrDie(name.ToString().c_str());       \
     auto val_opt = TryParse<Type>(info.current_value);                      \
@@ -40,7 +44,7 @@ class GFlagsProvider : public OptionPassiveProvider {
     FLARE_CHECK_EQ(info.type, GFlagTypeName, "Type mismatch on flag [{}].", \
                    name.ToString());                                        \
     *value = *val_opt;                                                      \
-    return true;                                                            \
+    return Status(0);                                                       \
   }
 
   DEFINE_GFLAGS_PROVIDER_IMPL_FOR(bool, Bool, "bool")
@@ -49,11 +53,12 @@ class GFlagsProvider : public OptionPassiveProvider {
   DEFINE_GFLAGS_PROVIDER_IMPL_FOR(std::uint64_t, UInt64, "uint64")
   DEFINE_GFLAGS_PROVIDER_IMPL_FOR(double, Double, "double")
 
-#define DEFINE_NOT_SUPPORTED_IMPL_FOR(Type, TypeName)                      \
-  bool Get##TypeName(const option::MultiKey& name, Type* value) override { \
-    FLARE_CHECK(0, "Not supported: GFlags does not allow type [{}].",      \
-                #TypeName);                                                \
-    return false;                                                          \
+#define DEFINE_NOT_SUPPORTED_IMPL_FOR(Type, TypeName)                 \
+  Status Get##TypeName(const option::MultiKey& name,                  \
+                       std::optional<Type>* value) override {         \
+    FLARE_CHECK(0, "Not supported: GFlags does not allow type [{}].", \
+                #TypeName);                                           \
+    return Status(-1);                                                \
   }
 
   DEFINE_NOT_SUPPORTED_IMPL_FOR(std::int8_t, Int8)
@@ -63,12 +68,13 @@ class GFlagsProvider : public OptionPassiveProvider {
   DEFINE_NOT_SUPPORTED_IMPL_FOR(std::uint32_t, UInt32)
   DEFINE_NOT_SUPPORTED_IMPL_FOR(float, Float)
 
-  bool GetString(const option::MultiKey& name, std::string* value) override {
+  Status GetString(const option::MultiKey& name,
+                   std::optional<std::string>* value) override {
     auto&& info = google::GetCommandLineFlagInfoOrDie(name.ToString().c_str());
     FLARE_CHECK_EQ(info.type, "string", "Type mismatch on flag [{}].",
                    name.ToString());
     *value = info.current_value;
-    return true;
+    return Status(0);
   }
 };
 

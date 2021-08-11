@@ -59,7 +59,9 @@ inline struct dynamic_option_t {
 //   }
 // }
 // ```
-template <class T, class Parser = option::detail::IdentityParser<T>,
+template <class T,
+          class Parser = option::detail::IdentityParser<
+              option::detail::remove_optional_t<T>>,
           class = void>
 class Option : private option::OptionImpl<T, Parser> {
   // Exactly `T` for primitive types, otherwise it's `const T&`.
@@ -100,7 +102,8 @@ class Option : private option::OptionImpl<T, Parser> {
 // YOU SHOULDN'T BE USING THIS ONE, IT PROVIDES ABSOLUTELY NO BENIFITS OVER
 // USING GFLAGS DIRECTLY. THIS CLASS IS ONLY A PROOF-OF-CONCEPT (mainly for
 // testing purpose, for you and for us.).
-template <class T, class Parser = option::detail::IdentityParser<T>>
+template <class T, class Parser = option::detail::IdentityParser<
+                       option::detail::remove_optional_t<T>>>
 class GflagsOptions : public Option<T, Parser> {
  public:
   // Reading from GFlags should never fail, so no default value is needed.

@@ -82,11 +82,11 @@ bool OptionService::ResolveAll() {
       if (!std::exchange(e->initial_resolution_done, true) &&
           e->name_ref->Ready()) {
         // Called with lock.
-        if (!e->read_cb(p)) {
+        if (auto status = e->read_cb(p); !status.ok()) {
           FLARE_LOG_ERROR(
-              "Initial try of reading [{}] from [{}] failed. "
-              "Failing back to the defaults.",
-              e->name_ref->ToString(), prov);
+              "Initial try of reading [{}] from [{}] failed, "
+              "failing back to the defaults: {}",
+              e->name_ref->ToString(), prov, status.ToString());
           all_success = false;
         }
         e->initial_resolution_done = true;  // Set even if the initial try
@@ -143,11 +143,11 @@ void OptionService::UpdateOptions() {
                    // time when `ResolveAll()` is called.
       }
       // Called with lock.
-      if (!e->read_cb(options.provider)) {
+      if (auto status = e->read_cb(options.provider); !status.ok()) {
         FLARE_LOG_WARNING_EVERY_SECOND(
-            "Failed to read option [{}] from [{}]. Keep using current "
-            "value.",
-            e->name_ref->ToString(), prov);
+            "Failed to read option [{}] from [{}], keep using current "
+            "value: {}",
+            e->name_ref->ToString(), prov, status.ToString());
       }
     }
   }
@@ -176,27 +176,32 @@ void OptionService::Shutdown() {
   internal::TimeKeeper::Instance()->KillTimer(timer_id_);
 }
 
-#define FLARE_DETAIL_OPTION_DEFINE_CREATE_WATCHER_FOR(Type, TypeName)         \
-  OptionService::ReadCallback OptionService::CreateReader(                    \
-      const std::string& provider, const MultiKey* name,                      \
-      Function<bool(Type)> cb, Json::Value* current_value) {                  \
-    return [cb = std::move(cb), provider, name, current_value,                \
-            last = std::optional<Type>()](OptionPassiveProvider* p) mutable { \
-      Type value;                                                             \
-      if (p->Get##TypeName(*name, &value)) {                                  \
-        if (last && last == value) {                                          \
-          return true; /* No change. */                                       \
-        }                                                                     \
-        last = value;                                                         \
-        if (cb(value)) {                                                      \
-          *current_value = ToJsonValue(value);                                \
-          return true;                                                        \
-        }                                                                     \
-        return false;                                                         \
-      } else {                                                                \
-        return false;                                                         \
-      }                                                                       \
-    };                                                                        \
+#define FLARE_DETAIL_OPTION_DEFINE_CREATE_WATCHER_FOR(Type, TypeName)       \
+  OptionService::ReadCallback OptionService::CreateReader(                  \
+      const std::string& provider, const MultiKey* name,                    \
+      Function<bool(std::optional<Type>)> cb, Json::Value* current_value) { \
+    return [cb = std::move(cb), provider, name, current_value,              \
+            last = std::optional<std::optional<Type>>()](                   \
+               OptionPassiveProvider* p) mutable {                          \
+      std::optional<Type> value;                                            \
+      auto status = p->Get##TypeName(*name, &value);                        \
+      if (status.ok()) {                                                    \
+        if (last && *last == value) {                                       \
+          return Status(0); /* No change. */                                \
+        }                                                                   \
+        last = value;                                                       \
+        if (cb(value)) {                                                    \
+          if (value) {                                                      \
+            *current_value = ToJsonValue(*value);                           \
+          } else {                                                          \
+            *current_value = Json::nullValue;                               \
+          }                                                                 \
+          return Status(0);                                                 \
+        }                                                                   \
+        return Status(-1);                                                  \
+      }                                                                     \
+      return status;                                                        \
+    };                                                                      \
   }
 
 FLARE_DETAIL_OPTION_DEFINE_CREATE_WATCHER_FOR(bool, Bool)
