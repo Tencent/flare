@@ -30,6 +30,7 @@
 #include "flare/base/never_destroyed.h"
 #include "flare/base/option/dynamically_changed.h"
 #include "flare/base/option/key.h"
+#include "flare/base/status.h"
 
 namespace flare {
 
@@ -61,7 +62,7 @@ class OptionService {
   template <class T>
   [[gnu::noinline]] std::uint64_t RegisterOptionWatcher(
       const std::string& provider, const MultiKey* name_ref, bool is_fixed,
-      Function<bool(T)> cb) {
+      Function<bool(std::optional<T>)> cb) {
     auto id = ++option_id_;
     {
       std::scoped_lock _(lock_);
@@ -105,7 +106,7 @@ class OptionService {
 
  private:
   friend class NeverDestroyedSingleton<OptionService>;
-  using ReadCallback = Function<bool(OptionPassiveProvider*)>;
+  using ReadCallback = Function<Status(OptionPassiveProvider*)>;
   struct WatchedOption {
     bool initial_resolution_done{false};
     std::uint64_t id;
@@ -121,7 +122,7 @@ class OptionService {
 
 #define FLARE_DETAIL_OPTION_DECLARE_CREATE_WATCHER_FOR(Type)                   \
   ReadCallback CreateReader(const std::string& provider, const MultiKey* name, \
-                            Function<bool(Type)> cb,                           \
+                            Function<bool(std::optional<Type>)> cb,            \
                             Json::Value* current_value);
 
   FLARE_DETAIL_OPTION_DECLARE_CREATE_WATCHER_FOR(bool)
