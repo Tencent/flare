@@ -42,7 +42,7 @@ Flare 内部用了一些对象池来优化性能。
 
 *flare框架本身由于涉及大量的数据迁移，因此对这一对象池较少使用。*
 
-就其[实现](../base/object_pool/thread_local.cc]而言，这种对象池至少会保留`PoolTraits<T>::kLowWaterMark`个对象存活，除此之外，如果当前线程局部的对象池数量尚未超过`PoolTraits<T>::kHighWaterMark`，那么对于被释放尚不足`PoolTraits<T>::kMaxIdle`时长的对象，会保留下来备用，否则将会被释放。
+就其[实现](../base/object_pool/thread_local.cc)而言，这种对象池至少会保留`PoolTraits<T>::kLowWaterMark`个对象存活，除此之外，如果当前线程局部的对象池数量尚未超过`PoolTraits<T>::kHighWaterMark`，那么对于被释放尚不足`PoolTraits<T>::kMaxIdle`时长的对象，会保留下来备用，否则将会被释放。
 
 对象的重用使用LIFO的方式，即后释放的先重用，我们期望这有利于保持缓存热度。
 
