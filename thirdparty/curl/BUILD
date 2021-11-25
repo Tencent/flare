@@ -19,6 +19,8 @@ autotools_build(
         '--disable-ldap',
         '--disable-ldaps',
         '--without-brotli',
+        '--without-libidn',
+        '--without-libidn2',
     ]),
     deps=[
         '//thirdparty/nghttp2:nghttp2',
