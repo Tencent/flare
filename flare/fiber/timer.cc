@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "flare/fiber/detail/scheduling_group.h"
-#include "flare/fiber/execution_context.h"
 #include "flare/fiber/fiber.h"
 #include "flare/fiber/runtime.h"
 
@@ -33,17 +32,14 @@ std::uint64_t SetTimer(std::chrono::steady_clock::time_point at,
 
 std::uint64_t SetTimer(std::chrono::steady_clock::time_point at,
                        Function<void(std::uint64_t)>&& cb) {
-  auto ec = RefPtr(ref_ptr, ExecutionContext::Current());
-  auto mcb = [cb = std::move(cb), ec = std::move(ec)](auto timer_id) mutable {
-    // Note that we're called in timer's worker thread, not in fiber
-    // context. So fire a fiber to run user's code.
-    internal::StartFiberDetached(
-        Fiber::Attributes{.execution_context = ec.Get()},
-        [cb = std::move(cb), timer_id] { cb(timer_id); });
-  };
-
   auto sg = detail::NearestSchedulingGroup();
-  auto timer_id = sg->CreateTimer(at, std::move(mcb));
+  auto timer_id =
+      sg->CreateTimer(at, [cb = std::move(cb)](auto timer_id) mutable {
+        // Note that we're called in timer's worker thread, not in fiber
+        // context. So fire a fiber to run user's code.
+        internal::StartFiberDetached(
+            [cb = std::move(cb), timer_id] { cb(timer_id); });
+      });
   sg->EnableTimer(timer_id);
   return timer_id;
 }
@@ -76,17 +72,12 @@ std::uint64_t SetTimer(std::chrono::steady_clock::time_point at,
   };
 
   auto ucb = std::make_shared<UserCallback>();
-  auto ec = RefPtr(ref_ptr, ExecutionContext::Current());
   ucb->cb = std::move(cb);
 
-  auto mcb = [ucb, ec = std::move(ec)](auto tid) mutable {
-    internal::StartFiberDetached(
-        Fiber::Attributes{.execution_context = ec.Get()},
-        [ucb, tid] { ucb->cb(tid); });
-  };
-
   auto sg = detail::NearestSchedulingGroup();
-  auto timer_id = sg->CreateTimer(at, interval, std::move(mcb));
+  auto timer_id = sg->CreateTimer(at, interval, [ucb](auto tid) mutable {
+    internal::StartFiberDetached([ucb, tid] { ucb->cb(tid); });
+  });
   sg->EnableTimer(timer_id);
   return timer_id;
 }
