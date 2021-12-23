@@ -77,26 +77,6 @@ TEST(ExecutionContext, AsyncPropagation) {
   });
 }
 
-TEST(ExecutionContext, TimerPropagation) {
-  ASSERT_EQ(nullptr, ExecutionContext::Current());
-  auto ctx = ExecutionContext::Create();
-  static ExecutionLocal<int> els_int;
-
-  ctx->Execute([&] {
-    *els_int = 10;
-    fiber::Latch latch(2);
-    SetDetachedTimer(ReadCoarseSteadyClock() + 100ms, [&] {
-      ASSERT_EQ(10, *els_int);
-      latch.count_down();
-    });
-    SetDetachedTimer(ReadCoarseSteadyClock() + 50ms, [&] {
-      ASSERT_EQ(10, *els_int);
-      latch.count_down();
-    });
-    latch.wait();
-  });
-}
-
 TEST(ExecutionLocal, All) {
   ASSERT_EQ(nullptr, ExecutionContext::Current());
   auto ctx = ExecutionContext::Create();
