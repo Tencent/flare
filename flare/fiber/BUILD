@@ -216,7 +216,6 @@ cc_test(
   deps = [
     ':async',
     ':fiber',
-    ':timer',
     '//flare/testing:main',
   ]
 )
