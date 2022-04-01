@@ -352,6 +352,20 @@ namespace flare {
 
 namespace internal::logging {
 
+namespace details {
+
+// Converts `value` to string. This is only used when `FormatLog` fails -- in
+// this case we write arguments to log file for later investigation.
+template <class T>
+std::string ToString(const T& value) {
+  return fmt::format("{}", value);
+}
+
+// Describes arguments to `FormatLog`.
+std::string DescribeFormatArguments(const std::vector<std::string>& args);
+
+}  // namespace details
+
 // Prefix writer.
 //
 // Note that the implementation MAY NOT touch whatever has been in `to`. The
@@ -393,8 +407,13 @@ std::string FormatLog([[maybe_unused]] const char* file,
       result += fmt::format(args...);
     } catch (const std::exception& xcpt) {
       // Presumably a wrong format string was provided?
-      LOG(FATAL) << "Failed to format log at [" << file << ":" << line
-                 << "]: " << xcpt.what();
+      //
+      // Don't panic here, aborting the whole program merely because of a
+      // mal-formatted log message doesn't feel right.
+      return fmt::format(
+          "Failed to format log at [{}:{}] with arguments ({}): {}", file, line,
+          details::DescribeFormatArguments({details::ToString(args)...}),
+          xcpt.what());
     }
   }
   return result;
@@ -419,12 +438,16 @@ std::string FormatLog([[maybe_unused]] const char* file,
     }                                                                         \
   } while (0)
 
+// `val` and `val2` are COPIED in the macro to avoid dangling reference. This
+// can be SLOW.
+//
+// See comments on `FLARE_INTERNAL_DETAIL_LOGGING_CHECK_OP` provided for GCC /
+// clang 10+ (see below) for discussion how can dangling reference occur.
 #define FLARE_INTERNAL_DETAIL_LOGGING_CHECK_OP(name, op, val1, val2, ...)      \
   do {                                                                         \
-    /* `google::GetReferenceableValue` triggers `-Wmaybe-uninitialized`, */    \
-    /* Not sure about the reason though. */                                    \
-    auto&& flare_anonymous_x = (val1);                                         \
-    auto&& flare_anonymous_y = (val2);                                         \
+    /* Copied to avoid dangling reference. SLOW. */                            \
+    auto flare_anonymous_x = (val1);                                           \
+    auto flare_anonymous_y = (val2);                                           \
     if (FLARE_UNLIKELY(!(flare_anonymous_x op flare_anonymous_y))) {           \
       ::google::LogMessageFatal(                                               \
           __FILE__, __LINE__,                                                  \
@@ -495,12 +518,14 @@ std::string FormatLog([[maybe_unused]] const char* file,
     }                                                                        \
   } while (0)
 
+// CAUTION: Do NOT use `auto&& x = (val1)` in the macro. Use IIFE instead (as
+// shown below).
+//
+// The `auto&&` trick won't work if `std::vector{1, 2}[0]` is given `val1`. In
+// this case `x` is a dangling reference as it refers to the (first) element of
+// the already-destroyed temporary vector.
 #define FLARE_INTERNAL_DETAIL_LOGGING_CHECK_OP(name, op, val1, val2, ...)    \
-  do {                                                                       \
-    /* `google::GetReferenceableValue` triggers `-Wmaybe-uninitialized`, */  \
-    /* Not sure about the reason though. */                                  \
-    auto&& flare_anonymous_x = (val1);                                       \
-    auto&& flare_anonymous_y = (val2);                                       \
+  [&](auto&& flare_anonymous_x, auto&& flare_anonymous_y) {                  \
     if (FLARE_UNLIKELY(!(flare_anonymous_x op flare_anonymous_y))) {         \
       [&]() FLARE_INTERNAL_DETAIL_LOGGING_ATTRIBUTE_NORETURN_NOINLINE_COLD { \
         ::google::LogMessageFatal(                                           \
@@ -514,7 +539,7 @@ std::string FormatLog([[maybe_unused]] const char* file,
         FLARE_UNREACHABLE();                                                 \
       }();                                                                   \
     }                                                                        \
-  } while (0)
+  }((val1), (val2))
 
 #define FLARE_INTERNAL_DETAIL_LOGGING_PCHECK(expr, ...)                        \
   do {                                                                         \
