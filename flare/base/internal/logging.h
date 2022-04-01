@@ -411,7 +411,7 @@ std::string FormatLog([[maybe_unused]] const char* file,
       // Don't panic here, aborting the whole program merely because of a
       // mal-formatted log message doesn't feel right.
       return fmt::format(
-          "Failed to format log at [{}:{}] with arguments ({}): {}", file, line,
+          "FAILED TO FORMAT LOG AT [{}:{}] WITH ARGUMENTS ({}): {}", file, line,
           details::DescribeFormatArguments({details::ToString(args)...}),
           xcpt.what());
     }
