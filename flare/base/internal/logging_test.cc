@@ -58,6 +58,11 @@ TEST(Logging, Prefix) {
   google::RemoveLogSink(&sink);
 }
 
+TEST(Logging, DontPanicOnFormatFailure) {
+  FLARE_LOG_INFO("Don't panic!{}{}", 1);
+  // No assertion here, so long as the test runs without error, it passes.
+}
+
 }  // namespace foreign_ns
 
 FLARE_INTERNAL_LOGGING_REGISTER_PREFIX_PROVIDER(0,
