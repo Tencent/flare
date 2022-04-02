@@ -169,6 +169,18 @@ cc_library(
   ]
 )
 
+cc_test(
+  name = 'gdt_json_proto_conversion_test',
+  srcs = 'gdt_json_proto_conversion_test.cc',
+  deps = [
+    ':gdt_json_proto_conversion',
+    '//flare/testing:message_proto',
+    '//thirdparty/googletest:gmock',
+    '//thirdparty/jsoncpp:jsoncpp',
+    '//thirdparty/protobuf:protobuf',
+  ]
+)
+
 cc_library(
   name = 'proto_over_http_protocol',
   hdrs = 'proto_over_http_protocol.h',

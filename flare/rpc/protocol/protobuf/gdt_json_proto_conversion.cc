@@ -323,7 +323,7 @@ bool JsonValueToProtoMessage(const Json::Value& json_value,
           reflection->Add##method(message, field, item.as##jsontype());       \
         } else if (item.isString()) {                                         \
           if (item.asString().empty()) {                                      \
-          } else if (auto opt = TryParse<valuetype>(value.asString())) {      \
+          } else if (auto opt = TryParse<valuetype>(item.asString())) {       \
             reflection->Add##method(message, field, *opt);                    \
           } else {                                                            \
             SET_ERROR_INFO(                                                   \
