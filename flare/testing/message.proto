@@ -52,4 +52,6 @@ message ComplexMessage {
     One one = 5;
     Two two = 6;
   }
+  repeated int32 numbers = 7;
+  repeated string strs = 8;
 }
