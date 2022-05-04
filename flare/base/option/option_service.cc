@@ -14,7 +14,6 @@
 
 #include "flare/base/option/option_service.h"
 
-#include <optional>
 #include <string>
 #include <utility>
 
