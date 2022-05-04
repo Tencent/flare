@@ -230,4 +230,72 @@ TEST(Fiber, StartFiberFromPthread) {
   });
 }
 
+
+void product(int a, int b, int& c) {
+  c = a * b;
+}
+
+TEST(Fiber, CallWithArgs) {
+  RunAsFiber([](){
+    // test lambda
+    Fiber([](const char* hello) {
+      ASSERT_EQ(hello, "hello");
+    }, "hello").join();
+
+    Fiber([](auto&& First, auto&&... other){
+      auto ans = (First + ... + other);
+      ASSERT_EQ(ans, 55);
+    }, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10).join();
+
+    // test member method
+    struct Add {
+      void operator()(int a, int b, int c) const {
+        ASSERT_EQ(a + b, c);
+      }
+    };
+
+    const Add add;
+    Fiber(std::ref(add), 2, 3, 5).join();
+    Fiber(&Add::operator(), &add, 1, 2, 3).join();
+    
+    struct Worker {   // noncopyable
+      std::string s_;
+      void work(std::string_view s) {
+        ASSERT_EQ("work...", s);
+      }
+      void operator()(const std::string& s) { s_ = s; }
+      Worker() = default;
+      Worker(Worker&&) = default;
+      Worker(const Worker&) = delete;
+      Worker& operator=(const Worker&) = delete;
+    };
+
+    Worker w;
+    Fiber(&Worker::work, &w, "work...").join();
+    Fiber(&Worker::operator(), &w, "Work Test").join();
+    ASSERT_EQ(w.s_, "Work Test");
+    Fiber(std::move(w), "Move Test").join();
+
+    // test template function
+    std::vector vec{5, 4, 3, 2, 1};
+    ASSERT_FALSE(std::is_sorted(vec.begin(), vec.end()));
+    Fiber(&std::sort<std::vector<int>::iterator>, vec.begin(), vec.end()).join();
+    ASSERT_TRUE(std::is_sorted(vec.begin(), vec.end()));
+
+    // test function name
+    int res = 0;
+    Fiber(product, 2, 5, std::ref(res)).join();
+    ASSERT_EQ(res, 10);
+
+    // test function address
+    Fiber(&product, 6, 7, std::ref(res)).join();
+    ASSERT_EQ(res, 42);
+
+    // test bind
+    auto bind_function = std::bind(product, 3, std::placeholders::_1, std::placeholders::_2);
+    Fiber(bind_function, 5, std::ref(res)).join();
+    ASSERT_EQ(res, 15);
+  });
+}
+
 }  // namespace flare
