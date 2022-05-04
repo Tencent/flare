@@ -231,13 +231,13 @@ TEST(Fiber, StartFiberFromPthread) {
 }
 
 
-void product(int a, int b, int& c) {
+void Product(int a, int b, int& c) {
   c = a * b;
 }
 
 TEST(Fiber, CallWithArgs) {
   RunAsFiber([](){
-    // test lambda
+    // Test lambda
     Fiber([](const char* hello) {
       ASSERT_EQ(hello, "hello");
     }, "hello").join();
@@ -247,7 +247,7 @@ TEST(Fiber, CallWithArgs) {
       ASSERT_EQ(ans, 55);
     }, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10).join();
 
-    // test member method
+    // Test member method
     struct Add {
       void operator()(int a, int b, int c) const {
         ASSERT_EQ(a + b, c);
@@ -258,12 +258,12 @@ TEST(Fiber, CallWithArgs) {
     Fiber(std::ref(add), 2, 3, 5).join();
     Fiber(&Add::operator(), &add, 1, 2, 3).join();
     
-    struct Worker {   // noncopyable
-      std::string s_;
+    struct Worker {   // Noncopyable
+      std::string s;
       void work(std::string_view s) {
         ASSERT_EQ("work...", s);
       }
-      void operator()(const std::string& s) { s_ = s; }
+      void operator()(const std::string& str) { s = str; }
       Worker() = default;
       Worker(Worker&&) = default;
       Worker(const Worker&) = delete;
@@ -273,26 +273,26 @@ TEST(Fiber, CallWithArgs) {
     Worker w;
     Fiber(&Worker::work, &w, "work...").join();
     Fiber(&Worker::operator(), &w, "Work Test").join();
-    ASSERT_EQ(w.s_, "Work Test");
+    ASSERT_EQ(w.s, "Work Test");
     Fiber(std::move(w), "Move Test").join();
 
-    // test template function
+    // Test template function
     std::vector vec{5, 4, 3, 2, 1};
     ASSERT_FALSE(std::is_sorted(vec.begin(), vec.end()));
     Fiber(&std::sort<std::vector<int>::iterator>, vec.begin(), vec.end()).join();
     ASSERT_TRUE(std::is_sorted(vec.begin(), vec.end()));
 
-    // test function name
+    // Test function name
     int res = 0;
-    Fiber(product, 2, 5, std::ref(res)).join();
+    Fiber(Product, 2, 5, std::ref(res)).join();
     ASSERT_EQ(res, 10);
 
-    // test function address
-    Fiber(&product, 6, 7, std::ref(res)).join();
+    // Test function address
+    Fiber(&Product, 6, 7, std::ref(res)).join();
     ASSERT_EQ(res, 42);
 
-    // test bind
-    auto bind_function = std::bind(product, 3, std::placeholders::_1, std::placeholders::_2);
+    // Test bind
+    auto bind_function = std::bind(Product, 3, std::placeholders::_1, std::placeholders::_2);
     Fiber(bind_function, 5, std::ref(res)).join();
     ASSERT_EQ(res, 15);
   });
