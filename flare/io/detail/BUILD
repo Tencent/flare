@@ -60,7 +60,6 @@ cc_test(
   deps = [
     ':writing_buffer_list',
     '//flare/base/thread:latch',
-    '//flare/fiber:errno',
     '//flare/io/util:socket',
     '//flare/testing:main',
   ]
@@ -84,6 +83,7 @@ cc_test(
   srcs = 'writing_datagram_list_test.cc',
   deps = [
     ':writing_datagram_list',
+    '//flare/fiber:errno',
     '//flare/io/util:socket',
     '//flare/testing:endpoint',
     '//flare/testing:main',
