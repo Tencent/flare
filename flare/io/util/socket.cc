@@ -24,6 +24,7 @@
 #include "fmt/format.h"
 
 #include "flare/base/logging.h"
+#include "flare/fiber/alternatives.h"
 
 namespace flare::io::util {
 
@@ -141,7 +142,8 @@ Handle CreateDatagramSocket(sa_family_t family) {
 }
 
 bool StartConnect(int fd, const Endpoint& addr) {
-  if (connect(fd, addr.Get(), addr.Length()) == -1 && errno != EINPROGRESS) {
+  if (connect(fd, addr.Get(), addr.Length()) == -1 &&
+      fiber::GetLastError() != EINPROGRESS) {
     FLARE_PLOG_WARNING("Cannot connect fd #{} to {}", fd, addr.ToString());
     return false;
   }

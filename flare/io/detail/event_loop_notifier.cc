@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "flare/base/logging.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 
 namespace flare::io::detail {
@@ -52,7 +53,8 @@ void EventLoopNotifier::Reset() noexcept {
   // number-of-Notify-calls bytes readable anyway.
   do {
     rc = io::detail::EIntrSafeRead(fd(), &v, sizeof(v));
-    PCHECK(rc >= 0 || errno == EAGAIN || errno == EWOULDBLOCK);
+    PCHECK(rc >= 0 || fiber::GetLastError() == EAGAIN ||
+           fiber::GetLastError() == EWOULDBLOCK);
   } while (rc > 0);
 }
 

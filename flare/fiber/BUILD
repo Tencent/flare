@@ -16,6 +16,7 @@ cc_library(
   name = 'fiber',
   hdrs = [
     'async.h',
+    'alternatives.h',
     'condition_variable.h',
     'execution_context.h',
     'fiber_local.h',
@@ -32,6 +33,7 @@ cc_library(
     'work_queue.h',
   ],
   deps = [
+    ':alternatives',
     ':async',
     ':fiber_basic',
     ':future',
@@ -86,6 +88,13 @@ cc_library(
     '//flare/base:string',
     '//flare/base/internal:logging',
   ],
+  visibility = 'PUBLIC',
+)
+
+cc_library(
+  name = 'alternatives',
+  hdrs = 'alternatives.h',
+  srcs = 'alternatives.cc',
   visibility = 'PUBLIC',
 )
 
@@ -203,10 +212,6 @@ cc_test(
     '//flare/fiber/detail:testing',
     '//thirdparty/gflags:gflags',
   ],
-  # `__const__` (specified on `errno`) does not get along well with fibers.
-  #
-  # @sa: https://github.com/apache/incubator-brpc/blob/master/docs/cn/thread_local.md
-  extra_cppflags = ['-D__const__='],
   exclusive = True
 )
 
@@ -325,5 +330,14 @@ cc_test(
     '//flare/base/thread:attribute',
     '//flare/testing:main',
     '//thirdparty/gflags:gflags',
+  ]
+)
+
+cc_test(
+  name = 'alternatives_test',
+  srcs = 'alternatives_test.cc',
+  deps = [
+    ':fiber',
+    '//flare/fiber/detail:testing',
   ]
 )

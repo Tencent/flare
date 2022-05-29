@@ -34,6 +34,7 @@ cc_library(
     '//flare/base:maybe_owning',
     '//flare/base:object_pool',
     '//flare/base/net:endpoint',
+    '//flare/fiber:alternatives',
     '//flare/io:acceptor',
     '//flare/io:datagram_transceiver',
     '//flare/io:io_basic',
@@ -46,10 +47,6 @@ cc_library(
     '//flare/io/util:socket',
     '//flare/io/util:stream_io',
   ],
-  # `__const__` (specified on `errno`) does not get along well with fibers.
-  #
-  # @sa: https://github.com/apache/incubator-brpc/blob/master/docs/cn/thread_local.md
-  extra_cppflags = ['-D__const__='],
   visibility = 'PUBLIC',
 )
 

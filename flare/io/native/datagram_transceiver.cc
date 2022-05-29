@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 
 using namespace std::literals;
@@ -80,7 +81,8 @@ Descriptor::EventAction NativeDatagramTransceiver::OnReadable() {
         fd(), buffer.data(), buffer.size(), 0 /* MSG_CMSG_CLOEXEC? */,
         er.RetrieveAddr(), er.RetrieveLength());
     if (read < 0) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      auto err = fiber::GetLastError();
+      if (err == EAGAIN || err == EWOULDBLOCK) {
         return EventAction::Ready;
       } else {
         Kill(CleanupReason::Error);
@@ -155,7 +157,8 @@ NativeDatagramTransceiver::FlushWritingBuffer(std::size_t max_writes) {
       return ever_succeeded ? FlushStatus::PartialWrite
                             : FlushStatus::NothingWritten;
     } else if (rc < 0) {
-      if (errno == EWOULDBLOCK || errno == EAGAIN) {
+      auto err = fiber::GetLastError();
+      if (err == EWOULDBLOCK || err == EAGAIN) {
         return FlushStatus::SystemBufferSaturated;
       } else {
         return FlushStatus::Error;

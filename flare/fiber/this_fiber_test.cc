@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/random.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/fiber/detail/testing.h"
 #include "flare/fiber/fiber.h"
 #include "flare/fiber/this_fiber.h"
@@ -46,8 +47,8 @@ TEST(ThisFiber, Yield) {
       for (int i = 0; i != N; ++i) {
         fs[i] = Fiber([&run, &ever_switched_thread] {
           // `Yield()`
-          auto tid = std::this_thread::get_id();
-          while (tid == std::this_thread::get_id()) {
+          auto tid = fiber::GetCurrentThreadId();
+          while (tid == fiber::GetCurrentThreadId()) {
             this_fiber::Yield();
           }
           ever_switched_thread = true;

@@ -63,7 +63,8 @@ AbstractStreamIo::HandshakingStatus HttpProxyStreamIo::DoHandshakeWrite() {
     return AbstractStreamIo::HandshakingStatus::Error;
   }
   if (FLARE_UNLIKELY(n < 0)) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+    auto err = fiber::GetLastError();
+    if (err == EAGAIN || err == EWOULDBLOCK) {
       return AbstractStreamIo::HandshakingStatus::WannaWrite;
     } else {
       return AbstractStreamIo::HandshakingStatus::Error;
@@ -86,7 +87,8 @@ AbstractStreamIo::HandshakingStatus HttpProxyStreamIo::DoHandshakeRead() {
     return AbstractStreamIo::HandshakingStatus::Error;
   }
   if (FLARE_UNLIKELY(n < 0)) {
-    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+    auto err = fiber::GetLastError();
+    if (err == EAGAIN || err == EWOULDBLOCK) {
       return AbstractStreamIo::HandshakingStatus::WannaRead;
     } else {
       return AbstractStreamIo::HandshakingStatus::Error;

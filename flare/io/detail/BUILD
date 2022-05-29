@@ -18,6 +18,7 @@ cc_library(
   srcs = 'eintr_safe.cc',
   deps = [
     '//flare/base:likely',
+    '//flare/fiber:alternatives',
   ],
   visibility = ['//flare/...'],
 )
@@ -82,6 +83,7 @@ cc_test(
   srcs = 'writing_datagram_list_test.cc',
   deps = [
     ':writing_datagram_list',
+    '//flare/fiber:alternatives',
     '//flare/io/util:socket',
     '//flare/testing:endpoint',
     '//flare/testing:main',
@@ -97,6 +99,7 @@ cc_library(
     '//flare/base:logging',
     '//flare/base:object_pool',
     '//flare/base/internal:annotation',
+    '//flare/fiber:alternatives',
     '//flare/io/util:stream_io',
   ],
   visibility = ['//flare/...'],

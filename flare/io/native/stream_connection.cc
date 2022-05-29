@@ -24,6 +24,7 @@
 #include "flare/base/likely.h"
 #include "flare/base/logging.h"
 #include "flare/base/object_pool.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 #include "flare/io/detail/read_at_most.h"
 #include "flare/io/util/socket.h"
@@ -355,7 +356,8 @@ NativeStreamConnection::FlushStatus NativeStreamConnection::FlushWritingBuffer(
                             : FlushStatus::NothingWritten;
     }
     if (FLARE_UNLIKELY(written < 0)) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      auto err = fiber::GetLastError();
+      if (err == EAGAIN || err == EWOULDBLOCK) {
         return FlushStatus::SystemBufferSaturated;
       } else {
         FLARE_VLOG(10, "Cannot write to fd [{}].", fd());

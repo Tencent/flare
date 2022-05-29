@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "flare/base/likely.h"
+#include "flare/fiber/alternatives.h"
 
 namespace flare::io::detail {
 
@@ -41,7 +42,7 @@ template <class F>
   // Slow path.
   while (true) {
     auto rc = std::forward<F>(f)();
-    if (FLARE_LIKELY(rc >= 0 || errno != EINTR)) {
+    if (FLARE_LIKELY(rc >= 0 || fiber::GetLastError() != EINTR)) {
       return rc;
     }
   }
@@ -51,7 +52,7 @@ template <class F>
 template <class F>
 inline auto EIntrSafeCall(F&& f) {
   auto rc = std::forward<F>(f)();
-  if (FLARE_LIKELY(rc >= 0 || errno != EINTR)) {
+  if (FLARE_LIKELY(rc >= 0 || fiber::GetLastError() != EINTR)) {
     return rc;
   }
 
