@@ -42,7 +42,7 @@ TEST(LastError, All) {
 
 TEST(ThreadId, All) {
   fiber::testing::RunAsFiber(
-      [&] { EXPECT_EQ(GetCurrentThreadId(), std::this_thread::id()); });
+      [&] { EXPECT_EQ(GetCurrentThreadId(), std::this_thread::get_id()); });
 }
 
 }  // namespace flare::fiber

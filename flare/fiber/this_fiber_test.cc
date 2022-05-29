@@ -33,7 +33,6 @@ DECLARE_bool(flare_fiber_stack_enable_guard_page);
 
 namespace flare::this_fiber {
 
-
 TEST(ThisFiber, Yield) {
   FLAGS_flare_fiber_stack_enable_guard_page = false;
 
@@ -48,8 +47,8 @@ TEST(ThisFiber, Yield) {
       for (int i = 0; i != N; ++i) {
         fs[i] = Fiber([&run, &ever_switched_thread] {
           // `Yield()`
-          auto tid = GetCurrentThreadId();
-          while (tid == GetCurrentThreadId()) {
+          auto tid = fiber::GetCurrentThreadId();
+          while (tid == fiber::GetCurrentThreadId()) {
             this_fiber::Yield();
           }
           ever_switched_thread = true;

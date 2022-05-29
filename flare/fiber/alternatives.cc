@@ -40,6 +40,6 @@ int GetLastError() {
 
 void SetLastError(int error) { errno = error; }
 
-std::thread::id GetCurrentThreadId() { return std::this_thead::id(); }
+std::thread::id GetCurrentThreadId() { return std::this_thread::get_id(); }
 
 }  // namespace flare::fiber
