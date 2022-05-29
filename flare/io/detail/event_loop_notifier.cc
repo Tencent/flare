@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 #include "flare/base/logging.h"
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 
 namespace flare::io::detail {

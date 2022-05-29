@@ -34,7 +34,7 @@ cc_library(
     '//flare/base:maybe_owning',
     '//flare/base:object_pool',
     '//flare/base/net:endpoint',
-    '//flare/fiber:errno',
+    '//flare/fiber:alternatives',
     '//flare/io:acceptor',
     '//flare/io:datagram_transceiver',
     '//flare/io:io_basic',

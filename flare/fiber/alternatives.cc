@@ -12,9 +12,11 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 
 #include <errno.h>
+
+#include <thread>
 
 namespace flare::fiber {
 
@@ -36,9 +38,8 @@ int GetLastError() {
   return errno;
 }
 
-void SetLastError(int error) {
-  // See comments in `GetLastError()`.
-  errno = error;
-}
+void SetLastError(int error) { errno = error; }
+
+std::thread::id GetCurrentThreadId() { return std::this_thead::id(); }
 
 }  // namespace flare::fiber

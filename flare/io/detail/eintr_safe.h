@@ -24,7 +24,7 @@
 #include <utility>
 
 #include "flare/base/likely.h"
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 
 namespace flare::io::detail {
 

@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/util/socket.h"
 #include "flare/testing/endpoint.h"
 #include "flare/testing/main.h"

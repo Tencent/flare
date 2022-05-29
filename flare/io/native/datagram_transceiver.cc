@@ -18,7 +18,7 @@
 #include <string>
 #include <utility>
 
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 
 using namespace std::literals;

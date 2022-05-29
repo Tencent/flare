@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/random.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/fiber/detail/testing.h"
 #include "flare/fiber/fiber.h"
 #include "flare/fiber/this_fiber.h"
@@ -31,6 +32,7 @@ using namespace std::literals;
 DECLARE_bool(flare_fiber_stack_enable_guard_page);
 
 namespace flare::this_fiber {
+
 
 TEST(ThisFiber, Yield) {
   FLAGS_flare_fiber_stack_enable_guard_page = false;
@@ -46,8 +48,8 @@ TEST(ThisFiber, Yield) {
       for (int i = 0; i != N; ++i) {
         fs[i] = Fiber([&run, &ever_switched_thread] {
           // `Yield()`
-          auto tid = std::this_thread::get_id();
-          while (tid == std::this_thread::get_id()) {
+          auto tid = GetCurrentThreadId();
+          while (tid == GetCurrentThreadId()) {
             this_fiber::Yield();
           }
           ever_switched_thread = true;

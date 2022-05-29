@@ -24,7 +24,7 @@
 #include "flare/base/likely.h"
 #include "flare/base/logging.h"
 #include "flare/base/object_pool.h"
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 #include "flare/io/detail/read_at_most.h"
 #include "flare/io/util/socket.h"

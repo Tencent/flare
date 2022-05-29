@@ -16,8 +16,8 @@ cc_library(
   name = 'fiber',
   hdrs = [
     'async.h',
+    'alternatives.h',
     'condition_variable.h',
-    'errno.h',
     'execution_context.h',
     'fiber_local.h',
     'fiber.h',
@@ -33,8 +33,8 @@ cc_library(
     'work_queue.h',
   ],
   deps = [
+    ':alternatives',
     ':async',
-    ':errno',
     ':fiber_basic',
     ':future',
     ':logging',
@@ -92,9 +92,9 @@ cc_library(
 )
 
 cc_library(
-  name = 'errno',
-  hdrs = 'errno.h',
-  srcs = 'errno.cc',
+  name = 'alternatives',
+  hdrs = 'alternatives.h',
+  srcs = 'alternatives.cc',
   visibility = 'PUBLIC',
 )
 
@@ -330,5 +330,14 @@ cc_test(
     '//flare/base/thread:attribute',
     '//flare/testing:main',
     '//thirdparty/gflags:gflags',
+  ]
+)
+
+cc_test(
+  name = 'alternatives_test',
+  srcs = 'alternatives_test.cc',
+  deps = [
+    ':fiber',
+    '//flare/fiber/detail:testing',
   ]
 )

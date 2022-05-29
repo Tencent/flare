@@ -23,7 +23,7 @@
 #include "flare/base/internal/annotation.h"
 #include "flare/base/logging.h"
 #include "flare/base/object_pool.h"
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/io/util/stream_io.h"
 
 namespace flare::io::detail {

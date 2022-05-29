@@ -20,7 +20,7 @@ cc_library(
     '//flare/base:buffer',
     '//flare/base:handle',
     '//flare/base/net:endpoint',
-    '//flare/fiber:errno',
+    '//flare/fiber:alternatives',
     '//thirdparty/fmt:fmt',
   ],
   visibility = ['//flare/...'],
@@ -93,7 +93,7 @@ cc_library(
     ':http_proxy_stream_io',
     ':stream_io',
     '//flare/base:logging',
-    '//flare/fiber:errno',
+    '//flare/fiber:alternatives',
     '//flare/io/detail:eintr_safe',
     '//thirdparty/openssl:ssl',
   ],
@@ -121,6 +121,6 @@ cc_library(
     '//flare/base:down_cast',
     '//flare/base:string',
     '//flare/base:logging',
-    '//flare/fiber:errno',
+    '//flare/fiber:alternatives',
   ]
 )

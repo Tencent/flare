@@ -24,7 +24,7 @@
 #include "fmt/format.h"
 
 #include "flare/base/logging.h"
-#include "flare/fiber/errno.h"
+#include "flare/fiber/alternatives.h"
 
 namespace flare::io::util {
 

@@ -12,15 +12,18 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#ifndef FLARE_FIBER_ERRNO_H_
-#define FLARE_FIBER_ERRNO_H_
+#ifndef FLARE_FIBER_ALTERNATIVES_H_
+#define FLARE_FIBER_ALTERNATIVES_H_
+
+#include <thread>
+
+// This file provides you alternatives for accessing special variables safely
+// (e.g., `errno`). By default it's unsafe to access some of them more than once
+// if fiber rescheduling happens in between.
 
 namespace flare::fiber {
 
 // Fiber-safe alternative for reading `errno`.
-//
-// It's unsafe to read `errno` consecutively when fiber context switch in
-// between. To access `errno` safely, use `fiber::GetLastError()` instead.
 //
 // You don't need this method if no fiber-rescheduling happens in your method.
 int GetLastError();
@@ -28,6 +31,9 @@ int GetLastError();
 // Fiber-safe alternative for setting `errno`.
 void SetLastError(int error);
 
+// Reads current thread's ID.
+std::thread::id GetCurrentThreadId();
+
 }  // namespace flare::fiber
 
-#endif  // FLARE_FIBER_ERRNO_H_
+#endif  // FLARE_FIBER_ALTERNATIVES_H_
