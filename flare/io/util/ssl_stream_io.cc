@@ -159,14 +159,14 @@ ssize_t SslStreamIo::WriteV(const iovec* iov, int iovcnt) {
 int SslStreamIo::HandleSslError(const char* operation, int ret) {
   int ssle = SSL_get_error(ssl_.get(), ret);
   if (ssle == SSL_ERROR_WANT_READ || ssle == SSL_ERROR_WANT_WRITE) {
-    errno = EAGAIN;
+    fiber::SetLastError(EAGAIN);
   } else if (ssle == SSL_ERROR_ZERO_RETURN) {
     // ret should be 0 here.
     FLARE_LOG_WARNING_EVERY_SECOND("SSL error {} errno {} ssle {} ret {}",
-                                   operation, errno, ssle, ret);
+                                   operation, fiber::GetLastError(), ssle, ret);
   } else {
     FLARE_LOG_WARNING_EVERY_SECOND("SSL error {} errno {} ssle {} ret {}",
-                                   operation, errno, ssle, ret);
+                                   operation, fiber::GetLastError(), ssle, ret);
   }
   return ssle;
 }

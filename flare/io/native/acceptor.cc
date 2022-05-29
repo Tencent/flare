@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "flare/base/logging.h"
+#include "flare/fiber/errno.h"
 #include "flare/io/detail/eintr_safe.h"
 
 namespace flare {
@@ -40,19 +41,20 @@ Descriptor::EventAction NativeAcceptor::OnReadable() {
       // `addr` does not support move, actually.
       options_.connection_handler(std::move(new_fd), std::move(ep));
     } else {
+      auto err = fiber::GetLastError();
       // @sa: http://man7.org/linux/man-pages/man2/accept.2.html
-      if (errno == ECONNABORTED || errno == EPERM || errno == EMFILE ||
-          errno == ENFILE || errno == ENOBUFS || errno == ENOMEM) {
+      if (err == ECONNABORTED || err == EPERM || err == EMFILE ||
+          err == ENFILE || err == ENOBUFS || err == ENOMEM) {
         FLARE_LOG_WARNING_EVERY_SECOND(
-            "Failed in accepting connection (fd #{}): [{}] {}", fd(), errno,
-            strerror(errno));
+            "Failed in accepting connection (fd #{}): [{}] {}", fd(), err,
+            strerror(err));
         continue;
-      } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      } else if (err == EAGAIN || err == EWOULDBLOCK) {
         return EventAction::Ready;
       } else {
         FLARE_LOG_FATAL(
             "Unexpected error when accepting connection (fd #{}): [{}] {}",
-            fd(), errno, strerror(errno));
+            fd(), err, strerror(err));
       }
     }
   }

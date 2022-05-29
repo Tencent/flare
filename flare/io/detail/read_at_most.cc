@@ -23,6 +23,7 @@
 #include "flare/base/internal/annotation.h"
 #include "flare/base/logging.h"
 #include "flare/base/object_pool.h"
+#include "flare/fiber/errno.h"
 #include "flare/io/util/stream_io.h"
 
 namespace flare::io::detail {
@@ -136,7 +137,8 @@ ReadStatus ReadAtMost(std::size_t max_bytes, AbstractStreamIo* io,
       return ReadStatus::PeerClosing;
     }
     if (FLARE_UNLIKELY(read < 0)) {
-      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+      auto err = fiber::GetLastError();
+      if (err == EAGAIN || err == EWOULDBLOCK) {
         return ReadStatus::Drained;
       } else {
         return ReadStatus::Error;

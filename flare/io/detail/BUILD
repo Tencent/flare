@@ -18,6 +18,7 @@ cc_library(
   srcs = 'eintr_safe.cc',
   deps = [
     '//flare/base:likely',
+    '//flare/fiber:errno',
   ],
   visibility = ['//flare/...'],
 )
@@ -59,6 +60,7 @@ cc_test(
   deps = [
     ':writing_buffer_list',
     '//flare/base/thread:latch',
+    '//flare/fiber:errno',
     '//flare/io/util:socket',
     '//flare/testing:main',
   ]
@@ -97,6 +99,7 @@ cc_library(
     '//flare/base:logging',
     '//flare/base:object_pool',
     '//flare/base/internal:annotation',
+    '//flare/fiber:errno',
     '//flare/io/util:stream_io',
   ],
   visibility = ['//flare/...'],

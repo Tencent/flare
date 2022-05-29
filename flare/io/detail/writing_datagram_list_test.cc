@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "flare/io/detail/eintr_safe.h"
 #include "flare/io/util/socket.h"
 #include "flare/testing/endpoint.h"
 #include "flare/testing/main.h"
@@ -87,7 +88,8 @@ TEST(WritingDatagramList, DISABLED_ShortWrite) {
   std::uintptr_t ctx;
   auto rc = wbl.FlushTo(send.Get(), &ctx, &emptied);
   ASSERT_EQ(0, rc);
-  ASSERT_TRUE(errno == EAGAIN || errno == EWOULDBLOCK);
+  auto err = fiber::GetLastError();
+  ASSERT_TRUE(err == EAGAIN || err == EWOULDBLOCK);
   ASSERT_FALSE(emptied);
 }
 

@@ -17,6 +17,7 @@ cc_library(
   hdrs = [
     'async.h',
     'condition_variable.h',
+    'errno.h',
     'execution_context.h',
     'fiber_local.h',
     'fiber.h',
@@ -33,6 +34,7 @@ cc_library(
   ],
   deps = [
     ':async',
+    ':errno',
     ':fiber_basic',
     ':future',
     ':logging',
@@ -86,6 +88,13 @@ cc_library(
     '//flare/base:string',
     '//flare/base/internal:logging',
   ],
+  visibility = 'PUBLIC',
+)
+
+cc_library(
+  name = 'errno',
+  hdrs = 'errno.h',
+  srcs = 'errno.cc',
   visibility = 'PUBLIC',
 )
 
@@ -203,10 +212,6 @@ cc_test(
     '//flare/fiber/detail:testing',
     '//thirdparty/gflags:gflags',
   ],
-  # `__const__` (specified on `errno`) does not get along well with fibers.
-  #
-  # @sa: https://github.com/apache/incubator-brpc/blob/master/docs/cn/thread_local.md
-  extra_cppflags = ['-D__const__='],
   exclusive = True
 )
 
