@@ -21,6 +21,8 @@ autotools_build(
         '--without-brotli',
         '--without-libidn',
         '--without-libidn2',
+	'--without-librtmp',
+	'--without-libpsl'
     ]),
     deps=[
         '//thirdparty/nghttp2:nghttp2',
