@@ -51,6 +51,9 @@ void RunAsFiber(F&& f) {
   fiber::TerminateRuntime();
 }
 
+// Passing `c` as non-const reference to test `std::ref` (see below.).
+void Product(int a, int b, int& c) { c = a * b; }
+
 }  // namespace
 
 TEST(Fiber, StartWithDispatch) {
@@ -229,8 +232,6 @@ TEST(Fiber, StartFiberFromPthread) {
     }
   });
 }
-
-void Product(int a, int b, int& c) { c = a * b; }
 
 TEST(Fiber, CallWithArgs) {
   RunAsFiber([]() {
