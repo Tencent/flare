@@ -108,9 +108,9 @@ class Fiber {
   template <class F, class... Args,
             class = std::enable_if_t<std::is_invocable_v<F&&, Args&&...>>>
   Fiber(const Attributes& attr, F&& f, Args&&... args)
-      : Fiber(attr, [f = std::forward<F>(f), t = std::tuple<typename std::decay_t<Args>...>
+      : Fiber(attr, [f = std::forward<F>(f),
                      // P0780R2 is not implemented as of now (GCC 8.2).
-                    (std::forward<Args>(args)...)] () mutable {
+                     t = std::tuple(std::forward<Args>(args)...)]() mutable {
           std::apply(std::move(f), std::move(t));
         }) {}
 
