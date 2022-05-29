@@ -39,7 +39,7 @@ class ReturnImpl {
   using ValueTuple = std::tuple<Ts...>;
 
  public:
-  explicit ReturnImpl(Ts... value) : values_(std::tuple(std::move(value)...)) {}
+  explicit ReturnImpl(Ts... value) : values_(std::move(value)...) {}
 
   template <typename F>
   operator ::testing::Action<F>() const {
