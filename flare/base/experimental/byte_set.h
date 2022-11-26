@@ -51,7 +51,7 @@ class ByteSet {
   constexpr bool operator==(const ByteSet& bs) const { return rep_ == bs.rep_; }
 
   // insert one byte
-  void insert(value_type n) { rep_.u[n / 64] |= (1ULL << (n % 64)); }
+  constexpr void insert(value_type n) { rep_.u[n / 64] |= (1ULL << (n % 64)); }
 
   // remove one byte
   void erase(value_type n) { rep_.u[n / 64] &= ~(1ULL << (n % 64)); }
@@ -69,7 +69,7 @@ class ByteSet {
   }
 
   // insert any bytes in str into set
-  void insert(std::string_view bytes) {
+  constexpr void insert(std::string_view bytes) {
     for (auto&& e : bytes) {
       insert(e);
     }
