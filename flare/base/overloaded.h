@@ -15,8 +15,6 @@
 #ifndef FLARE_BASE_OVERLOADED_H_
 #define FLARE_BASE_OVERLOADED_H_
 
-#include <type_traits>
-
 namespace flare {
 
 // This class helps you to create a functor that accepts different argument
@@ -37,7 +35,7 @@ struct Overloaded : Ts... {
 };
 
 template <class... Ts>
-Overloaded(Ts&&...) -> Overloaded<std::remove_reference_t<Ts>...>;
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 }  // namespace flare
 
