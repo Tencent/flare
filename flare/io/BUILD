@@ -79,7 +79,6 @@ cc_library(
     '//thirdparty/gflags:gflags',
     '//thirdparty/googletest:gtest_prod',
   ],
-  extra_cppflags = ['-D__const__='],
   visibility = 'PUBLIC',
 )
 
