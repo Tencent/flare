@@ -6,12 +6,12 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  build_on_ubuntu_20_04:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.9]
-        cc: [gcc]
+        cc: [8, 9, 10]
 
     steps:
     - uses: actions/checkout@v2
@@ -29,10 +29,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.cc }}
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }}
     - name: Build
       run: |
-        ./blade build ... -k
+        CC=/usr/bin/gcc-${{ matrix.cc }} CXX=/usr/bin/g++-${{ matrix.cc }} ./blade build ... -k
     - name: Run tests
       run: |
-        ./blade test ...
+        CC=/usr/bin/gcc-${{ matrix.cc }} CXX=/usr/bin/g++-${{ matrix.cc }} ./blade test ...
