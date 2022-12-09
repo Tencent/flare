@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/future.h"
+#include "flare/fiber/alternatives.h"
 #include "flare/fiber/detail/testing.h"
 #include "flare/fiber/future.h"
 #include "flare/fiber/this_fiber.h"
@@ -29,10 +30,10 @@ TEST(Async, Execute) {
   testing::RunAsFiber([] {
     for (int i = 0; i != 10000; ++i) {
       int rc = 0;
-      auto tid = std::this_thread::get_id();
+      auto tid = GetCurrentThreadId();
       auto ff = Async(Launch::Dispatch, [&] {
         rc = 1;
-        ASSERT_EQ(tid, std::this_thread::get_id());
+        ASSERT_EQ(tid, GetCurrentThreadId());
       });
       fiber::BlockingGet(&ff);
       ASSERT_EQ(1, rc);

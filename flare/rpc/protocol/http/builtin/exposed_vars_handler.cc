@@ -57,7 +57,8 @@ void ExposedVarsHandler::OnGet(const HttpRequest& request,
     abs_path = request.uri().substr(uri_prefix_.size());
     NormalizePath(&abs_path);
     if (abs_path.empty()) {
-      abs_path = "/";
+      // FIXME: GCC12 -Werror=restrict
+      abs_path = std::string("/");
     }
   }
   FLARE_CHECK(abs_path[0] == '/',

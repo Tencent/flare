@@ -9,6 +9,7 @@ cmake_build(
         '-DBUILD_SHARED_LIBS=ON',
         '-DBUILD_STATIC_LIBS=ON',
         '-DBUILD_MOCKTRACER=ON',
+        '-DBUILD_TESTING=OFF',
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
     ],
