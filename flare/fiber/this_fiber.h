@@ -18,6 +18,7 @@
 #include <chrono>
 
 #include "flare/base/chrono.h"
+#include "flare/fiber/fiber.h"
 
 namespace flare::this_fiber {
 
@@ -45,7 +46,8 @@ void SleepFor(std::chrono::duration<Rep, Period> expires_in) {
   return SleepFor(static_cast<std::chrono::nanoseconds>(expires_in));
 }
 
-// `GetId()`?
+// Returns fiber ID of the calling fiber.
+Fiber::Id GetId();
 
 }  // namespace flare::this_fiber
 
