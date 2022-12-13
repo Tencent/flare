@@ -85,10 +85,20 @@ class Boxed {
   // Returns: See above.
   std::add_lvalue_reference_t<unboxed_type_t<Ts...>> Get() &;
   std::add_rvalue_reference_t<unboxed_type_t<Ts...>> Get() &&;
+  const std::add_lvalue_reference_t<unboxed_type_t<Ts...>> Get() const&;
+  const std::add_rvalue_reference_t<unboxed_type_t<Ts...>> Get() const&&;
+
+  template <class Self>
+  static decltype(auto) GetImpl(Self&& self);
 
   // `GetRaw` returns the `std::tuple` we're holding.
   value_type& GetRaw() &;
   value_type&& GetRaw() &&;
+  const value_type& GetRaw() const&;
+  const value_type&& GetRaw() const&&;
+
+  template <class Self>
+  static decltype(auto) GetRawImpl(Self&& self);
 
  private:
   template <class T>
@@ -139,35 +149,64 @@ Boxed<Ts...>::Boxed(Boxed<Us...> boxed) {
 }
 
 template <class... Ts>
-std::add_lvalue_reference_t<unboxed_type_t<Ts...>> Boxed<Ts...>::Get() & {
-  FLARE_CHECK_NE(holding_.index(), kEmpty);
+template <class Self>
+decltype(auto) Boxed<Ts...>::GetImpl(Self&& self) {
   if constexpr (sizeof...(Ts) == 0) {
-    return (void)GetRaw();
+    return (void)std::forward<Self>(self).GetRaw();
   } else if constexpr (sizeof...(Ts) == 1) {
-    return std::get<0>(GetRaw());
+    return std::get<0>(std::forward<Self>(self).GetRaw());
   } else {
-    return GetRaw();
+    return std::forward<Self>(self).GetRaw();
   }
+}
+
+template <class... Ts>
+std::add_lvalue_reference_t<unboxed_type_t<Ts...>> Boxed<Ts...>::Get() & {
+  return GetImpl(*this);
 }
 
 template <class... Ts>
 std::add_rvalue_reference_t<unboxed_type_t<Ts...>> Boxed<Ts...>::Get() && {
-  if constexpr (std::is_void_v<decltype(Get())>) {
-    return Get();  // Nothing to move then.
-  } else {
-    return std::move(Get());
-  }
+  return GetImpl(std::move(*this));
+}
+
+template <class... Ts>
+const std::add_lvalue_reference_t<unboxed_type_t<Ts...>> Boxed<Ts...>::Get()
+    const& {
+  return GetImpl(*this);
+}
+
+template <class... Ts>
+const std::add_rvalue_reference_t<unboxed_type_t<Ts...>> Boxed<Ts...>::Get()
+    const&& {
+  return GetImpl(std::move(*this));
+}
+
+template <class... Ts>
+template <class Self>
+decltype(auto) Boxed<Ts...>::GetRawImpl(Self&& self) {
+  FLARE_CHECK_NE(self.holding_.index(), kEmpty);
+  return std::get<kValue>(std::forward<Self>(self).holding_);
 }
 
 template <class... Ts>
 typename Boxed<Ts...>::value_type& Boxed<Ts...>::GetRaw() & {
-  FLARE_CHECK_NE(holding_.index(), kEmpty);
-  return std::get<kValue>(holding_);
+  return GetRawImpl(*this);
 }
 
 template <class... Ts>
 typename Boxed<Ts...>::value_type&& Boxed<Ts...>::GetRaw() && {
-  return std::move(GetRaw());
+  return GetRawImpl(std::move(*this));
+}
+
+template <class... Ts>
+const typename Boxed<Ts...>::value_type& Boxed<Ts...>::GetRaw() const& {
+  return GetRawImpl(*this);
+}
+
+template <class... Ts>
+const typename Boxed<Ts...>::value_type&& Boxed<Ts...>::GetRaw() const&& {
+  return GetRawImpl(std::move(*this));
 }
 
 }  // namespace flare::future
