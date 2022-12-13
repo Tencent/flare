@@ -20,6 +20,13 @@
 
 namespace flare::this_fiber {
 
+Fiber::Id GetId() {
+  auto self = fiber::detail::GetCurrentFiberEntity();
+  FLARE_CHECK(self,
+              "this_fiber::GetId may only be called in fiber environment.");
+  return reinterpret_cast<Fiber::Id>(self);
+}
+
 void Yield() {
   auto self = fiber::detail::GetCurrentFiberEntity();
   FLARE_CHECK(self,

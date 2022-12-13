@@ -53,6 +53,8 @@ class Fiber {
   static constexpr auto kUnspecifiedSchedulingGroup =
       std::numeric_limits<std::size_t>::max();
 
+  using Id = struct InternalOpaqueId*;
+
   struct Attributes {
     // How the fiber is launched.
     fiber::Launch launch_policy = fiber::Launch::Post;
