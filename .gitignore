@@ -26,6 +26,10 @@ GTAGS
 # vscode
 .vscode/
 
+# vscode clangd
+/compile_commands.json
+/.cache
+
 # Eclipse Core
 .project
 

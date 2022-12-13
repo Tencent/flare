@@ -1,4 +1,4 @@
-# Bazel (http://bazel.io/) BUILD file for Protobuf.
+# Blade BUILD file for Protobuf.
 
 ################################################################################
 # Protobuf Runtime Library
@@ -15,6 +15,8 @@ COPTS = [
     "-Wno-ignored-qualifiers",
     "-Wno-enum-compare",
     "-Wno-register",
+    "-Wno-array-bounds",
+    "-Wno-stringop-overread",
     "-Ithirdparty/protobuf-3.4.1/src",
 ]
 
