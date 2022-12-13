@@ -6,12 +6,12 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  build_on_ubuntu_20_04:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.9]
-        cc: [gcc]
+        cc: [8, 9, 10]
 
     steps:
     - uses: actions/checkout@v2
@@ -29,10 +29,35 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.cc }}
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }}
     - name: Build
       run: |
-        ./blade build ... -k
+        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
     - name: Run tests
       run: |
-        ./blade test ...
+        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
+  build_on_ubuntu_22_04:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: [3.9]
+        cc: [11, 12]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }}
+    - name: Build
+      run: |
+        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
+    - name: Run tests
+      run: |
+        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
