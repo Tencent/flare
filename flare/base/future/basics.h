@@ -123,10 +123,16 @@ static_assert(
 // - `T` is there's only one type `T` in `Ts...`.;
 // - `std::tuple<Ts...>` otherwise.
 template <class... Ts>
-using unboxed_type_t = typename std::conditional_t<
-    sizeof...(Ts) == 0, std::common_type<void>,
-    std::conditional_t<sizeof...(Ts) == 1, std::common_type<Ts...>,
-                       std::common_type<std::tuple<Ts...>>>>::type;
+struct unboxed_type {
+  using type = typename std::conditional_t<
+      sizeof...(Ts) == 0, std::common_type<void>,
+      std::conditional_t<sizeof...(Ts) == 1, std::common_type<Ts...>,
+                         std::common_type<std::tuple<Ts...>>>>::type;
+};
+
+template <class... Ts>
+using unboxed_type_t = typename unboxed_type<Ts...>::type;
+
 }  // namespace flare::future
 
 #endif  // FLARE_BASE_FUTURE_BASICS_H_
