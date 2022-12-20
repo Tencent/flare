@@ -48,8 +48,8 @@ class BasicCountingSemaphore {
   bool try_acquire_until(std::chrono::time_point<Clock, Duration> expires_at);
 
  private:
-  std::mutex lock_;
-  std::condition_variable cv_;
+  Mutex lock_;
+  ConditionVariable cv_;
   std::uint32_t current_;
 };
 // Mimic of C++20 `std::counting_semaphore`. It's unfortunate that for the
