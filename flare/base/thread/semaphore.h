@@ -22,6 +22,8 @@
 #include <mutex>
 #include <type_traits>
 
+#include "flare/base/internal/logging.h"
+
 namespace flare {
 
 // @sa: https://en.cppreference.com/w/cpp/thread/counting_semaphore
@@ -31,7 +33,11 @@ namespace flare {
 template <class Mutex, class ConditionVariable, std::ptrdiff_t kLeastMaxValue>
 class BasicCountingSemaphore {
  public:
+
+  static_assert(kLeastMaxValue >= 0);
   explicit BasicCountingSemaphore(std::ptrdiff_t desired) : current_(desired) {}
+
+  static constexpr ptrdiff_t max() noexcept { return kLeastMaxValue; }
 
   // Acquire / release semaphore, blocking.
   void acquire();
@@ -86,7 +92,12 @@ void BasicCountingSemaphore<Mutex, ConditionVariable,
 template <class Mutex, class ConditionVariable, std::ptrdiff_t kLeastMaxValue>
 void BasicCountingSemaphore<Mutex, ConditionVariable, kLeastMaxValue>::release(
     std::ptrdiff_t count) {
+  // Count should be less than LeastMaxValue and greater than 0
+  FLARE_CHECK_LE(count, kLeastMaxValue);
+  FLARE_CHECK_GT(count, 0);
   std::scoped_lock lk(lock_);
+  // Internal counter should be less than LeastMaxValue
+  FLARE_CHECK_LE(current_, kLeastMaxValue - count);
   current_ += count;
   if (count == 1) {
     cv_.notify_one();
