@@ -94,6 +94,9 @@ cc_benchmark(
 cc_library(
   name = 'semaphore',
   hdrs = 'semaphore.h',
+  deps = [
+    '//flare/base/internal:logging',
+  ],
   visibility = 'PUBLIC',
 )
 
