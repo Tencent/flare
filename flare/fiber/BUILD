@@ -17,6 +17,7 @@ cc_library(
   hdrs = [
     'async.h',
     'alternatives.h',
+    'barrier.h',
     'condition_variable.h',
     'execution_context.h',
     'fiber_local.h',
@@ -107,6 +108,7 @@ cc_library(
 cc_library(
   name = 'fiber_basic',
   hdrs = [
+    'barrier.h',
     'condition_variable.h',
     'execution_context.h',
     'fiber_local.h',
@@ -199,6 +201,15 @@ cc_test(
   deps = [
     ':fiber',
     '//flare/base:chrono',
+    '//flare/fiber/detail:testing',
+  ]
+)
+
+cc_test(
+  name = 'barrier_test',
+  srcs = 'barrier_test.cc',
+  deps = [
+    ':fiber',
     '//flare/fiber/detail:testing',
   ]
 )
