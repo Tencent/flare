@@ -124,8 +124,8 @@ void TypedOutputStreamProvider<T>::WriteEosMarker(Function<void()> cb) {
 
   last_sent_ = true;
   ctlr_->output_stream_
-      ->WriteLast(
-          std::make_unique<protobuf::ProtoMessage>(std::move(meta), nullptr))
+      ->WriteLast(std::make_unique<protobuf::ProtoMessage>(std::move(meta),
+                                                           std::monostate{}))
       .Then([cb = std::move(cb)](bool) { cb(); });
 }
 

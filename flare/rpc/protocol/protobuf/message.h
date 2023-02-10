@@ -31,7 +31,7 @@ namespace flare::protobuf {
 // Either a:
 //
 // - Empty state: no payload is present.
-// - A pointer to actual message.
+// - A pointer to actual message. Never null.
 // - Binary bytes: `accept_xxx_in_raw_bytes` is applied.
 //
 // TODO(luobogao): We need a dedicated C++ type for this (for cleaner code.).
@@ -50,12 +50,21 @@ std::size_t WriteTo(const MessageOrBytes& msg,
 
 struct ProtoMessage : Message {
   ProtoMessage() { SetRuntimeTypeTo<ProtoMessage>(); }
-  ProtoMessage(PooledPtr<rpc::RpcMeta> meta, MessageOrBytes&& msg_or_buffer,
-               NoncontiguousBuffer attachment = {})
-      : meta(std::move(meta)),
-        msg_or_buffer(std::move(msg_or_buffer)),
-        attachment(std::move(attachment)) {
+  ProtoMessage(PooledPtr<rpc::RpcMeta> m, MessageOrBytes&& mob,
+               NoncontiguousBuffer att = {})
+      : meta(std::move(m)),
+        msg_or_buffer(std::move(mob)),
+        attachment(std::move(att)) {
+#if __GNUC__ != 11  // GCC 11 issues a spurious uninitialized-var warning.
+    FLARE_CHECK(
+        msg_or_buffer.index() != 1 || std::get<1>(msg_or_buffer),
+        "Use `std::monostate` if you want to build a message without a body.");
+#endif
     SetRuntimeTypeTo<ProtoMessage>();
+
+    // FIXME: If `msg_or_buffer.index()` is `0` (i.e., no body is present),
+    // `meta.flags` should have `MESSAGE_FLAGS_NO_PAYLOAD` set. We need to check
+    // this when parsing packets in `xxx_protocol.cc`.
   }
 
   std::uint64_t GetCorrelationId() const noexcept override {

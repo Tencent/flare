@@ -64,7 +64,7 @@ ProtoMessage CreateErrorResponse(std::uint64_t correlation_id,
   meta->set_method_type(rpc::METHOD_TYPE_SINGLE);
   meta->mutable_response_meta()->set_status(status);
   meta->mutable_response_meta()->set_description(std::move(description));
-  return ProtoMessage(std::move(meta), nullptr);
+  return ProtoMessage(std::move(meta), std::monostate{});
 }
 
 std::unordered_map<std::string, std::uint32_t> ParseMaxOngoingRequestFlag() {
@@ -329,8 +329,8 @@ StreamService::ProcessingStatus Service::StreamCall(
     // In case the request is a single message, it should be passed to user's
     // code via `request` parameter. In this case passing it via `StreamReader`
     // is counter-intuitive.
-    FLARE_CHECK(
-        msg_ptr->msg_or_buffer.index() == 1,
+    FLARE_CHECK_EQ(
+        msg_ptr->msg_or_buffer.index(), 1,
         "Receiving request in bytes is not supported in streaming RPC.");
     request = std::get<1>(msg_ptr->msg_or_buffer).Get();
   }

@@ -258,8 +258,8 @@ bool QZoneProtocol::TryParse(std::unique_ptr<Message>* message,
             meta->correlation_id());
         return false;
       }
+      msg->msg_or_buffer = std::move(unpack_to);
     }
-    msg->msg_or_buffer = std::move(unpack_to);
   }
 
   msg->meta = std::move(meta);
