@@ -470,38 +470,44 @@ bool ProtoOverHttpProtocol::TryParse(std::unique_ptr<Message>* message,
     return true;
   }
   auto ppm = cast<OnWireMessage>(message->get());
-  MaybeOwning<google::protobuf::Message> unpack_to;
   auto&& meta = **ppm->GetMeta();
-  bool expecting_body = !(meta.flags() & rpc::MESSAGE_FLAGS_END_OF_STREAM);
+  auto&& body = ppm->GetBody();
+  bool empty_body =
+      // Message body (if any) is ignored if this is an error message.
+      (!server_side_ && meta.response_meta().status() != rpc::STATUS_SUCCESS) ||
+      // Last message in a stream can be empty, and serves solely as an EOS
+      // marker.
+      (body.Empty() && !!(meta.flags() & rpc::MESSAGE_FLAGS_END_OF_STREAM));
 
-  if (!ppm->GetBody().Empty() || expecting_body) {
-    unpack_to = TryGetUnpackingBuffer(
-        meta, server_side_ ? nullptr : cast<ProactiveCallContext>(controller));
-    if (FLARE_UNLIKELY(!unpack_to)) {
-      if (server_side_) {
-        // We always need a valid request message for server side, even if it's
-        // an empty request.
-        *message = std::make_unique<EarlyErrorMessage>(
-            meta.correlation_id(), rpc::STATUS_METHOD_NOT_FOUND,
-            "Method not found.");
-        return true;
-      } else {
-        FLARE_CHECK(
-            cast<ProactiveCallContext>(controller)->accept_response_in_bytes);
-        // FIXME: Slow.
-        *message = std::make_unique<ProtoMessage>(std::move(*ppm->GetMeta()),
-                                                  ppm->GetBody());
-        return true;
-      }
+  if (empty_body) {
+    *message = std::make_unique<ProtoMessage>(std::move(*ppm->GetMeta()),
+                                              std::monostate{});
+    return true;
+  }
+
+  auto unpack_to = TryGetUnpackingBuffer(
+      meta, server_side_ ? nullptr : cast<ProactiveCallContext>(controller));
+  if (FLARE_UNLIKELY(!unpack_to)) {
+    if (server_side_) {
+      // We always need a valid request message for server side, even if it's an
+      // empty request.
+      *message = std::make_unique<EarlyErrorMessage>(
+          meta.correlation_id(), rpc::STATUS_METHOD_NOT_FOUND,
+          "Method not found.");
+      return true;
+    } else {
+      FLARE_CHECK(
+          cast<ProactiveCallContext>(controller)->accept_response_in_bytes);
+      // FIXME: Slow.
+      *message = std::make_unique<ProtoMessage>(std::move(*ppm->GetMeta()),
+                                                std::move(body));
+      return true;
     }
-    // For client side, non-successful response should not contain a payload.
-    if (server_side_ || meta.response_meta().status() == rpc::STATUS_SUCCESS) {
-      if (!TryDeserialize(ppm->GetBody(), unpack_to.Get())) {
-        return false;
-      }
-    }
-  }  // Otherwise it's the last message in a stream, and is expected to be
-     // empty.
+  }
+
+  if (!TryDeserialize(body, unpack_to.Get())) {
+    return false;
+  }
   *message = std::make_unique<ProtoMessage>(std::move(*ppm->GetMeta()),
                                             std::move(unpack_to));
   return true;
@@ -509,7 +515,6 @@ bool ProtoOverHttpProtocol::TryParse(std::unique_ptr<Message>* message,
 
 void ProtoOverHttpProtocol::WriteMessage(const Message& message,
                                          NoncontiguousBuffer* buffer,
-
                                          Controller* controller) {
   FLARE_LOG_ERROR_IF_ONCE(!controller->GetTracingContext().empty() ||
                               controller->IsTraceForciblySampled(),
@@ -926,7 +931,7 @@ ProtoOverHttpProtocol::TryKeepParsingStream(NoncontiguousBuffer* buffer,
                                             std::unique_ptr<Message>* msg) {
   FLARE_CHECK(!!current_stream_);  // There must be.
   FLARE_CHECK(!server_side_);      // Only response stream was supported by
-  // HTTP-based protocols.
+                                   // HTTP-based protocols.
   NoncontiguousBuffer body;
   std::string trailer;
   auto result = ReadNextChunk(buffer, &body, &trailer);

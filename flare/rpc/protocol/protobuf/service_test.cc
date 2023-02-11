@@ -282,9 +282,10 @@ class ServiceTest : public ::testing::Test {
     svc->AddService(std::make_unique<ServiceImpl>());
 
     auto write_cb = [this](auto&& m) {
-      auto payload = std::get<1>(cast<ProtoMessage>(&m)->msg_or_buffer).Get();
-      if (payload) {
-        sctx->resps += flare::down_cast<testing::EchoResponse>(payload)->body();
+      auto&& msg = cast<ProtoMessage>(&m)->msg_or_buffer;
+      if (msg.index() != 0) {
+        auto&& p = std::get<1>(msg).Get();
+        sctx->resps += flare::down_cast<testing::EchoResponse>(p)->body();
       }
       sctx->sio_ptr->NotifyWriteCompletion();
       return true;

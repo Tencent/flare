@@ -17,8 +17,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "gtest/gtest.h"
 #include "google/protobuf/util/message_differencer.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/string.h"
@@ -175,7 +175,7 @@ TEST(ProtoOverHttpProtocol, PackFailureHttpResponseMessage) {
 
   ProtoOverHttpProtocol server_prot(
       ProtoOverHttpProtocol::ContentType::kApplicationJson, true);
-  ProtoMessage msg(std::move(src), nullptr);
+  ProtoMessage msg(std::move(src), std::monostate{});
   auto passive_ctx = server_prot.GetControllerFactory()->Create(false);
   NoncontiguousBuffer buffer;
   server_prot.WriteMessage(msg, &buffer, passive_ctx.get());

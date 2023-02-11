@@ -48,7 +48,7 @@ std::unique_ptr<Message> CreateErrorMessage(std::uint64_t correlation_id,
   auto&& resp_meta = *meta->mutable_response_meta();
   resp_meta.set_status(status);
   resp_meta.set_description(std::move(desc));
-  return std::make_unique<ProtoMessage>(std::move(meta), nullptr);
+  return std::make_unique<ProtoMessage>(std::move(meta), std::monostate{});
 }
 
 }  // namespace
@@ -68,15 +68,12 @@ std::size_t WriteTo(const MessageOrBytes& msg,
   } else if (FLARE_LIKELY(msg.index() == 1)) {
     NoncontiguousBufferOutputStream nbos(builder);
     auto&& pb_msg = std::get<1>(msg);
-    if (FLARE_LIKELY(pb_msg)) {
-      // `msg->InInitialized()` is not checked here, it's too slow to be checked
-      // in optimized build. For non-optimized build, it's already checked by
-      // default (by Protocol Buffers' generated code).
-      FLARE_CHECK(pb_msg->SerializeToZeroCopyStream(&nbos));
-      return pb_msg->GetCachedSize();
-    } else {
-      return 0;
-    }
+    FLARE_CHECK(pb_msg.Get());
+    // `msg->InInitialized()` is not checked here, it's too slow to be checked
+    // in optimized build. For non-optimized build, it's already checked by
+    // default (by Protocol Buffers' generated code).
+    FLARE_CHECK(pb_msg->SerializeToZeroCopyStream(&nbos));
+    return pb_msg->GetCachedSize();
   } else {
     FLARE_CHECK_EQ(msg.index(), 2);
     auto&& buffer = std::get<2>(msg);

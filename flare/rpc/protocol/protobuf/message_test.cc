@@ -31,7 +31,7 @@ TEST(ErrorMessageFactory, CreateNormal) {
     auto msg = error_message_factory.Create(t, 123, false);
     auto pmsg = dyn_cast<ProtoMessage>(msg.get());
     ASSERT_TRUE(!!pmsg);
-    ASSERT_FALSE(!!std::get<1>(pmsg->msg_or_buffer));
+    ASSERT_EQ(0, pmsg->msg_or_buffer.index());
     ASSERT_EQ(rpc::METHOD_TYPE_SINGLE, pmsg->meta->method_type());
     ASSERT_EQ(123, pmsg->meta->correlation_id());
     ASSERT_EQ(s, pmsg->meta->response_meta().status());
@@ -43,7 +43,7 @@ TEST(ErrorMessageFactory, CreateStream) {
     auto msg = error_message_factory.Create(t, 123, true);
     auto pmsg = dyn_cast<ProtoMessage>(msg.get());
     ASSERT_TRUE(!!pmsg);
-    ASSERT_FALSE(!!std::get<1>(pmsg->msg_or_buffer));
+    ASSERT_EQ(0, pmsg->msg_or_buffer.index());
     ASSERT_EQ(rpc::METHOD_TYPE_STREAM, pmsg->meta->method_type());
     ASSERT_EQ(
         rpc::MESSAGE_FLAGS_START_OF_STREAM | rpc::MESSAGE_FLAGS_END_OF_STREAM,
