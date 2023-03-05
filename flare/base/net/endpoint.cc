@@ -37,34 +37,20 @@ namespace flare {
 namespace {
 
 std::string SockAddrToString(const sockaddr* addr) {
-  static constexpr auto kPortChars = 6;  // ":12345"
   auto af = addr->sa_family;
   switch (af) {
     case AF_INET: {
-      std::string result;
       auto p = reinterpret_cast<const sockaddr_in*>(addr);
-      result.resize(INET_ADDRSTRLEN + kPortChars + 1 /* '\x00' */);
-      FLARE_CHECK(inet_ntop(af, &p->sin_addr, result.data(), result.size()));
-      auto ptr = result.data() + result.find('\x00');
-      *ptr++ = ':';
-      snprintf(ptr, kPortChars, "%d", ntohs(p->sin_port));
-      result.resize(result.find('\x00'));
-      return result;
+      uint32_t s_addr = ntohl(p->sin_addr.s_addr);
+      return Format("{}.{}.{}.{}:{}", (s_addr >> 24) & 0xff,
+                    (s_addr >> 16) & 0xff, (s_addr >> 8) & 0xff, s_addr & 0xff,
+                    ntohs(p->sin_port));
     }
     case AF_INET6: {
-      std::string result;
       auto p = reinterpret_cast<const sockaddr_in6*>(addr);
-      result.resize(INET6_ADDRSTRLEN + 2 /* "[]" */ + kPortChars +
-                    1 /* '\x00' */);
-      result[0] = '[';
-      FLARE_CHECK(
-          inet_ntop(af, &p->sin6_addr, result.data() + 1, result.size()));
-      auto ptr = result.data() + result.find('\x00');
-      *ptr++ = ']';
-      *ptr++ = ':';
-      snprintf(ptr, kPortChars, "%d", ntohs(p->sin6_port));
-      result.resize(result.find('\x00'));
-      return result;
+      char ip[INET6_ADDRSTRLEN];
+      FLARE_CHECK(inet_ntop(af, &p->sin6_addr, ip, INET6_ADDRSTRLEN));
+      return Format("[{}]:{}", ip, ntohs(p->sin6_port));
     }
     case AF_UNIX: {
       auto p = reinterpret_cast<const sockaddr_un*>(addr);

@@ -51,6 +51,12 @@ std::string Format(std::string_view fmt, Args&&... args) {
   return fmt::format(fmt, std::forward<Args>(args)...);
 }
 
+// @sa: `std::format_to`
+template <class OutputIt, class... Args>
+OutputIt FormatTo(OutputIt out, std::string_view fmt, Args&&... args) {
+  return fmt::format_to(out, fmt, std::forward<Args>(args)...);
+}
+
 // `std::string(_view)::starts_with/ends_with` is not available until C++20, so
 // we roll our own here.
 bool StartsWith(std::string_view s, std::string_view prefix);
