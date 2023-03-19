@@ -61,6 +61,29 @@ TEST(Timer, SetPeriodicTimer) {
   });
 }
 
+TEST(Timer, SetPeriodicTimerWithSlowCallback) {
+  testing::RunAsFiber([] {
+    auto start = ReadSteadyClock();
+    std::atomic<std::size_t> called{};
+    auto timer_id = SetTimer(start + 10ms, 10ms, [&](auto) {
+      std::this_thread::sleep_for(100ms);  // Slower than timer interval.
+      ++called;
+    });
+    std::this_thread::sleep_for(105ms);  // Fire the callback for 10 times.
+    KillTimer(timer_id);
+
+    // Each timer callback needs 100ms, and we're firing the callback 10 times,
+    // so expect at least 1 second to elapse before our callback finishes.
+    std::this_thread::sleep_for(1s + 100ms /* Tolerance to busy system. */);
+    EXPECT_NEAR(10, called, 2 /* Tolerance to busy system. */);
+
+    // It's possible that the timer callback is running when `KillTimer` is
+    // called, so wait for it to complete. (Unlikely to happen except on
+    // extremely busy system.)
+    std::this_thread::sleep_for(500ms);
+  });
+}
+
 TEST(Timer, TimerKiller) {
   testing::RunAsFiber([] {
     auto start = ReadSteadyClock();
