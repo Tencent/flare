@@ -60,15 +60,21 @@ std::uint64_t SetTimer(std::chrono::steady_clock::time_point at,
   // has returned. Otherwise we'll likely crash user's (presumably poor) code.
   struct UserCallback {
     void Run(std::uint64_t tid) {
-      if (!running.exchange(true, std::memory_order_acq_rel)) {
-        cb(tid);
+      // If `remaining` was non-zero, there must be a fiber running concurrently
+      // to us, and is executing user's callback. In this case, that fiber will
+      // see our increment and call user's callback for us.
+      if (remaining.fetch_add(1, std::memory_order_acquire) == 0) {
+        do {
+          cb(tid);
+          // If `remaining` was not 1, there must have been another fiber else
+          // who tried to call user's callback (@see the increment above) and
+          // gave up due to the presence of us. In this case, we're responsible
+          // for calling user's callback on behalf of that fiber.
+        } while (remaining.fetch_sub(1, std::memory_order_release) != 1);
       }
-      running.store(false, std::memory_order_relaxed);
-      // Otherwise this call is lost. This can happen if user's code runs too
-      // slowly. For the moment we left the behavior as unspecified.
     }
     Function<void(std::uint64_t)> cb;
-    std::atomic<bool> running{};
+    std::atomic<std::int64_t> remaining{};
   };
 
   auto ucb = std::make_shared<UserCallback>();
@@ -76,7 +82,7 @@ std::uint64_t SetTimer(std::chrono::steady_clock::time_point at,
 
   auto sg = detail::NearestSchedulingGroup();
   auto timer_id = sg->CreateTimer(at, interval, [ucb](auto tid) mutable {
-    internal::StartFiberDetached([ucb, tid] { ucb->cb(tid); });
+    internal::StartFiberDetached([ucb, tid] { ucb->Run(tid); });
   });
   sg->EnableTimer(timer_id);
   return timer_id;
