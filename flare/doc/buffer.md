@@ -56,7 +56,7 @@ flare::NoncontiguousBuffer RepackNoncontiguousBuffer(
 
   这通常通过[`MakeReferencingBuffer(...)`](../base/buffer.h)实现。
 
-  这个方法接受一个[`std::string_view`](https://en.cppreference.com/w/cpp/string/basic_string_view)，指向需要引用的缓冲区。
+  这个方法接受两个参数`(const void* ptr, std::size_t size)`，指向需要引用的缓冲区。
 
   另外，这个方法还（可选的）接受一个回调，当缓冲区对象（`PolymorphicBuffer`）析构时回调用这个回调。这个回调可以用来通知用户“缓冲区可以被释放”。
 
@@ -74,13 +74,13 @@ flare::NoncontiguousBuffer RepackNoncontiguousBuffer(
 
 ```cpp
 NoncontiguousBufferBuilder nbb;
-nbb.Append(MakeReferencingBuffer("abcdefg"sv));
+nbb.Append("abcdefg"sv);
 auto result = nbb.DestructiveGet();
 ```
 
 ```cpp
 NoncontiguousBufferBuilder nbb;
-nbb.Append(MakeReferencingBuffer(std::string_view(some_mmaped_ptr, size),
+nbb.Append(MakeReferencingBuffer(some_mmaped_ptr, size,
                                  [] { /* Now buffer can be `munmap`-ed*/ }));
 auto result = nbb.DestructiveGet();
 ```
