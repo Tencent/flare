@@ -42,8 +42,7 @@ class RedisCommand {
 
     // Elements.
     AppendRedisCommandComponent(op, &builder);
-    [[maybe_unused]] int dummy[] = {
-        (AppendRedisCommandComponent(args, &builder), 0)...};
+    (AppendRedisCommandComponent(args, &builder), ...);
 
     // Save the request buffer.
     buffer_ = builder.DestructiveGet();
