@@ -30,8 +30,8 @@ More documents are being translated to English.
   encoding processing, compression, encryption and decryption, configuration, HTTP client, etc., which are convenient to
   get started developing business code quickly
 - Provides a flexible expansion mechanism. Easy to support multiple protocols, service discovery, load balancing,
-  monitoring and alerting, [call tracking](flare/doc/), etc.
-- Extensive optimizations for modern architectures. For example, the [scheduling group](flare/) and
+  monitoring and alerting, [RPC tracing](flare/doc/tracing.md), etc.
+- Extensive optimizations for modern architectures. For example, the [scheduling group](flare/doc/scheduling-group.md) and
   [object pool](flare/doc/object-pool.md) of [NUMA aware](https://en.wikipedia.org/wiki/Non-uniform_memory_access),
   [zero-copy buffer](flare /doc/buffer.md), etc.
 - High-quality code. Strict adherence to [Google C++ Code Specification](https://google.github.io/styleguide/cppguide.html),
