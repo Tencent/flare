@@ -23,8 +23,8 @@ Flare 项目开始于 2019 年，目前广泛应用于腾讯广告的众多后�
 - 提供了 [M:N 的线程模型](https://en.wikipedia.org/wiki/Thread_(computing))的微线程实现[Fiber](flare/doc/fiber.md)，方便业务开发人员以便利的同步调用语法编写高性能的异步调用代码
 - 支持基于消息的[流式 RPC](flare/doc/streaming-rpc.md)支持
 - 除了 RPC 外，还提供了一系列便利的[基础库](flare/base)，比如字符串、时间日期、编码处理、压缩、加密解密、配置、HTTP 客户端等，方便快速上手开发业务代码
-- 提供了灵活的扩充机制。方便支持多种协议、服务发现、负载均衡、监控告警、[调用追踪](flare/doc/)等
-- 针对现代体系结构做了大量的优化。比如 [NUMA 感知](https://en.wikipedia.org/wiki/Non-uniform_memory_access)的[调度组](flare/)和[对象池](flare/doc/object-pool.md)、[零拷贝缓冲区](flare/doc/buffer.md)等
+- 提供了灵活的扩充机制。方便支持多种协议、服务发现、负载均衡、监控告警、[调用追踪](flare/doc/tracing.md)等
+- 针对现代体系结构做了大量的优化。比如 [NUMA 感知](https://en.wikipedia.org/wiki/Non-uniform_memory_access)的[调度组](flare/doc/scheduling-group.md)和[对象池](flare/doc/object-pool.md)、[零拷贝缓冲区](flare/doc/buffer.md)等
 - 高质量的代码。严格遵守 [Google C++ 代码规范](https://google.github.io/styleguide/cppguide.html)，测试覆盖率达 80%
 - 完善的[文档](flare/doc)和[示例](flare/example)以及[调试支持](flare/doc/debugging.md)，方便快速上手
 
