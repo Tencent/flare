@@ -134,6 +134,16 @@ TEST(Endpoint, GetIpPortV6) {
   ASSERT_EQ(1234, EndpointGetPort(*ep));
 }
 
+TEST(Endpoint, ResolveDomainName) {
+  auto eps = ResolveDomain("www.qq.com", 80);
+  ASSERT_TRUE(eps);
+  for (auto& ep : *eps) {
+    std::cout << "Get IP from qq.com: " << ep.ToString() << std::endl;
+    ASSERT_EQ(EndpointGetPort(ep), 80);
+  }
+  ASSERT_GT(eps->size(), 0);
+}
+
 TEST(Endpoint, GetInterfaceAddresses) {
   auto ifaddrs = GetInterfaceAddresses();
   for (auto&& e : ifaddrs) {

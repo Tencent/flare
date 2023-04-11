@@ -22,6 +22,7 @@ cc_library(
     '//flare/base:object_pool',
     '//flare/base:ref_ptr',
     '//flare/base:string',
+    '//flare/base:expected',
   ],
   visibility = 'PUBLIC',
 )

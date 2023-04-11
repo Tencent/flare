@@ -17,6 +17,7 @@
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -188,6 +189,31 @@ std::uint16_t EndpointGetPort(const Endpoint& endpoint) {
         reinterpret_cast<const sockaddr_in6*>(endpoint.Get())->sin6_port);
   }
   FLARE_UNREACHABLE();
+}
+
+Expected<std::vector<Endpoint>, int> ResolveDomain(const std::string& domain,
+                                                   uint16_t port) {
+  std::vector<Endpoint> ret;
+  addrinfo hints, *result;
+  memset(&hints, 0, sizeof(struct addrinfo));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  auto port_str = std::to_string(port);
+  auto service = (port != 0) ? port_str.c_str() : nullptr;
+
+  if (int rt = getaddrinfo(domain.c_str(), service, &hints, &result); rt != 0) {
+    // TODO log
+    return rt;
+  }
+  for (auto curr = result; curr != nullptr; curr = curr->ai_next) {
+    EndpointRetriever er;
+    auto addr = er.RetrieveAddr();
+    memcpy(addr, curr->ai_addr, curr->ai_addrlen);
+    *er.RetrieveLength() = curr->ai_addrlen;
+    ret.emplace_back(er.Build());
+  }
+  freeaddrinfo(result);
+  return ret;
 }
 
 std::vector<Endpoint> GetInterfaceAddresses() {

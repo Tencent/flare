@@ -42,40 +42,13 @@ void NormalizeDomain(std::string* domain) {
 bool ResolveDomainQuery(const std::string& hostname, std::uint16_t port,
                         std::vector<Endpoint>* addresses,
                         int* error_code = nullptr) {
-  struct hostent* he = nullptr;
-  int error = 0;
-#ifdef _GNU_SOURCE
-  char buf[4096];
-  struct hostent he_buf;
-  gethostbyname_r(hostname.c_str(), &he_buf, buf, sizeof(buf), &he, &error);
-#else
-  he = gethostbyname(hostname.c_str());
-  if (!he) error = h_errno;
-#endif
-  if (!he) {
-    SetErrorCode(error_code, error);
+  if (auto eps = flare::ResolveDomain(hostname, port); eps) {
+    addresses->swap(eps.value());
+  } else {
+    SetErrorCode(error_code, eps.error());
     return false;
   }
 
-  char** address = he->h_addr_list;
-  if (address) {
-    while (*address) {
-      if (he->h_addrtype == AF_INET) {
-        char buffer[INET_ADDRSTRLEN];
-        if (inet_ntop(AF_INET, reinterpret_cast<in_addr*>(*address), buffer,
-                      INET_ADDRSTRLEN)) {
-          addresses->push_back(EndpointFromIpv4(buffer, port));
-        }
-      } else if (he->h_addrtype == AF_INET6) {
-        char buffer[INET6_ADDRSTRLEN];
-        if (inet_ntop(AF_INET6, reinterpret_cast<in6_addr*>(*address), buffer,
-                      INET6_ADDRSTRLEN)) {
-          addresses->push_back(EndpointFromIpv6(buffer, port));
-        }
-      }
-      ++address;
-    }
-  }
   SetErrorCode(error_code, 0);
   return true;
 }
