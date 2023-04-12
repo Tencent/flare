@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include "flare/base/expected.h"
 #include "flare/base/likely.h"
 #include "flare/base/logging.h"
 
@@ -147,6 +148,20 @@ std::uint16_t EndpointGetPort(const Endpoint& endpoint);
 
 // Enumerate all addresses (regardless of their family) attached to this host.
 std::vector<Endpoint> GetInterfaceAddresses();
+
+// Resolve the domain name, if successful return vector<Endpoint>, otherwise
+// return error_code.
+// Example:
+// if (auto eps = ResolveDomain("www.example.com"); eps) {
+//    for (Endpoint& ep : eps.value()) {
+//        // do something
+//    }
+// } else {
+//    int error_code = eps.error();
+//    // do something
+// }
+Expected<std::vector<Endpoint>, int> ResolveDomain(const std::string& domain,
+                                                   std::uint16_t port = 0);
 
 // For all special purposed IP address blocks, see RFC 6890.
 
