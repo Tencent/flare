@@ -20,15 +20,24 @@
 
 namespace flare {
 
+Expected<int, std::errc> to_int(std::string_view s) {
+  int value;
+  auto [_, err] = std::from_chars(s.begin(), s.end(), value);
+  if (err == std::errc{}) {
+    return value;
+  }
+  return Unexpected(err);
+}
+
+Expected<std::string, std::errc> hello_loop(int n) {
+  std::string result;
+  while (n--) {
+    result += "Hello World\n";
+  }
+  return result;
+}
+
 TEST(Expected, Normal) {
-  auto to_int = [](std::string_view s) -> Expected<int, std::errc> {
-    int value;
-    auto [_, err] = std::from_chars(s.begin(), s.end(), value);
-    if (err == std::errc{}) {
-      return value;
-    }
-    return Unexpected(err);
-  };
   EXPECT_EQ(to_int("42").value(), 42);
   auto foo = to_int("foo");
   EXPECT_FALSE(foo.has_value());

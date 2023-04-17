@@ -28,6 +28,138 @@
 
 namespace flare {
 
+template <typename T, typename E>
+class Expected;
+
+template <typename E>
+class Unexpected;
+
+struct unexpect_t {
+  explicit unexpect_t() = default;
+};
+
+inline constexpr unexpect_t unexpect{};
+
+namespace detail {
+
+template <typename T>
+constexpr bool is_expected_v = false;
+
+template <typename T, typename E>
+constexpr bool is_expected_v<Expected<T, E>> = true;
+
+template <typename T>
+constexpr bool is_unexpected_v = false;
+
+template <typename E>
+constexpr bool is_unexpected_v<Unexpected<E>> = true;
+
+template <class Self, class F>
+inline constexpr auto and_then_impl(Self&& self, F&& f) {
+  using self_value_t = typename std::decay_t<Self>::value_type;
+  if constexpr (std::is_void_v<self_value_t>) {
+    using Ret = std::invoke_result_t<F>;
+    static_assert(detail::is_expected_v<Ret>, "F must return an expected");
+    return self ? std::invoke(std::forward<F>(f))
+                : Ret(unexpect, std::forward<Self>(self).error());
+  } else {
+    using Ret = std::invoke_result_t<F, self_value_t>;
+    static_assert(detail::is_expected_v<Ret>, "F must return an expected");
+    return self ? std::invoke(std::forward<F>(f),
+                              std::forward<Self>(self).value())
+                : Ret(unexpect, std::forward<Self>(self).error());
+  }
+}
+
+template <class Self, class F>
+inline constexpr auto transform_impl(Self&& self, F&& f) {
+  using self_value_t = typename std::decay_t<Self>::value_type;
+  using self_error_t = typename std::decay_t<Self>::error_type;
+  if constexpr (std::is_void_v<self_value_t>) {
+    using Ret = std::invoke_result_t<F>;
+    using result = Expected<Ret, self_error_t>;
+    if constexpr (std::is_void_v<Ret>) {
+      if (self) {
+        std::invoke(std::forward<F>(f));
+        return result();
+      }
+      return result(unexpect, std::forward<Self>(self).error());
+    } else {
+      return self ? result(std::invoke(std::forward<F>(f)))
+                  : result(unexpect, std::forward<Self>(self).error());
+    }
+  } else {
+    using Ret = std::invoke_result_t<F, self_value_t>;
+    using result = Expected<Ret, self_error_t>;
+    if constexpr (std::is_void_v<Ret>) {
+      if (self) {
+        std::invoke(std::forward<F>(f), std::forward<Self>(self).value());
+        return result();
+      }
+      return result(unexpect, std::forward<Self>(self).error());
+    } else {
+      return self ? result(std::invoke(std::forward<F>(f),
+                                       std::forward<Self>(self).value()))
+                  : result(unexpect, std::forward<Self>(self).error());
+    }
+  }
+}
+
+template <class Self, class F>
+inline constexpr auto or_else_impl(Self&& self, F&& f) {
+  using self_error_t = typename std::decay_t<Self>::error_type;
+  using Ret = std::invoke_result_t<F, self_error_t>;
+  if constexpr (std::is_void_v<Ret>) {
+    if (!self) {
+      std::invoke(std::forward<F>(f), std::forward<Self>(self).error());
+    }
+    return std::forward<Self>(self);
+  } else {
+    static_assert(detail::is_expected_v<Ret>, "F must return an expected");
+    return self ? std::forward<Self>(self)
+                : std::invoke(std::forward<F>(f),
+                              std::forward<Self>(self).error());
+  }
+}
+
+template <class Self, class F>
+inline constexpr auto transform_error_impl(Self&& self, F&& f) {
+  using self_value_t = typename std::decay_t<Self>::value_type;
+  using self_error_t = typename std::decay_t<Self>::error_type;
+  using Ret = std::invoke_result_t<F, self_error_t>;
+  if constexpr (std::is_void_v<Ret>) {
+    using result = Expected<self_value_t, std::monostate>;
+    if constexpr (std::is_void_v<self_value_t>) {
+      if (self) {
+        return result();
+      }
+      std::invoke(std::forward<F>(f), std::forward<Self>(self).error());
+      return result(unexpect, std::monostate{});
+    } else {
+      if (self) {
+        return result(std::forward<Self>(self).value());
+      }
+      std::invoke(std::forward<F>(f), std::forward<Self>(self).error());
+      return result(unexpect, std::monostate{});
+    }
+  } else {
+    using result = Expected<self_value_t, std::decay_t<Ret>>;
+    if constexpr (std::is_void_v<self_value_t>) {
+      return self ? result()
+                  : result(unexpect,
+                           std::invoke(std::forward<F>(f),
+                                       std::forward<Self>(self).error()));
+    } else {
+      return self ? result(std::forward<Self>(self).value())
+                  : result(unexpect,
+                           std::invoke(std::forward<F>(f),
+                                       std::forward<Self>(self).error()));
+    }
+  }
+}
+
+}  // namespace detail
+
 template <class E>
 class Unexpected {
  public:
@@ -139,6 +271,22 @@ class Expected {
       std::is_nothrow_constructible_v<E, G>)
       : value_(std::in_place_index<1>, std::move(u).error()) {}
 
+  template <class... Args,
+            class = std::enable_if_t<std::is_constructible_v<E, Args...>>>
+  constexpr explicit Expected(unexpect_t, Args&&... args) noexcept(
+      std::is_nothrow_constructible_v<E, Args...>)
+      : value_(std::in_place_index<1>, std::forward<Args>(args)...) {}
+
+  template <class Up, class... Args,
+            class = std::enable_if_t<std::is_constructible_v<
+                E, std::initializer_list<Up>&, Args...>>>
+  constexpr explicit Expected(
+      unexpect_t, std::initializer_list<Up> il,
+      Args&&... args) noexcept(std::
+                                   is_nothrow_constructible_v<
+                                       E, std::initializer_list<Up>&, Args...>)
+      : value_(std::in_place_index<1>, il, std::forward<Args>(args)...) {}
+
   constexpr T* operator->() { return &value(); }
   constexpr const T* operator->() const { return &value(); }
   constexpr T& operator*() { return value(); }
@@ -191,6 +339,87 @@ class Expected {
       return std::forward<U>(alternative);
     }
   }
+
+  template <class F>
+  constexpr auto and_then(F&& f) & {
+    return detail::and_then_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto and_then(F&& f) const& {
+    return detail::and_then_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto and_then(F&& f) && {
+    return detail::and_then_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto and_then(F&& f) const&& {
+    return detail::and_then_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) & {
+    return detail::transform_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) const& {
+    return detail::transform_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) && {
+    return detail::transform_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) const&& {
+    return detail::transform_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) & {
+    return detail::or_else_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) const& {
+    return detail::or_else_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) && {
+    return detail::or_else_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) const&& {
+    return detail::or_else_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) & {
+    return detail::transform_error_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) const& {
+    return detail::transform_error_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) && {
+    return detail::transform_error_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) const&& {
+    return detail::transform_error_impl(std::move(*this), std::forward<F>(f));
+  }
+
   // TODO(?): Overload of `ValueOr` for rvalue-ref.
  private:
   std::variant<T, E> value_;
@@ -250,8 +479,89 @@ class Expected<void, E> {
                                        E, std::initializer_list<Up>&, Args...>)
       : error_(il, std::forward<Args>(args)...) {}
   constexpr explicit operator bool() const noexcept { return !error_; }
+  constexpr bool has_value() const noexcept { return !error_; }
   constexpr E& error() { return *error_; }
   constexpr const E& error() const { return *error_; }
+
+  template <class F>
+  constexpr auto and_then(F&& f) & {
+    return detail::and_then_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto and_then(F&& f) const& {
+    return detail::and_then_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto and_then(F&& f) && {
+    return detail::and_then_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto and_then(F&& f) const&& {
+    return detail::and_then_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) & {
+    return detail::transform_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) const& {
+    return detail::transform_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) && {
+    return detail::transform_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform(F&& f) const&& {
+    return detail::transform_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) & {
+    return detail::or_else_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) const& {
+    return detail::or_else_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) && {
+    return detail::or_else_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto or_else(F&& f) const&& {
+    return detail::or_else_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) & {
+    return detail::transform_error_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) const& {
+    return detail::transform_error_impl(*this, std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) && {
+    return detail::transform_error_impl(std::move(*this), std::forward<F>(f));
+  }
+
+  template <class F>
+  constexpr auto transform_error(F&& f) const&& {
+    return detail::transform_error_impl(std::move(*this), std::forward<F>(f));
+  }
 
  private:
   std::optional<E> error_;
