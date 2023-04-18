@@ -39,14 +39,14 @@ void RunTest() {
     Fiber([called, &l, &remote_count] {
       if (!called->exchange(true)) {
         this_fiber::Yield();
-        l.count_down();
         ++remote_count;
+        l.count_down();
       }
     }).detach();
     this_fiber::Yield();
     if (!called->exchange(true)) {
-      l.count_down();
       ++local_count;
+      l.count_down();
     }
     l.wait();
   }
