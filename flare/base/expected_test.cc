@@ -15,6 +15,7 @@
 #include "flare/base/expected.h"
 
 #include <charconv>
+#include <vector>
 
 #include "gtest/gtest.h"
 
@@ -43,6 +44,13 @@ TEST(Expected, Normal) {
   EXPECT_FALSE(foo.has_value());
   EXPECT_EQ(foo.error(), std::errc::invalid_argument);
   EXPECT_EQ(to_int("5000000000").error(), std::errc::result_out_of_range);
+
+  Expected<int, int> ex(1);
+  EXPECT_TRUE(ex);
+  EXPECT_EQ(*ex, 1);
+
+  Expected<std::vector<int>, int> ex2(2);
+  EXPECT_TRUE(ex2);
 }
 
 TEST(Expected, and_then) {
@@ -117,7 +125,7 @@ TEST(Expected, transform_error) {
                       EXPECT_FALSE(true);
                       return "hello";
                     })
-                    .transform([](auto value) {
+                    .and_then([](auto value) -> Expected<int, const char*> {
                       EXPECT_EQ(value, 2);
                       return Unexpected("world");
                     })

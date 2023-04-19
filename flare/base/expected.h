@@ -236,12 +236,38 @@ class Expected {
   using unexpected_type = Unexpected<E>;
 
   constexpr Expected() = default;
-  template <class U, class = std::enable_if_t<std::is_constructible_v<T, U> &&
-                                              std::is_convertible_v<U&&, T>>>
-  constexpr /* implicit */ Expected(U&& value)
-      : value_(std::forward<U>(value)) {}
-  constexpr /* implicit */ Expected(E error)
-      : value_(std::in_place_index<1>, std::move(error)) {}
+  template <
+      class U = T, std::enable_if_t<std::is_constructible_v<T, U>>* = nullptr,
+      std::enable_if_t<std::is_convertible_v<U, T>>* = nullptr,
+      std::enable_if_t<
+          !std::is_same_v<internal::remove_cvref_t<U>, Expected>>* = nullptr,
+      std::enable_if_t<!std::is_same_v<internal::remove_cvref_t<U>,
+                                       std::in_place_t>>* = nullptr,
+      std::enable_if_t<!detail::is_unexpected_v<internal::remove_cvref_t<U>>>* =
+          nullptr>
+  constexpr /* implicit */ Expected(U&& value) noexcept(
+      std::is_nothrow_constructible_v<T, U>)
+      : value_(std::in_place_index<0>, std::forward<U>(value)) {}
+
+  template <
+      class U = T, std::enable_if_t<std::is_constructible_v<T, U>>* = nullptr,
+      std::enable_if_t<!std::is_convertible_v<U, T>>* = nullptr,
+      std::enable_if_t<
+          !std::is_same_v<internal::remove_cvref_t<U>, Expected>>* = nullptr,
+      std::enable_if_t<!std::is_same_v<internal::remove_cvref_t<U>,
+                                       std::in_place_t>>* = nullptr,
+      std::enable_if_t<!detail::is_unexpected_v<internal::remove_cvref_t<U>>>* =
+          nullptr>
+  constexpr explicit Expected(U&& value) noexcept(
+      std::is_nothrow_constructible_v<T, U>)
+      : value_(std::in_place_index<0>, std::forward<U>(value)) {}
+
+  template <class U = E,
+            std::enable_if_t<std::is_constructible_v<E, U>>* = nullptr,
+            std::enable_if_t<!std::is_constructible_v<T, U>>* = nullptr>
+  // TODO: [[deprecated("Use Unexpected or unexpect_t")]]
+  constexpr /* implicit */ Expected(U&& error)
+      : value_(std::in_place_index<1>, std::forward<U>(error)) {}
 
   template <class G = E,
             std::enable_if_t<std::is_constructible_v<E, const G&>>* = nullptr,
