@@ -712,7 +712,17 @@ cc_library(
 cc_library(
   name = 'expected',
   hdrs = 'expected.h',
+  deps = [
+    '//flare/base/internal:logging',
+    '//flare/base/internal:meta',
+  ],
   visibility = 'PUBLIC',
+)
+
+cc_test(
+  name = 'expected_test',
+  srcs = 'expected_test.cc',
+  deps = ':expected',
 )
 
 cc_library(

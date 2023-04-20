@@ -203,7 +203,7 @@ Expected<std::vector<Endpoint>, int> ResolveDomain(const std::string& domain,
 
   if (int rt = getaddrinfo(domain.c_str(), service, &hints, &result); rt != 0) {
     // TODO log
-    return rt;
+    return Unexpected(rt);
   }
   for (auto curr = result; curr != nullptr; curr = curr->ai_next) {
     EndpointRetriever er;
