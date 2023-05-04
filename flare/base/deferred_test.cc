@@ -65,4 +65,17 @@ TEST(Deferred, All) {
   Deferred().Dismiss();  // Nothing happens.
 }
 
+TEST(FLARE_DEFER, All) {
+  FLARE_DEFER(printf("World\n"));
+  printf("Hello ");
+
+  struct NullMutex {
+    void lock() {}
+    void unlock() {}
+  };
+  NullMutex mutex;
+  mutex.lock();
+  FLARE_DEFER(mutex.unlock());
+}
+
 }  // namespace flare

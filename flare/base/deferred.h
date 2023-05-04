@@ -72,7 +72,20 @@ class Deferred {
   Function<void()> action_;
 };
 
-// Do we need a `FLARE_DEFER`?
+#define FLARE_CONCAT_(a, b) a##b
+#define FLARE_CONCAT(a, b) FLARE_CONCAT_(a, b)
+
+// FLARE_DEFER() is a macro to defer execution of a statement until the
+// surrounding scope is closed and is typically used to perform cleanup logic
+// once a function returns.
+//
+// Example usage:
+// void Hello() {
+//    FLARE_DEFER(printf("World\n"));
+//    printf("Hello ");
+// }
+#define FLARE_DEFER(x) \
+  ScopedDeferred FLARE_CONCAT(flare_defer, __LINE__)([&] { x; })
 
 }  // namespace flare
 
