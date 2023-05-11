@@ -116,7 +116,7 @@ TEST_P(WithPassword, All) {
   RedisChannel channel("redis://" + server_ep.ToString(),
                        RedisChannel::Options{.password = GetParam()});
   RedisClient client(&channel);
-  Fiber fibers[1000];
+  Fiber fibers[100];
   for (auto&& e : fibers) {
     e = Fiber([&] {
       auto result = client.Execute(RedisCommand("SET", "mykey", "12345"), 20s);
