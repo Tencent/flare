@@ -17,6 +17,7 @@
 
 #include <cctype>
 #include <climits>
+#include <cstdint>
 #include <string_view>
 
 namespace flare::experimental {
