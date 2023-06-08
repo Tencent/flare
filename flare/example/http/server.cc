@@ -34,7 +34,7 @@ class EchoHandler : public flare::HttpHandler {
                      flare::HttpResponse* response,
                      flare::HttpServerContext* context) override {
     response->set_status(flare::HttpStatus::OK);
-    response->set_body(std::move(*request.body()));
+    response->set_body(*request.body());
     counter->Add(1);
   }
 };

@@ -28,7 +28,7 @@ std::string GetTypeName() {
   return Demangle(typeid(T).name());
 }
 
-#if __GNUC__ == 12
+#if __GNUC__ >= 12
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnonnull-compare"
 #endif
@@ -38,7 +38,7 @@ std::string GetTypeName(T&& o) {
   return Demangle(typeid(std::forward<T>(o)).name());
 }
 
-#if __GNUC__ == 12
+#if __GNUC__ >= 12
 #pragma GCC diagnostic pop
 #endif
 

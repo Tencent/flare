@@ -16,7 +16,7 @@
 #define FLARE_FIBER_DETAIL_RUN_QUEUE_H_
 
 #include <cstddef>
-
+#include <cstdint>
 #include <atomic>
 #include <memory>
 

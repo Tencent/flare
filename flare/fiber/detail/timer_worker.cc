@@ -321,7 +321,7 @@ void TimerWorker::FireTimers() {
       if (cb) {
         // CAUTION: Do NOT create a new `Entry` otherwise timer ID we returned
         // in `AddTimer` will be invalidated.
-        auto cp = std::move(e);  // FIXME: This `std::move` has no effect.
+        auto cp = e;
         std::unique_lock cplk(cp->lock);
         if (!cp->cancelled) {
           cp->expires_at = cp->expires_at + cp->interval;
