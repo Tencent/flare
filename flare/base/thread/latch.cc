@@ -21,10 +21,13 @@ namespace flare {
 Latch::Latch(std::ptrdiff_t count) : count_(count) {}
 
 void Latch::count_down(std::ptrdiff_t update) {
-  std::unique_lock lk(m_);
-  FLARE_CHECK_GE(count_, update);
-  count_ -= update;
-  if (!count_) {
+  bool count_is_zero = false;
+  {
+    std::lock_guard _(m_);
+    FLARE_CHECK_GE(count_, update);
+    count_is_zero = !(count_ -= update);
+  }
+  if (count_is_zero) {
     cv_.notify_all();
   }
 }

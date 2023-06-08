@@ -19,10 +19,13 @@ namespace flare::fiber {
 Latch::Latch(std::ptrdiff_t count) : count_(count) {}
 
 void Latch::count_down(std::ptrdiff_t update) {
-  std::scoped_lock _(lock_);
-  FLARE_CHECK_GE(count_, update);
-  count_ -= update;
-  if (!count_) {
+  bool count_is_zero = false;
+  {
+    std::scoped_lock _(lock_);
+    FLARE_CHECK_GE(count_, update);
+    count_is_zero = !(count_ -= update);
+  }
+  if (count_is_zero) {
     cv_.notify_all();
   }
 }
