@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9]
-        cc: [11, 12]
+        cc: [11, 12, 13]
 
     steps:
     - uses: actions/checkout@v2
