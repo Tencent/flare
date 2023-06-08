@@ -45,7 +45,7 @@ class DummyPost : public HttpHandler {
  public:
   void OnPost(const HttpRequest& request, HttpResponse* response,
               HttpServerContext* context) override {
-    response->set_body(std::move(*request.body()));
+    response->set_body(*request.body());
   }
 };
 
