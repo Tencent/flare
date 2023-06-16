@@ -22,8 +22,8 @@
 #include "flare/base/logging.h"
 #include "flare/init/on_init.h"
 #include "flare/net/redis/reader.h"
-#include "flare/net/redis/redis_command.h"
 #include "flare/net/redis/redis_channel.h"
+#include "flare/net/redis/redis_command.h"
 
 namespace flare::testing {
 

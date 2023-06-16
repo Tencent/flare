@@ -18,9 +18,9 @@
 #include "flare/fiber/async.h"
 #include "flare/fiber/runtime.h"
 #include "flare/fiber/this_fiber.h"
-#include "flare/net/http/http_client.h"
 #include "flare/init.h"
 #include "flare/init/override_flag.h"
+#include "flare/net/http/http_client.h"
 #include "flare/rpc/server.h"
 #include "flare/rpc/server_group.h"
 

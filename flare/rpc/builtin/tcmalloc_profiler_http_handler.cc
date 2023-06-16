@@ -23,8 +23,8 @@
 #include <string>
 #include <utility>
 
-#include "gperftools/malloc_extension.h"
 #include "glog/logging.h"
+#include "gperftools/malloc_extension.h"
 #include "jsoncpp/json.h"
 
 #include "flare/base/string.h"

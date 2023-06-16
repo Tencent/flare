@@ -16,8 +16,8 @@
 
 #include "flare/base/enum.h"
 #include "flare/base/thread/latch.h"
-#include "flare/net/http/http_client.h"
 #include "flare/init.h"
+#include "flare/net/http/http_client.h"
 
 using namespace std::literals;
 

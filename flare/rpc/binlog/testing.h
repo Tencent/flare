@@ -56,9 +56,8 @@ class NullDumpingCall : public DumpingCall {
       const PacketDesc& packet, experimental::LazyEval<std::any>* dumper_ctx,
       experimental::LazyEval<std::string>* prov_ctx) override;
   void SetCorrelationId(std::string cid) override;
-  void SetTimestamps(
-      std::chrono::steady_clock::time_point start_ts,
-      std::chrono::steady_clock::time_point finish_ts) override;
+  void SetTimestamps(std::chrono::steady_clock::time_point start_ts,
+                     std::chrono::steady_clock::time_point finish_ts) override;
   void SetSystemTags(Tags tags) override;
   void SetUserTags(Tags tags) override;
   void SetLogs(std::vector<std::string> logs) override;
@@ -73,9 +72,8 @@ class IdentityDumpingCall : public DumpingCall {
  public:
   void SetCorrelationId(std::string cid) override;
   const std::string& GetCorrelationId() const noexcept;
-  void SetTimestamps(
-      std::chrono::steady_clock::time_point start_ts,
-      std::chrono::steady_clock::time_point finish_ts) override;
+  void SetTimestamps(std::chrono::steady_clock::time_point start_ts,
+                     std::chrono::steady_clock::time_point finish_ts) override;
   std::pair<std::chrono::steady_clock::time_point,
             std::chrono::steady_clock::time_point>
   GetTimestamps() const noexcept;

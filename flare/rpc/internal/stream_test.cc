@@ -18,12 +18,13 @@
 #include <utility>
 #include <vector>
 
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 #include "flare/base/chrono.h"
 #include "flare/fiber/latch.h"
 #include "flare/fiber/timer.h"
 #include "flare/testing/main.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 using namespace std::literals;
 

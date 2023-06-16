@@ -18,8 +18,8 @@
 #include <memory>
 
 #include "flare/base/function.h"
-#include "flare/rpc/protocol/message.h"
 #include "flare/rpc/internal/stream.h"
+#include "flare/rpc/protocol/message.h"
 
 // Draft, the interface may subject to change.
 

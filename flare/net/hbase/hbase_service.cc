@@ -20,12 +20,12 @@
 
 #include "flare/base/callback.h"
 #include "flare/base/down_cast.h"
-#include "flare/rpc/internal/fast_latch.h"
-#include "flare/rpc/internal/rpc_metrics.h"
 #include "flare/net/hbase/call_context.h"
 #include "flare/net/hbase/hbase_server_controller.h"
 #include "flare/net/hbase/hbase_server_protocol.h"
 #include "flare/net/hbase/message.h"
+#include "flare/rpc/internal/fast_latch.h"
+#include "flare/rpc/internal/rpc_metrics.h"
 
 using namespace std::literals;
 

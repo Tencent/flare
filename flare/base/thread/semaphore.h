@@ -33,7 +33,6 @@ namespace flare {
 template <class Mutex, class ConditionVariable, std::ptrdiff_t kLeastMaxValue>
 class BasicCountingSemaphore {
  public:
-
   static_assert(kLeastMaxValue >= 0);
   explicit BasicCountingSemaphore(std::ptrdiff_t desired) : current_(desired) {}
 

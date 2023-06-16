@@ -22,8 +22,8 @@
 #include "flare/base/ref_ptr.h"
 #include "flare/fiber/work_queue.h"
 #include "flare/rpc/internal/buffered_stream_provider.h"
-#include "flare/rpc/protocol/message.h"
 #include "flare/rpc/internal/stream.h"
+#include "flare/rpc/protocol/message.h"
 
 namespace flare::rpc::detail {
 

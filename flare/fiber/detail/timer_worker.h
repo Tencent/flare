@@ -25,8 +25,8 @@
 
 #include "flare/base/align.h"
 #include "flare/base/function.h"
-#include "flare/base/thread/latch.h"
 #include "flare/base/ref_ptr.h"
+#include "flare/base/thread/latch.h"
 
 namespace flare {
 

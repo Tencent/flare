@@ -12,13 +12,14 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+#include "flare/base/compression.h"
+
 #include <functional>
 #include <string>
 
 #include "gtest/gtest.h"
 
 #include "flare/base/buffer/compression_output_stream.h"
-#include "flare/base/compression.h"
 #include "flare/testing/main.h"
 
 namespace flare {

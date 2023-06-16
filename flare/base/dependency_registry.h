@@ -86,12 +86,12 @@
 // FLARE_REGISTER_CLASS_DEPENDENCY(world_destroyer, "fast-destroyer",
 //                                 FastDestroyer);
 // ```
-#define FLARE_REGISTER_CLASS_DEPENDENCY(Registry, ImplementationName,     \
-                                        ImplementationClassName)          \
-  FLARE_REGISTER_CLASS_DEPENDENCY_FACTORY(                                \
-      Registry, ImplementationName, []<class... Args>(Args&&... args) {   \
-        return std::make_unique<ImplementationClassName>(                 \
-            std::forward<Args>(args)...);                                 \
+#define FLARE_REGISTER_CLASS_DEPENDENCY(Registry, ImplementationName,   \
+                                        ImplementationClassName)        \
+  FLARE_REGISTER_CLASS_DEPENDENCY_FACTORY(                              \
+      Registry, ImplementationName, []<class... Args>(Args&&... args) { \
+        return std::make_unique<ImplementationClassName>(               \
+            std::forward<Args>(args)...);                               \
       })
 
 // Register a class by its factory.

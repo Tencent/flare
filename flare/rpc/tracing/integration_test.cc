@@ -17,10 +17,10 @@
 #include <utility>
 #include <vector>
 
-#include "opentracing/ext/tags.h"
 #include "gflags/gflags.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
+#include "opentracing/ext/tags.h"
 
 #include "flare/base/overloaded.h"
 #include "flare/fiber/this_fiber.h"

@@ -21,10 +21,10 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/random.h"
+#include "flare/fiber/detail/testing.h"
 #include "flare/fiber/fiber.h"
 #include "flare/fiber/mutex.h"
 #include "flare/fiber/this_fiber.h"
-#include "flare/fiber/detail/testing.h"
 
 using namespace std::literals;
 

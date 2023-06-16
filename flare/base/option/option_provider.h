@@ -16,7 +16,6 @@
 #define FLARE_BASE_OPTION_OPTION_PROVIDER_H_
 
 #include <cstdint>
-
 #include <memory>
 #include <optional>
 #include <string>

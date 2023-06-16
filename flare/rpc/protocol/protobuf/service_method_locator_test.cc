@@ -18,8 +18,8 @@
 
 #include "gtest/gtest.h"
 
-#include "flare/testing/main.h"
 #include "flare/testing/echo_service.flare.pb.h"
+#include "flare/testing/main.h"
 
 namespace flare::protobuf {
 

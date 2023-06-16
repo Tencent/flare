@@ -321,7 +321,7 @@ struct FunctionTypeDeducer<R (Class::*)(Args...) noexcept(kNoexcept)> {
 };
 
 template <class R, class Class, class... Args, bool kNoexcept>
-struct FunctionTypeDeducer<R (Class::*)(Args...)& noexcept(kNoexcept)> {
+struct FunctionTypeDeducer<R (Class::*)(Args...) & noexcept(kNoexcept)> {
   using Type = R(Args...) noexcept(kNoexcept);
 };
 
@@ -331,7 +331,7 @@ struct FunctionTypeDeducer<R (Class::*)(Args...) const noexcept(kNoexcept)> {
 };
 
 template <class R, class Class, class... Args, bool kNoexcept>
-struct FunctionTypeDeducer<R (Class::*)(Args...) const& noexcept(kNoexcept)> {
+struct FunctionTypeDeducer<R (Class::*)(Args...) const & noexcept(kNoexcept)> {
   using Type = R(Args...) noexcept(kNoexcept);
 };
 

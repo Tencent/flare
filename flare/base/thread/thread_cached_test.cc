@@ -21,9 +21,9 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/chrono.h"
-#include "flare/base/thread/latch.h"
 #include "flare/base/random.h"
 #include "flare/base/string.h"
+#include "flare/base/thread/latch.h"
 
 using namespace std::literals;
 

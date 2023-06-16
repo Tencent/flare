@@ -36,7 +36,7 @@ namespace flare::internal {
 // Our fancy monitoring system.
 class FancyMonitoringSystem : public monitoring::MonitoringSystem {
  public:
-  const Personality& GetPersonality() const  override {
+  const Personality& GetPersonality() const override {
     static Personality personality = {};
     return personality;
   }

@@ -15,9 +15,9 @@
 #ifndef FLARE_FIBER_DETAIL_RUN_QUEUE_H_
 #define FLARE_FIBER_DETAIL_RUN_QUEUE_H_
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
-#include <atomic>
 #include <memory>
 
 #include "flare/base/align.h"

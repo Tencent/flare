@@ -206,10 +206,10 @@ class ByteSet {
     }
   };
   static constexpr Rep FromChar(value_type c) {
-    return c < 64 ? Rep{{(1ULL << c), 0, 0, 0}}
-                  : c < 128 ? Rep{{0, (1ULL << (c - 64)), 0, 0}}
-                            : c < 192 ? Rep{{0, 0, (1ULL << (c - 128)), 0}}
-                                      : Rep{{0, 0, 0, (1ULL << (c - 192))}};
+    return c < 64    ? Rep{{(1ULL << c), 0, 0, 0}}
+           : c < 128 ? Rep{{0, (1ULL << (c - 64)), 0, 0}}
+           : c < 192 ? Rep{{0, 0, (1ULL << (c - 128)), 0}}
+                     : Rep{{0, 0, 0, (1ULL << (c - 192))}};
   }
   static constexpr Rep FromString(const char* s) {
     return *s == '\0' ? Rep() : FromChar(*s) | FromString(s + 1);

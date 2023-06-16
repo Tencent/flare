@@ -52,8 +52,10 @@ NameResolverImpl::GetRouteInfo(const std::string& name) {
   return {route_iter->second, true};
 }
 
-std::unique_ptr<NameResolutionView> NameResolverImpl::StartResolving(const std::string& name) {
-  FLARE_CHECK(updater_, "Default implementation of GetVersion need an updater!");
+std::unique_ptr<NameResolutionView> NameResolverImpl::StartResolving(
+    const std::string& name) {
+  FLARE_CHECK(updater_,
+              "Default implementation of GetVersion need an updater!");
   if (name.empty() || !CheckValid(name)) {
     return nullptr;
   }
@@ -70,8 +72,8 @@ std::unique_ptr<NameResolutionView> NameResolverImpl::StartResolving(const std::
   return std::make_unique<NameResolutionViewImpl>(route_info_ptr);
 }
 
-void NameResolverImpl::UpdateRoute(
-    const std::string& name, std::shared_ptr<RouteInfo> route_info) {
+void NameResolverImpl::UpdateRoute(const std::string& name,
+                                   std::shared_ptr<RouteInfo> route_info) {
   std::vector<Endpoint> new_address_table;
   std::string old_signature, new_signature;
   if (name_signatures_.find(name) != name_signatures_.end()) {
@@ -88,9 +90,10 @@ void NameResolverImpl::UpdateRoute(
       name_signatures_[name] = new_signature;
     }
   }
-  std::sort(new_address_table.begin(), new_address_table.end(), [] (auto&& left, auto&& right) {
-    return left.ToString() < right.ToString();
-  });
+  std::sort(new_address_table.begin(), new_address_table.end(),
+            [](auto&& left, auto&& right) {
+              return left.ToString() < right.ToString();
+            });
   std::scoped_lock lk(route_info->route_mutex);
   if (new_address_table != route_info->route_table) {
     route_info->route_table = std::move(new_address_table);
@@ -105,11 +108,10 @@ NameResolverUpdater* NameResolverImpl::GetUpdater() {
 }
 
 NameResolutionViewImpl::NameResolutionViewImpl(
-    std::shared_ptr<NameResolverImpl::RouteInfo> route) : route_(std::move(route)) {
-}
+    std::shared_ptr<NameResolverImpl::RouteInfo> route)
+    : route_(std::move(route)) {}
 
-NameResolutionViewImpl::~NameResolutionViewImpl() {
-}
+NameResolutionViewImpl::~NameResolutionViewImpl() {}
 
 std::int64_t NameResolutionViewImpl::GetVersion() {
   return route_->version.load(std::memory_order_relaxed);
