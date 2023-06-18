@@ -14,10 +14,9 @@
 
 #include "flare/base/string.h"
 
+#include <array>
 #include <climits>
 #include <cstdlib>
-
-#include <array>
 #include <optional>
 
 #include "flare/base/internal/logging.h"

@@ -12,12 +12,13 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+#include "flare/net/redis/redis_client.h"
+
 #include "gflags/gflags.h"
 
 #include "flare/base/string.h"
 #include "flare/init.h"
 #include "flare/init/override_flag.h"
-#include "flare/net/redis/redis_client.h"
 
 using namespace std::literals;
 

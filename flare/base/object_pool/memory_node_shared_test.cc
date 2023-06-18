@@ -12,7 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// clang-format off
 #include "flare/base/object_pool.h"
+// clang-format on
 
 #include <atomic>
 #include <thread>

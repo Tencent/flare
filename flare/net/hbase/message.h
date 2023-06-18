@@ -15,7 +15,9 @@
 #ifndef FLARE_NET_HBASE_MESSAGE_H_
 #define FLARE_NET_HBASE_MESSAGE_H_
 
+// clang-format off
 #include "flare/rpc/protocol/message.h"
+// clang-format on
 
 #include <variant>
 

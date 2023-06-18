@@ -12,7 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// clang-format off
 #include "flare/base/write_mostly/basic_ops.h"
+// clang-format on
 
 #include "benchmark/benchmark.h"
 

@@ -13,6 +13,7 @@
 // the License.
 
 #include "flare/rpc/server.h"
+
 #include "flare/base/down_cast.h"
 #include "flare/example/rpc/hbase/echo_service.pb.h"
 #include "flare/fiber/this_fiber.h"

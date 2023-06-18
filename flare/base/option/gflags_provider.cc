@@ -12,7 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// clang-format off
 #include "flare/base/option/option_provider.h"
+// clang-format on
 
 #include <optional>
 

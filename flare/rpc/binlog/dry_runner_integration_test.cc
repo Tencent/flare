@@ -12,7 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// clang-format off
 #include "flare/rpc/binlog/dry_runner.h"
+// clang-format on
 
 #include <chrono>
 #include <string>

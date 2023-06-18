@@ -15,9 +15,8 @@
 #include "flare/rpc/internal/stream_io_adaptor.h"
 
 #include <atomic>
-#include <utility>
-
 #include <memory>
+#include <utility>
 
 #include "flare/base/maybe_owning.h"
 #include "flare/fiber/latch.h"

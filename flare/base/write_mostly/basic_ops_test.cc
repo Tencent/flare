@@ -12,7 +12,9 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+// clang-format off
 #include "flare/base/write_mostly.h"
+// clang-format on
 
 #include <atomic>
 #include <vector>

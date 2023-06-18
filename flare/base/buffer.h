@@ -19,9 +19,8 @@
 //
 // @sa: https://github.com/apache/incubator-brpc/blob/master/src/butil/iobuf.h
 
-#include <cstddef>
-
 #include <algorithm>
+#include <cstddef>
 #include <limits>
 #include <numeric>
 #include <string>

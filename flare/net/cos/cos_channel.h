@@ -15,7 +15,9 @@
 #ifndef FLARE_NET_COS_COS_CHANNEL_H_
 #define FLARE_NET_COS_COS_CHANNEL_H_
 
+// clang-format off
 #include "flare/net/cos/channel.h"
+// clang-format on
 
 #include "flare/rpc/message_dispatcher/message_dispatcher.h"
 

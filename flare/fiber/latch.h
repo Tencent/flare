@@ -16,7 +16,6 @@
 #define FLARE_FIBER_LATCH_H_
 
 #include "flare/base/function.h"
-
 #include "flare/fiber/condition_variable.h"
 #include "flare/fiber/mutex.h"
 

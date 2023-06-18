@@ -15,7 +15,9 @@
 #ifndef FLARE_BASE_FUTURE_FUTURE_IMPL_H_
 #define FLARE_BASE_FUTURE_FUTURE_IMPL_H_
 
+// clang-format off
 #include "flare/base/future/future.h"
+// clang-format on
 
 #include <memory>
 #include <tuple>

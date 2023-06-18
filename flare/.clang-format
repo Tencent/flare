@@ -17,7 +17,18 @@ Language: Cpp
 BasedOnStyle: Google
 DerivePointerAlignment: false
 PointerAlignment: Left
-IncludeBlocks: Preserve
+
+IncludeIsMainRegex: "(_test|_benchmark)?$"
+IncludeBlocks:   Regroup
+IncludeCategories:
+  - Regex:           '^<.*\.h>'
+    Priority:        1
+  - Regex:           '^<.*'
+    Priority:        2
+  - Regex:           '^"(google|gperftools|jemalloc|lz4|snappy|nghttp2|zlib|benchmark|jsoncpp|ctemplate|curl|gflags|fmt|gtest|gmock|glog|yaml-cpp|openssl|opentracing|opentracing-cpp|zstd|rapidxml|xxhash|blake3)/'
+    Priority:        3
+  - Regex:           '.*'
+    Priority:        4
 ---
 Language: Proto
 DisableFormat: true

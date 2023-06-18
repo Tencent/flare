@@ -12,6 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+#include "flare/net/cos/cos_client.h"
+
 #include <chrono>
 #include <unordered_map>
 
@@ -19,7 +21,6 @@
 
 #include "flare/init.h"
 #include "flare/init/override_flag.h"
-#include "flare/net/cos/cos_client.h"
 #include "flare/net/cos/ops/bucket/get_bucket.h"
 #include "flare/net/cos/ops/object/delete_multiple_objects.h"
 #include "flare/net/cos/ops/object/delete_object.h"

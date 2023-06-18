@@ -13,6 +13,7 @@
 // the License.
 
 #include "flare/rpc/server.h"
+
 #include "flare/base/exposed_var.h"
 #include "flare/base/random.h"
 #include "flare/example/rpc/echo_service.flare.pb.h"

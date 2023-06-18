@@ -16,7 +16,6 @@
 #define FLARE_FIBER_DETAIL_FIBER_WORKER_H_
 
 #include <cstddef>
-
 #include <queue>
 #include <thread>
 

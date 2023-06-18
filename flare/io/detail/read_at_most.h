@@ -16,7 +16,6 @@
 #define FLARE_IO_DETAIL_READ_AT_MOST_H_
 
 #include "flare/base/buffer.h"
-
 #include "flare/io/util/stream_io.h"
 
 namespace flare::io::detail {
