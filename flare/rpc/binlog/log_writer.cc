@@ -15,7 +15,6 @@
 #include "flare/rpc/binlog/log_writer.h"
 
 #include "flare/base/internal/dpc.h"
-
 #include "flare/rpc/binlog/tags.h"
 
 using namespace std::literals;

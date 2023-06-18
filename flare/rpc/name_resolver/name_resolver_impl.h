@@ -15,12 +15,11 @@
 #ifndef FLARE_RPC_NAME_RESOLVER_NAME_RESOLVER_IMPL_H_
 #define FLARE_RPC_NAME_RESOLVER_NAME_RESOLVER_IMPL_H_
 
-#include <optional>
-#include <shared_mutex>
-
 #include <atomic>
 #include <map>
 #include <memory>
+#include <optional>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
 #include <utility>

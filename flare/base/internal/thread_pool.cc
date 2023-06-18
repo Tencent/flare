@@ -15,6 +15,7 @@
 #include "flare/base/internal/thread_pool.h"
 
 #include <unistd.h>
+
 #include <mutex>
 #include <utility>
 #include <vector>

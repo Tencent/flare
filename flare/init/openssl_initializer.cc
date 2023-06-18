@@ -13,7 +13,6 @@
 // the License.
 
 #include "flare/init/on_init.h"
-
 #include "flare/io/util/openssl.h"
 
 FLARE_ON_INIT(flare::io::util::InitializeOpenSSL,

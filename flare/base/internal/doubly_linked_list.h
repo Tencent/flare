@@ -16,7 +16,6 @@
 #define FLARE_BASE_INTERNAL_DOUBLY_LINKED_LIST_H_
 
 #include <cstddef>
-
 #include <utility>
 
 #include "flare/base/internal/logging.h"

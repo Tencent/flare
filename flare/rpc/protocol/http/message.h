@@ -20,10 +20,9 @@
 #include <utility>
 
 #include "flare/base/buffer.h"
-#include "flare/rpc/protocol/message.h"
-
 #include "flare/net/http/http_request.h"
 #include "flare/net/http/http_response.h"
+#include "flare/rpc/protocol/message.h"
 
 namespace flare::http {
 

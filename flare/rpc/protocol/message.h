@@ -16,7 +16,6 @@
 #define FLARE_RPC_PROTOCOL_MESSAGE_H_
 
 #include <cinttypes>
-
 #include <memory>
 
 #include "flare/base/casting.h"
