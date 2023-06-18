@@ -19,8 +19,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "opentracing/ext/tags.h"
 #include "gflags/gflags.h"
+#include "opentracing/ext/tags.h"
 
 #include "flare/base/exposed_var.h"
 #include "flare/base/internal/cpu.h"

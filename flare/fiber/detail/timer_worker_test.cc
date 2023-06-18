@@ -21,8 +21,8 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/chrono.h"
-#include "flare/base/thread/latch.h"
 #include "flare/base/random.h"
+#include "flare/base/thread/latch.h"
 #include "flare/fiber/detail/scheduling_group.h"
 
 using namespace std::literals;

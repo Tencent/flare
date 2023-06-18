@@ -23,8 +23,12 @@
 namespace flare {
 
 // @sa: Constructor of `RefPtr`.
-constexpr struct ref_ptr_t { explicit ref_ptr_t() = default; } ref_ptr;
-constexpr struct adopt_ptr_t { explicit adopt_ptr_t() = default; } adopt_ptr;
+constexpr struct ref_ptr_t {
+  explicit ref_ptr_t() = default;
+} ref_ptr;
+constexpr struct adopt_ptr_t {
+  explicit adopt_ptr_t() = default;
+} adopt_ptr;
 
 // You need to specialize this traits unless your type is inherited from
 // `RefCounted<T>`.

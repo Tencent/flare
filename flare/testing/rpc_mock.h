@@ -19,9 +19,9 @@
 #include <tuple>
 #include <utility>
 
+#include "gmock/gmock.h"
 #include "google/protobuf/service.h"
 #include "google/protobuf/util/message_differencer.h"
-#include "gmock/gmock.h"
 
 #include "flare/base/callback.h"
 #include "flare/base/down_cast.h"

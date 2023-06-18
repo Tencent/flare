@@ -20,5 +20,8 @@ PointerAlignment: Left
 IncludeBlocks: Preserve
 ---
 Language: Proto
-BasedOnStyle: Google
+DisableFormat: true
+---
+Language: JavaScript
+DisableFormat: true
 ...

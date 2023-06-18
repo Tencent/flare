@@ -36,7 +36,7 @@ std::string Demangle(const char* s) {
   }
   return demangled;
 #else
-  #error "Demangle not supported on current compiler."
+#error "Demangle not supported on current compiler."
 #endif
 }
 

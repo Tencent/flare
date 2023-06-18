@@ -32,16 +32,13 @@ TEST(ResolveDomain, ResolveDomain) {
 
 TEST(ResolveDomain, Invalid) {
   std::vector<Endpoint> addresses;
-  EXPECT_FALSE(
-      ResolveDomain("non-exist", 0, &addresses));
-  EXPECT_FALSE(
-      ResolveDomain("non-exist.domain", 0, &addresses));
+  EXPECT_FALSE(ResolveDomain("non-exist", 0, &addresses));
+  EXPECT_FALSE(ResolveDomain("non-exist.domain", 0, &addresses));
 }
 
 TEST(ResolveDomain, ResolveWithServers) {
   std::vector<Endpoint> addresses;
-  ASSERT_TRUE(
-      ResolveDomain("example.com", 1234 , &addresses));
+  ASSERT_TRUE(ResolveDomain("example.com", 1234, &addresses));
 }
 
 }  // namespace flare::name_resolver::util

@@ -24,7 +24,9 @@
 
 namespace flare {
 
-inline constexpr struct owning_t { explicit owning_t() = default; } owning;
+inline constexpr struct owning_t {
+  explicit owning_t() = default;
+} owning;
 inline constexpr struct non_owning_t {
   explicit non_owning_t() = default;
 } non_owning;

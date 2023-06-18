@@ -19,8 +19,8 @@
 
 #include "google/protobuf/service.h"
 
-#include "flare/rpc/protocol/controller.h"
 #include "flare/net/hbase/proto/rpc.pb.h"
+#include "flare/rpc/protocol/controller.h"
 
 namespace flare {
 

@@ -22,10 +22,10 @@
 #include <variant>
 #include <vector>
 
-#include "opentracing/ext/tags.h"
 #include "gtest/gtest_prod.h"
 #include "opentracing-cpp/span.h"
 #include "opentracing-cpp/tracer.h"
+#include "opentracing/ext/tags.h"
 
 #include "flare/base/chrono.h"
 #include "flare/base/maybe_owning.h"

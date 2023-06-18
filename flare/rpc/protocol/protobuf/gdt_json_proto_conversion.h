@@ -18,8 +18,8 @@
 #include <string>
 #include <string_view>
 
-#include "jsoncpp/value.h"
 #include "google/protobuf/service.h"
+#include "jsoncpp/value.h"
 
 // Conversion between gdt JSON & Protocol Buffers messages.
 //

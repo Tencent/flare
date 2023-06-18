@@ -23,8 +23,8 @@
 #include <string>
 
 #include "gflags/gflags_declare.h"
-#include "gtest/gtest_prod.h"
 #include "google/protobuf/service.h"
+#include "gtest/gtest_prod.h"
 
 #include "flare/base/internal/lazy_init.h"
 #include "flare/base/ref_ptr.h"

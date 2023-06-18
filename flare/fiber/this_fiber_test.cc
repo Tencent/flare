@@ -12,7 +12,7 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "flare/fiber/fiber_local.h"
+#include "flare/fiber/this_fiber.h"
 
 #include <atomic>
 #include <thread>
@@ -25,7 +25,7 @@
 #include "flare/fiber/alternatives.h"
 #include "flare/fiber/detail/testing.h"
 #include "flare/fiber/fiber.h"
-#include "flare/fiber/this_fiber.h"
+#include "flare/fiber/fiber_local.h"
 
 using namespace std::literals;
 

@@ -24,9 +24,9 @@
 #include "flare/base/internal/annotation.h"
 #include "flare/base/object_pool.h"
 #include "flare/base/object_pool/ref_counted.h"
-#include "flare/base/thread/spinlock.h"
 #include "flare/base/thread/attribute.h"
 #include "flare/base/thread/out_of_duty_callback.h"
+#include "flare/base/thread/spinlock.h"
 #include "flare/fiber/detail/scheduling_group.h"
 
 using namespace std::literals;

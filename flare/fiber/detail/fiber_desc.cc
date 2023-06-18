@@ -19,7 +19,6 @@
 #include <limits>
 
 #include "flare/base/object_pool.h"
-
 #include "flare/fiber/detail/waitable.h"
 
 namespace flare {

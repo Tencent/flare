@@ -142,9 +142,9 @@ class Future {
   // way to get the value back from the continuation's argument.
   //
   // `Get` and the continuation will race, as well.
-  [
-      [deprecated("`Future` does not support blocking `Get`, use `BlockingGet` "
-                  "instead.")]] void
+  [[deprecated(
+      "`Future` does not support blocking `Get`, use `BlockingGet` "
+      "instead.")]] void
   Get();  // Not implemented.
 
   // `Then` chains a continuation to `Future`. The continuation is called
@@ -201,9 +201,9 @@ class Future {
   // to force the user to mark the invalidation of the `Future` explicitly
   // using `std::move`.
   template <class F>
-  [
-      [deprecated("`Future` must be rvalue-qualified to call `Then` on it. "
-                  "Use `std::move(future).Then(...)` instead.")]] void
+  [[deprecated(
+      "`Future` must be rvalue-qualified to call `Then` on it. "
+      "Use `std::move(future).Then(...)` instead.")]] void
   Then(F&&) &;  // Not implemented.
 
  private:
@@ -225,7 +225,7 @@ Future(futurize_values_t, Us&&...) -> Future<std::decay_t<Us>...>;
 template <class... Us>
 Future(futurize_tuple_t, std::tuple<Us...>) -> Future<std::decay_t<Us>...>;
 template <class U>
-Future(U &&) -> Future<std::decay_t<U>>;
+Future(U&&) -> Future<std::decay_t<U>>;
 
 // Implemented in a separate header.
 

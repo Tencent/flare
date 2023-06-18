@@ -20,8 +20,8 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/internal/cpu.h"
-#include "flare/base/thread/latch.h"
 #include "flare/base/thread/attribute.h"
+#include "flare/base/thread/latch.h"
 #include "flare/fiber/fiber.h"
 #include "flare/testing/main.h"
 

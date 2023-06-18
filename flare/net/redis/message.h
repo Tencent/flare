@@ -15,9 +15,9 @@
 #ifndef FLARE_NET_REDIS_MESSAGE_H_
 #define FLARE_NET_REDIS_MESSAGE_H_
 
-#include "flare/rpc/protocol/message.h"
 #include "flare/net/redis/redis_command.h"
 #include "flare/net/redis/redis_object.h"
+#include "flare/rpc/protocol/message.h"
 
 namespace flare::redis {
 

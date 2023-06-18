@@ -144,7 +144,9 @@ namespace flare {
 
 namespace detail::logging {
 
-inline struct LoggingLinkCheck { LoggingLinkCheck(); } link_check;
+inline struct LoggingLinkCheck {
+  LoggingLinkCheck();
+} link_check;
 
 }  // namespace detail::logging
 }  // namespace flare

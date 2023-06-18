@@ -65,6 +65,7 @@ volatile C3* pc3;
 
 void Benchmark_BuiltinDynamicCast(benchmark::State& state) {
   while (state.KeepRunning()) {
+    // clang-format off
     // ... <+34>: lea    0x10783f(%rip),%rax        # <_ZN5flare3ptrE>
     // ... <+41>: mov    (%rax),%rdi
     // ... <+44>: xor    %eax,%eax
@@ -76,6 +77,7 @@ void Benchmark_BuiltinDynamicCast(benchmark::State& state) {
     // ... <+67>: callq  0x431130 <__dynamic_cast>
     // ... <+72>: lea    0x107811(%rip),%rdx        # <_ZN5flare13converted_ptrE>
     // ... <+79>: mov    %rax,(%rdx)
+    // clang-format on
     converted_ptr = dynamic_cast<A*>(ptr);
   }
 }
@@ -84,12 +86,14 @@ BENCHMARK(Benchmark_BuiltinDynamicCast);
 
 void Benchmark_DynCast(benchmark::State& state) {
   while (state.KeepRunning()) {
+    // clang-format off
     // ... <+34>: lea    0x1077bf(%rip),%rax        # <_ZN5flare3ptrE>
     // ... <+41>: lea    0x1077b0(%rip),%rdx        # <_ZN5flare13converted_ptrE>
     // ... <+48>: mov    (%rax),%rax
     // ... <+51>: cmpl   $0x2,0x8(%rax)
     // ... <+55>: cmovae %r12,%rax
     // ... <+59>: mov    %rax,(%rdx)
+    // clang-format on
     converted_ptr = dyn_cast<A>(ptr);
   }
 }
@@ -98,6 +102,7 @@ BENCHMARK(Benchmark_DynCast);
 
 void Benchmark_ExactMatchCastableDynCast(benchmark::State& state) {
   while (state.KeepRunning()) {
+    // clang-format off
     // ... <+34>: lea    0x107747(%rip),%rax        # <_ZN5flare3pc1E>
     // ... <+41>: lea    0x1077d8(%rip),%rdx        # <_ZN5flare8Castable12kRuntimeTypeINS_2C3EEE>
     // ... <+48>: mov    (%rax),%rax
@@ -106,6 +111,7 @@ void Benchmark_ExactMatchCastableDynCast(benchmark::State& state) {
     // ... <+55>: cmovne %r12,%rax
     // ... <+59>: lea    0x107726(%rip),%rdx        # <_ZN5flare3pc3E>
     // ... <+66>: mov    %rax,(%rdx)
+    // clang-format on
     pc3 = dyn_cast<C3>(pc1);
   }
 }

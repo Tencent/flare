@@ -14,8 +14,8 @@
 
 #include "flare/rpc/protocol/protobuf/poppy_protocol.h"
 
-#include "gtest/gtest.h"
 #include "google/protobuf/util/message_differencer.h"
+#include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/endian.h"

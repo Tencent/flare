@@ -32,9 +32,7 @@ class ErrorStreamReaderProvider : public StreamReaderProvider<T> {
     cb(&err_);
   }
 
-  void Read(Function<void(Expected<T, StreamError>)> cb) override {
-    cb(Error);
-  }
+  void Read(Function<void(Expected<T, StreamError>)> cb) override { cb(Error); }
 
   void Close(Function<void()> cb) override { cb(); }
 

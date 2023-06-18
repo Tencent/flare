@@ -14,4 +14,4 @@
 
 #include "flare/fiber/mutex.h"
 
-namespace flare::fiber {}  // namespace flare
+namespace flare::fiber {}  // namespace flare::fiber
