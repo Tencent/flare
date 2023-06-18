@@ -14,9 +14,8 @@
 
 #include "flare/base/experimental/uuid.h"
 
-#include <cstdio>
-
 #include <array>
+#include <cstdio>
 #include <optional>
 #include <string>
 #include <string_view>

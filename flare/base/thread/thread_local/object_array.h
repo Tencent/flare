@@ -16,7 +16,6 @@
 #define FLARE_BASE_THREAD_THREAD_LOCAL_OBJECT_ARRAY_H_
 
 #include <cstdint>
-
 #include <memory>
 #include <mutex>
 #include <type_traits>

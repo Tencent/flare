@@ -21,9 +21,10 @@
 #include <thread>
 #include <vector>
 
+#include "gtest/gtest.h"
+
 #include "flare/base/chrono.h"
 #include "flare/base/thread/latch.h"
-#include "gtest/gtest.h"
 
 using namespace std::literals;
 

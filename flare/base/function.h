@@ -19,7 +19,6 @@
 #define FLARE_BASE_FUNCTION_H_
 
 #include <cstddef>
-
 #include <functional>
 #include <new>
 #include <utility>
