@@ -35,17 +35,7 @@ namespace details {
 std::string DescribeFormatArguments(const std::vector<std::string>& args) {
   // We cannot use `Join` in `base/string.h` as doing so can easily leads to
   // circular dependency.
-  std::string result;
-
-  // Performance doesn't matter. We don't expect format failure to happen often.
-  for (auto&& e : args) {
-    result += e + ", ";
-  }
-  if (!result.empty()) {  // Erase the trailing ", ".
-    result.pop_back();
-    result.pop_back();
-  }
-  return result;
+  return fmt::format("{}", fmt::join(args.begin(), args.end(), ", "));
 }
 
 }  // namespace details
