@@ -143,7 +143,7 @@ void EventLoop::EnableDescriptor(Descriptor* desc) {
   FLARE_PCHECK(epoll_ctl(epfd_.Get(), EPOLL_CTL_ADD, desc->fd(), &ee) == 0,
                "Failed to add fd #{} to epoll.", desc->fd());
   FLARE_VLOG(20, "Added descriptor [{}] with event mask [{}].", desc->GetName(),
-             ee.events);
+             +ee.events);
 }
 
 void EventLoop::RearmDescriptor(Descriptor* desc) {
@@ -153,7 +153,7 @@ void EventLoop::RearmDescriptor(Descriptor* desc) {
   ee.events = desc->GetEventMask() | kEpollError | kExtraEpollFlags;
   ee.data.ptr = static_cast<void*>(desc);
   FLARE_VLOG(20, "Rearming descriptor [{}] with event mask [{}].",
-             desc->GetName(), ee.events);
+             desc->GetName(), +ee.events);
   FLARE_PCHECK(epoll_ctl(epfd_.Get(), EPOLL_CTL_MOD, desc->fd(), &ee) == 0,
                "Failed to modify fd #{} in epoll.", desc->fd());
 }

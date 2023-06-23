@@ -393,18 +393,15 @@ void WritePrefixTo(std::string* to);
 
 // Marked as noexcept. Throwing in formatting log is likely a programming
 // error.
-//
-// Forwarding-ref does not get along well with packed field, so we use
-// const-ref here.
 template <class... Ts>
 std::string FormatLog([[maybe_unused]] const char* file,
-                      [[maybe_unused]] int line, const Ts&... args) noexcept {
+                      [[maybe_unused]] int line, Ts&&... args) noexcept {
   std::string result;
 
   WritePrefixTo(&result);
   if constexpr (sizeof...(Ts) != 0) {
     try {
-      result += fmt::format(args...);
+      result += fmt::format(std::forward<Ts>(args)...);
     } catch (const std::exception& xcpt) {
       // Presumably a wrong format string was provided?
       //
