@@ -75,11 +75,6 @@ FLARE_CHECK_EQ(x, y, "x ({}) does not equal to y ({}). The reason is that [{}]."
 - [`flare::fiber::AddLoggingItemToFiber`、`flare::fiber::AddLoggingTagToFiber`](../fiber/logging.h)：这一方法允许增加一个针对当前[fiber](fiber.md)的日志前缀。通常而言这个方法较为底层，我们不推荐服务实现方直接使用。
 - [`flare::fiber::AddLoggingItemToExecution`、`flare::fiber::AddLoggingTagToExecution`](../fiber/logging.h)：这一方法允许增加一个针对当前[执行上下文](../fiber/execution_context.h)的日志前缀。这一方法较为底层通常不推荐服务实现方使用。
 
-## 注意
-你有可能会遇到几种失败情况导致编译失败:
-1. 完美转发失败, 详情可查看[Effective Modern Cpp Item30](https://github.com/CnTransGroup/EffectiveModernCppChinese/blob/master/src/5.RRefMovSemPerfForw/item30.md), 常见的失败情况有`bit-fields`, 解决方法为使用一元加号, 详情可查看[fmtlib::fmt issues 1284](https://github.com/fmtlib/fmt/issues/1284)
-2. 指针, 解决方法为使用`fmt::ptr`或者手动将其他类型的指针转换为`const void*`
-
 ## 性能
 
 在可行的情况下应当尽量使用我们提供的[`FLARE_CHECK_XX` / `FLARE_LOG_XXX`](../base/logging.h)宏。
@@ -208,6 +203,12 @@ FLARE_CHECK_EQ(x, y, "x ({}) does not equal to y ({}). The reason is that [{}]."
 0x00000000004079a3 <-36477>: callq  0x40787a <flare::<lambda()>::operator()(void) const>
 0x00000000004079a8 <-36472>: callq  0x4078ec <flare::<lambda()>::operator()(void) const>
 ```
+
+## 注意
+
+你有可能会遇到几种失败情况导致编译失败：
+- 完美转发失败，详情可查看[Effective Modern Cpp Item30](https://github.com/CnTransGroup/EffectiveModernCppChinese/blob/master/src/5.RRefMovSemPerfForw/item30.md)，常见的失败情况有`bit-fields`，解决方法为使用一元加号，详情可查看[fmtlib::fmt issues 1284](https://github.com/fmtlib/fmt/issues/1284)。参数之所以不使用`const&`进行传递，可以查看提案[P2418R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2418r2.html)。
+- 指针，解决方法为使用`fmt::ptr`或者手动将其他类型的指针转换为`const void*`。
 
 ---
 [返回目录](README.md)
