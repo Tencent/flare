@@ -45,12 +45,12 @@ FLARE_CHECK_EQ(x, y, "x ({}) does not equal to y ({}). The reason is that [{}]."
   ```cpp
   void EchoServiceImpl::Echo(const EchoRequest& request, EchoResponse* response,
                              flare::RpcServerController* ctlr) override {
-    AddLoggingTagToRpc("crash_id", request.body());  // String.
+    AddLoggingTagToRpc("crash_id", request.body());  // KV-pair.
     FLARE_LOG_INFO("crashing.");
     FLARE_LOG_WARNING("crashing..");
     FLARE_LOG_ERROR("crashing...");
 
-    AddLoggingItemToRpc(Format("crash_id 2: {}4", request.body()));  // KV-pair.
+    AddLoggingItemToRpc(Format("crash_id 2: {}4", request.body()));  // String.
     FLARE_LOG_INFO("crashing.");
     FLARE_LOG_WARNING("crashing..");
     FLARE_LOG_ERROR("crashing...");

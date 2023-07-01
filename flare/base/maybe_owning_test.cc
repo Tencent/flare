@@ -164,8 +164,8 @@ TEST(MaybeOwning, SelfMove) {
 #if __GNUC__ >= 13
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wself-move"
-    ppp = std::move(ppp);
 #endif
+    ppp = std::move(ppp);
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
