@@ -1,0 +1,100 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "get_object",
+    srcs = ["get_object.cc"],
+    hdrs = ["get_object.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base/encoding:percent",
+        "//flare/net/cos/ops:operation",
+    ],
+)
+
+cc_test(
+    name = "get_object_test",
+    srcs = ["get_object_test.cc"],
+    deps = [
+        ":get_object",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "put_object",
+    srcs = ["put_object.cc"],
+    hdrs = ["put_object.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base/encoding:percent",
+        "//flare/net/cos/ops:operation",
+    ],
+)
+
+cc_test(
+    name = "put_object_test",
+    srcs = ["put_object_test.cc"],
+    deps = [
+        ":put_object",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "delete_object",
+    srcs = ["delete_object.cc"],
+    hdrs = ["delete_object.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base/encoding:percent",
+        "//flare/net/cos/ops:operation",
+    ],
+)
+
+cc_test(
+    name = "delete_object_test",
+    srcs = ["delete_object_test.cc"],
+    deps = [
+        ":delete_object",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "delete_multiple_objects",
+    srcs = ["delete_multiple_objects.cc"],
+    hdrs = ["delete_multiple_objects.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base/encoding:percent",
+        "//flare/net/cos:xml_reader",
+        "//flare/net/cos/ops:operation",
+        "//thirdparty/rapidxml",
+    ],
+)
+
+cc_test(
+    name = "delete_multiple_objects_test",
+    srcs = ["delete_multiple_objects_test.cc"],
+    deps = [
+        ":delete_multiple_objects",
+        "//thirdparty/rapidxml",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

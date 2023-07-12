@@ -1,0 +1,188 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "out_of_duty_callback",
+    srcs = ["out_of_duty_callback.cc"],
+    hdrs = ["out_of_duty_callback.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":thread_local",
+        "//flare/base:chrono",
+        "//flare/base:function",
+        "//flare/base:never_destroyed",
+        "//flare/base/internal:biased_mutex",
+    ],
+)
+
+cc_test(
+    name = "out_of_duty_callback_test",
+    srcs = ["out_of_duty_callback_test.cc"],
+    deps = [
+        ":out_of_duty_callback",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "out_of_duty_callback_benchmark",
+    srcs = ["out_of_duty_callback_benchmark.cc"],
+    deps = [
+        ":out_of_duty_callback",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "attribute",
+    srcs = ["attribute.cc"],
+    hdrs = ["attribute.h"],
+    linkopts = ["-pthread"],
+    visibility = ["//visibility:public"],
+    deps = ["//flare/base:logging"],
+)
+
+cc_test(
+    name = "attribute_test",
+    srcs = ["attribute_test.cc"],
+    deps = [
+        ":attribute",
+        "//flare/base:logging",
+        "//flare/base:random",
+        "//flare/base/internal:cpu",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "thread_cached",
+    hdrs = ["thread_cached.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base/thread:thread_local",
+    ],
+)
+
+cc_test(
+    name = "thread_cached_test",
+    srcs = ["thread_cached_test.cc"],
+    deps = [
+        ":thread_cached",
+        "//flare/base:chrono",
+        "//flare/base:random",
+        "//flare/base:string",
+        "//flare/base/thread:latch",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "thread_cached_benchmark",
+    srcs = ["thread_cached_benchmark.cc"],
+    deps = [
+        ":thread_cached",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "semaphore",
+    hdrs = ["semaphore.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base/internal:logging",
+    ],
+)
+
+cc_test(
+    name = "semaphore_test",
+    srcs = ["semaphore_test.cc"],
+    deps = [
+        ":semaphore",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "latch",
+    srcs = ["latch.cc"],
+    hdrs = ["latch.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base/internal:logging",
+    ],
+)
+
+cc_test(
+    name = "latch_test",
+    srcs = ["latch_test.cc"],
+    deps = [
+        ":latch",
+        "//flare/base:chrono",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "thread_local",
+    hdrs = ["thread_local.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:function",
+        "//flare/base:likely",
+        "//flare/base:logging",
+        "//flare/base/thread/thread_local:always_initialized",
+        "//flare/base/thread/thread_local/detail:atomic_ptr",
+    ],
+)
+
+cc_test(
+    name = "thread_local_test",
+    srcs = ["thread_local_test.cc"],
+    deps = [
+        ":latch",
+        ":thread_local",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# cc_benchmark(
+#   name = 'thread_local_benchmark',
+#   srcs = 'thread_local_benchmark.cc',
+#   deps = [
+#     ':thread_local',
+#     # Tests workaround for gperftools's false-sharing issue.
+#     '//thirdparty/gperftools:tcmalloc_minimal',
+#   ]
+# )
+
+cc_library(
+    name = "spinlock",
+    srcs = ["spinlock.cc"],
+    hdrs = ["spinlock.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:likely",
+    ],
+)
+
+cc_test(
+    name = "spinlock_test",
+    srcs = ["spinlock_test.cc"],
+    deps = [
+        ":latch",
+        ":spinlock",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

@@ -1,0 +1,201 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "redis",
+    hdrs = [
+        "redis_channel.h",
+        "redis_client.h",
+        "redis_command.h",
+        "redis_object.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":redis_channel",
+        ":redis_client",
+        ":redis_command",
+        ":redis_object",
+    ],
+)
+
+cc_library(
+    name = "redis_object",
+    hdrs = ["redis_object.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+    ],
+)
+
+cc_library(
+    name = "reader",
+    srcs = ["reader.cc"],
+    hdrs = ["reader.h"],
+    visibility = ["//flare/testing:__pkg__"],
+    deps = [
+        ":redis_object",
+        "//flare/base:buffer",
+        "//flare/base:string",
+    ],
+)
+
+cc_test(
+    name = "reader_test",
+    srcs = ["reader_test.cc"],
+    deps = [
+        ":reader",
+        "//flare/base:buffer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "redis_command",
+    srcs = ["redis_command.cc"],
+    hdrs = ["redis_command.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base:string",
+    ],
+)
+
+cc_test(
+    name = "redis_command_test",
+    srcs = ["redis_command_test.cc"],
+    deps = [
+        ":redis_command",
+        "//flare/base:buffer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "message",
+    hdrs = ["message.h"],
+    deps = [
+        ":redis_command",
+        ":redis_object",
+        "//flare/rpc/protocol:message",
+    ],
+)
+
+cc_library(
+    name = "redis_protocol",
+    srcs = ["redis_protocol.cc"],
+    hdrs = ["redis_protocol.h"],
+    deps = [
+        ":message",
+        ":reader",
+        ":redis_command",
+        ":redis_object",
+        "//flare/base:buffer",
+        "//flare/base:casting",
+        "//flare/rpc/protocol:stream_protocol",
+    ],
+)
+
+cc_test(
+    name = "redis_protocol_test",
+    srcs = ["redis_protocol_test.cc"],
+    deps = [
+        ":message",
+        ":redis_protocol",
+        "//flare/base:down_cast",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "mock_channel",
+    hdrs = ["mock_channel.h"],
+    visibility = ["//flare/testing:__pkg__"],
+    deps = [
+        ":redis_command",
+        ":redis_object",
+        "//flare/base:function",
+    ],
+)
+
+cc_library(
+    name = "redis_channel",
+    srcs = ["redis_channel.cc"],
+    hdrs = ["redis_channel.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":message",
+        ":mock_channel",
+        ":nslb_registration",
+        ":redis_command",
+        ":redis_object",
+        ":redis_protocol",
+        "//flare/base:casting",
+        "//flare/base:function",
+        "//flare/base:string",
+        "//flare/base/encoding:hex",
+        "//flare/base/internal:early_init",
+        "//flare/base/internal:lazy_init",
+        "//flare/rpc:message_dispatcher_factory",
+        "//flare/rpc/internal:stream_call_gate",
+        "//flare/rpc/internal:stream_call_gate_pool",
+    ],
+)
+
+cc_library(
+    name = "redis_client",
+    srcs = ["redis_client.cc"],
+    hdrs = ["redis_client.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":redis_channel",
+        ":redis_command",
+        ":redis_object",
+        "//flare/base:future",
+        "//flare/base:maybe_owning",
+        "//flare/base:string",
+        "//flare/base/internal:early_init",
+        "//flare/base/internal:lazy_init",
+        "//flare/base/internal:time_view",
+        "//flare/fiber",
+        "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+cc_test(
+    name = "redis_test",
+    srcs = ["redis_test.cc"],
+    deps = [
+        ":redis",
+        "//flare/base:string",
+        "//flare/fiber",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+        "//flare/testing:naked_server",
+    ],
+)
+
+cc_library(
+    name = "nslb_registration",
+    srcs = ["nslb_registration.cc"],
+    hdrs = [],
+    deps = [
+        "//flare/base:string",
+        "//flare/init:on_init",
+        "//flare/rpc:message_dispatcher_factory",
+        "//flare/rpc/load_balancer:round_robin",
+        "//flare/rpc/message_dispatcher",
+        "//flare/rpc/name_resolver:list",
+    ],
+    alwayslink = True,
+)

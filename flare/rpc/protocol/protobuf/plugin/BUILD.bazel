@@ -1,0 +1,122 @@
+# Copyright (C) 2019 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "code_writer",
+    hdrs = ["code_writer.h"],
+)
+
+cc_library(
+    name = "names",
+    srcs = ["names.cc"],
+    hdrs = ["names.h"],
+    deps = [
+        ":code_writer",
+        "//flare/base:string",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+# cc_library(
+#     name = "async_decl_generator",
+#     srcs = ["async_decl_generator.cc"],
+#     hdrs = ["async_decl_generator.h"],
+#     deps = [
+#         ":code_writer",
+#         ":names",
+#         "//flare/base:string",
+#         "//flare/rpc/protocol/protobuf:rpc_options",
+#         "@com_google_protobuf//:protoc",
+#     ],
+# )
+
+# cc_library(
+#     name = "sync_decl_generator",
+#     srcs = ["sync_decl_generator.cc"],
+#     hdrs = ["sync_decl_generator.h"],
+#     deps = [
+#         ":code_writer",
+#         ":names",
+#         "//flare/base:string",
+#         "//flare/rpc/protocol/protobuf:rpc_options",
+#         "@com_google_protobuf//:protoc",
+#     ],
+# )
+
+# cc_library(
+#     name = "basic_decl_generator",
+#     srcs = ["basic_decl_generator.cc"],
+#     hdrs = ["basic_decl_generator.h"],
+#     deps = [
+#         ":code_writer",
+#         ":names",
+#         "//flare/base:string",
+#         "//flare/rpc/protocol/protobuf:rpc_options",
+#         "@com_google_protobuf//:protoc",
+#     ],
+# )
+
+# cc_library(
+#     name = "gdt_future_decl_generator",
+#     srcs = ["gdt_future_decl_generator.cc"],
+#     hdrs = ["gdt_future_decl_generator.h"],
+#     deps = [
+#         ":code_writer",
+#         ":names",
+#         "//flare/base:string",
+#         "//flare/rpc/protocol/protobuf:rpc_options",
+#         "@com_google_protobuf//:protoc",
+#     ],
+# )
+
+# cc_binary(
+#     name = "v1_plugin",
+#     srcs = [
+#         "v1_plugin.cc",
+#     ],
+#     deps = [
+#         ":async_decl_generator",
+#         ":basic_decl_generator",
+#         ":gdt_future_decl_generator",
+#         ":names",
+#         ":sync_decl_generator",
+#         "//flare/base:logging",
+#         "//flare/base:string",
+#         "//flare/rpc/protocol/protobuf:rpc_options",
+#         "@com_github_fmtlib_fmt//:fmt",
+#         "@com_google_protobuf//:protoc",
+#         "@com_google_protobuf//:protobuf",
+#     ],
+# )
+
+# cc_binary(
+#     name = "v2_plugin",
+#     srcs = [
+#         "v2_plugin.cc",
+#     ],
+#     visibility = ["//visibility:public"],
+#     deps = [
+#         ":async_decl_generator",
+#         ":basic_decl_generator",
+#         ":names",
+#         ":sync_decl_generator",
+#         "//flare/base:logging",
+#         "//flare/base:string",
+#         "//flare/base/encoding:hex",
+#         "//flare/rpc/protocol/protobuf:rpc_options",
+#         "@com_github_google_glog//:glog", #FIXME(kangjinci): remove it
+#         "@com_github_fmtlib_fmt//:fmt",
+#         "@com_google_protobuf//:protoc",
+#     ],
+# )

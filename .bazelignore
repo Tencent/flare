@@ -1,0 +1,28 @@
+# Ignore BUILD files in these directories
+thirdparty/benchmark
+thirdparty/blade
+thirdparty/ctemplate
+thirdparty/curl
+thirdparty/fmt
+thirdparty/gflags
+thirdparty/glog
+thirdparty/gperftools
+thirdparty/jemalloc
+thirdparty/jsoncpp
+thirdparty/lz4
+thirdparty/nghttp2
+thirdparty/openssl
+thirdparty/opentracing-cpp
+thirdparty/protobuf
+thirdparty/protobuf-3.4.1
+thirdparty/snappy
+thirdparty/yaml-cpp
+thirdparty/zlib
+thirdparty/zstd
+
+# Blade
+blade-bin
+build32_debug/
+build32_release/
+build64_debug/
+build64_release/

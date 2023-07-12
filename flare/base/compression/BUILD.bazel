@@ -1,0 +1,107 @@
+# Copyright (C) 2020 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "compression",
+    srcs = ["compression.cc"],
+    hdrs = ["compression.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base:dependency_registry",
+        "//flare/base:function",
+    ],
+)
+
+cc_test(
+    name = "compression_test",
+    srcs = ["compression_test.cc"],
+    deps = [
+        "//flare:init",
+        "//flare/base:compression",
+        "//flare/base/buffer:compression_output_stream",
+        "//flare/testing:main",
+    ],
+)
+
+cc_library(
+    name = "util",
+    srcs = ["util.cc"],
+    hdrs = ["util.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":compression",
+    ],
+)
+
+cc_test(
+    name = "util_test",
+    srcs = ["util_test.cc"],
+    deps = [
+        ":util",
+        "//flare/base/buffer:compression_output_stream",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "gzip",
+    srcs = ["gzip.cc"],
+    hdrs = ["gzip.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":compression",
+        ":util",
+        "@zlib",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "lz4",
+    srcs = ["lz4.cc"],
+    hdrs = ["lz4.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":compression",
+        ":util",
+        "@com_github_lz4_lz4//:lz4",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "snappy",
+    srcs = ["snappy.cc"],
+    hdrs = ["snappy.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":compression",
+        ":util",
+        "@com_github_google_snappy//:snappy",
+    ],
+    alwayslink = True,
+)
+
+cc_library(
+    name = "zstd",
+    srcs = ["zstd.cc"],
+    hdrs = ["zstd.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":compression",
+        "@com_github_facebook_zstd//:zstd",
+    ],
+    alwayslink = True,
+)

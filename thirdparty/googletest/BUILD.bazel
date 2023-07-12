@@ -1,0 +1,6 @@
+cc_library(
+    name = "gtest_prod",
+    hdrs = ["gtest/gtest_prod.h"],
+    includes = ["."],
+    visibility = ["//visibility:public"],
+)

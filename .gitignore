@@ -9,6 +9,9 @@
 /.blade.test.stamp
 /BLADE_ROOT.local
 
+# Bazel
+/bazel-*
+
 # Vim
 .*.swp
 .*.swo
