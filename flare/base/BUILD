@@ -391,6 +391,7 @@ cc_library(
   deps = [
     ':ref_ptr',
     '//flare/base/internal:early_init',
+    '//flare/base/internal:meta',
     '//flare/base/internal:logging',
   ],
   visibility = 'PUBLIC',
