@@ -5,7 +5,7 @@ cc_library(
   hdrs = 'xxhash.h',
   srcs = [
     'xxhash.c',
-  ] + ['xxh_x86dispatch.c'] if build_target.arch == 'x86_64' else [],
+  ],
   export_incs = '.',
   visibility = 'PUBLIC',
 )

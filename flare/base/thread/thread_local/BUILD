@@ -16,12 +16,23 @@ cc_library(
   name = 'always_initialized',
   hdrs = 'always_initialized.h',
   deps = [
+    ':object_array',
     '//flare/base:function',
-    '//flare/base:likely',
-    '//flare/base:logging',
-    '//flare/base/internal:memory_barrier',
   ],
   visibility = ['//flare/base/thread:thread_local'],
+)
+
+cc_library(
+  name = 'object_array',
+  hdrs = 'object_array.h',
+  deps = [
+    '//flare/base:align',
+    '//flare/base/internal:annotation',
+    '//flare/base/internal:memory_barrier',
+    '//flare/base:likely',
+    '//flare/base:logging',
+    '//flare/base:never_destroyed',
+  ],
 )
 
 cc_library(

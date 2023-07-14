@@ -116,10 +116,8 @@ cc_test(
   srcs = 'memory_node_shared_test.cc',
   deps = [
     '//flare/base:object_pool',
-    '//flare/fiber:fiber',
     '//flare/base/thread:latch',
     '//flare/base:random',
-    '//thirdparty/gflags:gflags',
   ]
 )
 
