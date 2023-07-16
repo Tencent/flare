@@ -200,8 +200,6 @@ void V1Generator::GeneratePrologue(const google::protobuf::FileDescriptor* file,
       "}}  // namespace\n"
       "\n",
       fmt::arg("service_count", file->service_count()),
-      fmt::arg("file_ns", google::protobuf::compiler::cpp::FileLevelNamespace(
-                              file->name())),
       fmt::arg("file", file->name()));
 }
 

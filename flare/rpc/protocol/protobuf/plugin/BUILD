@@ -35,6 +35,7 @@ cc_library(
   deps = [
     ':code_writer',
     ':names',
+    '//flare/base/internal:logging',
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
@@ -48,6 +49,7 @@ cc_library(
   deps = [
     ':code_writer',
     ':names',
+    '//flare/base/internal:logging',
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',

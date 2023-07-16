@@ -23,7 +23,6 @@
 #include <string>
 #include <utility>
 
-#include "glog/logging.h"
 #include "gperftools/malloc_extension.h"
 #include "jsoncpp/json.h"
 

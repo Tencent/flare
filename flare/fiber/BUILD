@@ -339,7 +339,6 @@ cc_test(
     '//flare/base/thread:latch',
     '//flare/base/internal:cpu',
     '//flare/base/thread:attribute',
-    '//flare/testing:main',
     '//thirdparty/gflags:gflags',
   ]
 )

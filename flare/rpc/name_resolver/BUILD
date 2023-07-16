@@ -33,7 +33,6 @@ cc_library(
     '//flare/base:logging',
     '//flare/base:string',
     '//flare/rpc/name_resolver/util:domain_name_resolver',
-    '//thirdparty/glog:glog',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',

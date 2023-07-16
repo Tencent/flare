@@ -76,6 +76,7 @@ cc_library(
     '//flare/rpc/protocol/protobuf:mock_channel',
     '//flare/rpc/protocol/protobuf:protobuf',
     '//flare/testing/detail:gmock_actions',
+    '//flare/testing/detail:implicitly_casting',
     '//thirdparty/googletest:gmock',
     '//thirdparty/googletest:gtest',
     '//thirdparty/protobuf:protobuf',

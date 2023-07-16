@@ -28,7 +28,6 @@ cc_library(
   deps = [
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:prof_utility',
-    '//thirdparty/glog:glog',
     '//thirdparty/gperftools:tcmalloc_and_profiler',
     '//thirdparty/jsoncpp:jsoncpp',
   ],
@@ -47,7 +46,6 @@ cc_library(
     '//flare/base:deferred',
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:prof_utility',
-    '//thirdparty/glog:glog',
     '//thirdparty/jemalloc:jemalloc',
     '//thirdparty/jsoncpp:jsoncpp',
   ],

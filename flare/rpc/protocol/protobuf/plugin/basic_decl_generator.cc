@@ -182,8 +182,6 @@ void BasicDeclGenerator::GenerateService(
       "\n",
       fmt::arg("file", file->name()),
       fmt::arg("service", GetBasicServiceName(service)),
-      fmt::arg("file_ns", google::protobuf::compiler::cpp::FileLevelNamespace(
-                              file->name())),
       fmt::arg("svc_idx", service->index()),
       fmt::arg("methods", Join(method_impls, "\n")),
       fmt::arg("call_method_cases",

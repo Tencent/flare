@@ -26,17 +26,11 @@ cc_library(
 
 cc_library(
   name = 'monitoring_system',
-  hdrs = [
-    'event.h',
-    'fwd.h',
-    'monitoring_system.h',
-  ],
+  hdrs = 'monitoring_system.h',
   srcs = 'monitoring_system.cc',
   deps = [
+    ':event',
     '//flare/base:dependency_registry',
-    '//flare/base:logging',
-    '//flare/base/experimental:flyweight',
-    '//flare/base/internal:hash_map',
   ],
   visibility = 'PUBLIC',
 )
@@ -56,6 +50,30 @@ cc_library(
     '//thirdparty/gflags:gflags',
   ],
   visibility = ['//flare/base:monitoring'],
+)
+
+cc_library(
+  name = 'event',
+  srcs = 'event.cc',
+  hdrs = 'event.h',
+  visibility = [
+    '//flare/base:monitoring'
+  ],
+  deps = [
+    ':fwd',
+    '//flare/base:likely',
+    '//flare/base:logging',
+    '//flare/base/experimental:flyweight',
+    '//flare/base/internal:hash_map',
+  ],
+)
+
+cc_library(
+  name = 'fwd',
+  hdrs = 'fwd.h',
+  visibility = [
+    '//flare/base:monitoring'
+  ],
 )
 
 cc_library(
