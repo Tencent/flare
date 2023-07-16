@@ -29,7 +29,6 @@ cc_library(
     deps = [
         "//flare/rpc:http",
         "//flare/rpc/builtin/detail:prof_utility",
-        "@com_github_google_glog//:glog",  #FIXME(kangjinci): remove it
         "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
         "@com_github_jsoncpp//:jsoncpp",
     ],
@@ -48,7 +47,6 @@ cc_library(
         "//flare/base:deferred",
         "//flare/rpc:http",
         "//flare/rpc/builtin/detail:prof_utility",
-        "@com_github_google_glog//:glog",  #FIXME(kangjinci): remove it
         "@com_github_jemalloc_jemalloc//:jemalloc",
         "@com_github_jsoncpp//:jsoncpp",
     ],
@@ -93,16 +91,16 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "basic_authentication_http_filter_test",
-#     srcs = ["basic_authentication_http_filter_test.cc"],
-#     deps = [
-#         ":basic_authentication_http_filter",
-#         "//flare/base:string",
-#         "//flare/net/http:http_client",
-#         "//flare/rpc",
-#         "//flare/rpc:http",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "basic_authentication_http_filter_test",
+    srcs = ["basic_authentication_http_filter_test.cc"],
+    deps = [
+        ":basic_authentication_http_filter",
+        "//flare/base:string",
+        "//flare/net/http:http_client",
+        "//flare/rpc",
+        "//flare/rpc:http",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)

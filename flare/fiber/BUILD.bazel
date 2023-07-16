@@ -347,9 +347,8 @@ cc_test(
         "//flare/base/internal:cpu",
         "//flare/base/thread:attribute",
         "//flare/base/thread:latch",
-        "//flare/testing:main",
         "@com_github_gflags_gflags//:gflags",
-        "@com_google_googletest//:gtest_main",  #FIXME(kangjinci): remove this
+        "@com_google_googletest//:gtest_main",
     ],
 )
 

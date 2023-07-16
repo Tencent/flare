@@ -106,10 +106,11 @@ cc_library(
 #     "//flare/base/monitoring:monitoring_system",
 #     "//flare/init:override_flag",
 #     "//flare/testing:main",
-#     "@com_google_gflags_gflags//:gflags",
+#     "@com_github_gflags_gflags//:gflags",
 #     "@com_google_googletest//:gtest_main",
 #   ],
-#   testdata = [
-#     ('testdata', 'conf')
+#   data = [
+#     "testdata/remap_sys2.yaml",
+#     "testdata/remap_sys3.yaml",
 #   ]
 # )

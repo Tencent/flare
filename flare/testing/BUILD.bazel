@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+load("//bazel:cc_flare_library.bzl", "cc_flare_library")
+
 cc_library(
     name = "endpoint",
     srcs = ["endpoint.cc"],
@@ -84,16 +86,16 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "rpc_mock_test",
-#     srcs = ["rpc_mock_test.cc"],
-#     deps = [
-#         ":echo_service_proto_flare",
-#         ":main",
-#         ":rpc_mock",
-#         "//flare/rpc",
-#     ],
-# )
+cc_test(
+    name = "rpc_mock_test",
+    srcs = ["rpc_mock_test.cc"],
+    deps = [
+        ":echo_service_proto_flare",
+        ":main",
+        ":rpc_mock",
+        "//flare/rpc",
+    ],
+)
 
 cc_library(
     name = "rpc_controller",
@@ -138,26 +140,41 @@ proto_library(
     ],
 )
 
-# cc_flare_library(
-#     name = "echo_service_proto_flare",
-#     visibility = ["//visibility:public"],
-#     deps = [":echo_service_proto"],
-# )
+cc_proto_library(
+    name = "echo_service_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":echo_service_proto"],
+)
+
+cc_flare_library(
+    name = "echo_service_proto_flare",
+    srcs = ["echo_service.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":echo_service_cc_proto",
+        "//flare/rpc:rpc_options_cc_proto",
+    ],
+)
 
 proto_library(
     name = "relay_service_proto",
     srcs = ["relay_service.proto"],
     visibility = ["//visibility:public"],
-    deps = [
-        "//flare/rpc:rpc_options_proto",
-    ],
+    deps = ["//flare/rpc:rpc_options_proto"],
 )
 
-# cc_flare_library(
-#     name = "relay_service_proto_flare",
-#     visibility = ["//visibility:public"],
-#     deps = [":relay_service_proto"],
-# )
+cc_proto_library(
+    name = "relay_service_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":relay_service_proto"],
+)
+
+cc_flare_library(
+    name = "relay_service_proto_flare",
+    srcs = ["relay_service.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":relay_service_cc_proto"],
+)
 
 cc_library(
     name = "http_mock",

@@ -117,21 +117,21 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "hbase_channel_test",
-#     srcs = ["hbase_channel_test.cc"],
-#     deps = [
-#         ":hbase_channel",
-#         ":hbase_client_controller",
-#         ":hbase_server_controller",
-#         ":hbase_service",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#         "//flare/testing:rpc_mock",
-#     ],
-# )
+cc_test(
+    name = "hbase_channel_test",
+    srcs = ["hbase_channel_test.cc"],
+    deps = [
+        ":hbase_channel",
+        ":hbase_client_controller",
+        ":hbase_server_controller",
+        ":hbase_service",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+        "//flare/testing:rpc_mock",
+    ],
+)
 
 cc_library(
     name = "hbase_controller_common",
@@ -239,22 +239,22 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "hbase_protocol_test",
-#     srcs = ["hbase_protocol_test.cc"],
-#     deps = [
-#         ":call_context",
-#         ":hbase_client_controller",
-#         ":hbase_client_protocol",
-#         ":hbase_server_controller",
-#         ":hbase_server_protocol",
-#         ":message",
-#         "//flare/base:down_cast",
-#         "//flare/init:on_init",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "hbase_protocol_test",
+    srcs = ["hbase_protocol_test.cc"],
+    deps = [
+        ":call_context",
+        ":hbase_client_controller",
+        ":hbase_client_protocol",
+        ":hbase_server_controller",
+        ":hbase_server_protocol",
+        ":message",
+        "//flare/base:down_cast",
+        "//flare/init:on_init",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "hbase_service",
@@ -277,16 +277,16 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "hbase_service_test",
-#     srcs = ["hbase_service_test.cc"],
-#     deps = [
-#         ":call_context",
-#         ":hbase_server_controller",
-#         ":hbase_service",
-#         ":message",
-#         "//flare/base:down_cast",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "hbase_service_test",
+    srcs = ["hbase_service_test.cc"],
+    deps = [
+        ":call_context",
+        ":hbase_server_controller",
+        ":hbase_service",
+        ":message",
+        "//flare/base:down_cast",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)

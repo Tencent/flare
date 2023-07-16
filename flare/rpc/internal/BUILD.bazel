@@ -165,25 +165,26 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "rpc_metrics_test",
-#     srcs = ["rpc_metrics_test.cc"],
-#     deps = [
-#         ":rpc_metrics",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#         "@com_github_jsoncpp//:jsoncpp",
-#     ],
-# )
+cc_test(
+    name = "rpc_metrics_test",
+    srcs = ["rpc_metrics_test.cc"],
+    deps = [
+        ":rpc_metrics",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+        "@com_github_jsoncpp//:jsoncpp",
+    ],
+)
 
-# cc_benchmark(
-#     name = "rpc_metrics_benchmark",
-#     srcs = "rpc_metrics_benchmark.cc",
-#     deps = [
-#         ":rpc_metrics",
-#         "//flare/testing:echo_service_proto_flare",
-#     ],
-# )
+cc_test(
+    name = "rpc_metrics_benchmark",
+    srcs = ["rpc_metrics_benchmark.cc"],
+    deps = [
+        ":rpc_metrics",
+        "//flare/testing:echo_service_proto_flare",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
 
 cc_library(
     name = "fast_latch",

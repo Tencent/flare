@@ -62,20 +62,20 @@ cc_test(
     ],
 )
 
-# cc_test(
-#     name = "rate_limiter_integration_test",
-#     srcs = ["rate_limiter_integration_test.cc"],
-#     deps = [
-#         "//flare/fiber",
-#         "//flare/init:override_flag",
-#         "//flare/rpc",
-#         "//flare/rpc/load_balancer:round_robin",
-#         "//flare/rpc/name_resolver:list",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "rate_limiter_integration_test",
+    srcs = ["rate_limiter_integration_test.cc"],
+    deps = [
+        "//flare/fiber",
+        "//flare/init:override_flag",
+        "//flare/rpc",
+        "//flare/rpc/load_balancer:round_robin",
+        "//flare/rpc/name_resolver:list",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "stream_io",

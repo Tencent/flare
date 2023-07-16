@@ -105,21 +105,20 @@ cc_test(
     ],
 )
 
-# cc_test(
-#     name = "integration_test",
-#     srcs = "integration_test.cc",
-#     deps = [
-#         ":tracing",
-#         "//flare/base:overloaded",
-#         "//flare/base/internal:cpu",
-#         "//flare/fiber",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#         "//flare/testing:relay_service_proto_flare",
-#         "@com_github_gflags_gflags//:gflags",
-#         "//thirdparty/googletest:gmock",
-#         "@com_github_opentracing_opentracing_cpp//:opentracing",
-#     ],
-# )
+cc_test(
+    name = "integration_test",
+    srcs = ["integration_test.cc"],
+    deps = [
+        ":tracing",
+        "//flare/base:overloaded",
+        "//flare/base/internal:cpu",
+        "//flare/fiber",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+        "//flare/testing:relay_service_proto_flare",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_github_opentracing_opentracing_cpp//:opentracing",
+    ],
+)

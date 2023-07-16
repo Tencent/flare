@@ -146,15 +146,15 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "service_method_locator_test",
-#     srcs = ["service_method_locator_test.cc"],
-#     deps = [
-#         ":service_method_locator",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "service_method_locator_test",
+    srcs = ["service_method_locator_test.cc"],
+    deps = [
+        ":service_method_locator",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "gdt_json_proto_conversion",
@@ -211,36 +211,36 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "proto_over_http_protocol_test",
-#     srcs = ["proto_over_http_protocol_test.cc"],
-#     deps = [
-#         ":call_context",
-#         ":proto_over_http_protocol",
-#         ":service_method_locator",
-#         "//flare/base:down_cast",
-#         "//flare/base:string",
-#         "//flare/init:on_init",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "proto_over_http_protocol_test",
+    srcs = ["proto_over_http_protocol_test.cc"],
+    deps = [
+        ":call_context",
+        ":proto_over_http_protocol",
+        ":service_method_locator",
+        "//flare/base:down_cast",
+        "//flare/base:string",
+        "//flare/init:on_init",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
-# cc_test(
-#     name = "proto_over_http_protocol_streaming_rpc_test",
-#     srcs = ["proto_over_http_protocol_streaming_rpc_test.cc"],
-#     deps = [
-#         ":protobuf",
-#         "//flare/base:callback",
-#         "//flare/base:random",
-#         "//flare/base/thread:latch",
-#         "//flare/fiber",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "proto_over_http_protocol_streaming_rpc_test",
+    srcs = ["proto_over_http_protocol_streaming_rpc_test.cc"],
+    deps = [
+        ":protobuf",
+        "//flare/base:callback",
+        "//flare/base:random",
+        "//flare/base/thread:latch",
+        "//flare/fiber",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "std_protocol",
@@ -266,33 +266,33 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "std_protocol_test",
-#     srcs = ["std_protocol_test.cc"],
-#     deps = [
-#         ":call_context",
-#         ":message",
-#         ":service_method_locator",
-#         ":std_protocol",
-#         "//flare/init:on_init",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "std_protocol_test",
+    srcs = ["std_protocol_test.cc"],
+    deps = [
+        ":call_context",
+        ":message",
+        ":service_method_locator",
+        ":std_protocol",
+        "//flare/init:on_init",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
-# cc_test(
-#     name = "std_protocol_streaming_rpc_test",
-#     srcs = ["std_protocol_streaming_rpc_test.cc"],
-#     deps = [
-#         ":protobuf",
-#         ":std_protocol",
-#         "//flare/fiber",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "std_protocol_streaming_rpc_test",
+    srcs = ["std_protocol_streaming_rpc_test.cc"],
+    deps = [
+        ":protobuf",
+        ":std_protocol",
+        "//flare/fiber",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "qzone_protocol",
@@ -321,33 +321,33 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "qzone_protocol_test",
-#     srcs = ["qzone_protocol_test.cc"],
-#     deps = [
-#         ":call_context",
-#         ":message",
-#         ":qzone_protocol",
-#         ":service_method_locator",
-#         "//flare/init:on_init",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "qzone_protocol_test",
+    srcs = ["qzone_protocol_test.cc"],
+    deps = [
+        ":call_context",
+        ":message",
+        ":qzone_protocol",
+        ":service_method_locator",
+        "//flare/init:on_init",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
-# cc_test(
-#     name = "qzone_protocol_streaming_rpc_test",
-#     srcs = ["qzone_protocol_streaming_rpc_test.cc"],
-#     deps = [
-#         ":protobuf",
-#         ":qzone_protocol",
-#         "//flare/fiber",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "qzone_protocol_streaming_rpc_test",
+    srcs = ["qzone_protocol_streaming_rpc_test.cc"],
+    deps = [
+        ":protobuf",
+        ":qzone_protocol",
+        "//flare/fiber",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "rpc_client_controller",
@@ -365,23 +365,23 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "rpc_client_controller_test",
-#     srcs = "rpc_client_controller_test.cc",
-#     deps = [
-#         ":rpc_channel",
-#         ":rpc_client_controller",
-#         ":rpc_server_controller",
-#         "//flare/base:callback",
-#         "//flare/base:string",
-#         "//flare/fiber",
-#         "//flare/init:override_flag",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "rpc_client_controller_test",
+    srcs = ["rpc_client_controller_test.cc"],
+    deps = [
+        ":rpc_channel",
+        ":rpc_client_controller",
+        ":rpc_server_controller",
+        "//flare/base:callback",
+        "//flare/base:string",
+        "//flare/fiber",
+        "//flare/init:override_flag",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "rpc_controller_common",
@@ -420,20 +420,20 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "rpc_server_controller_test",
-#     srcs = "rpc_server_controller_test.cc",
-#     deps = [
-#         ":rpc_channel",
-#         ":rpc_client_controller",
-#         ":rpc_server_controller",
-#         "//flare/fiber",
-#         "//flare/rpc",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "rpc_server_controller_test",
+    srcs = ["rpc_server_controller_test.cc"],
+    deps = [
+        ":rpc_channel",
+        ":rpc_client_controller",
+        ":rpc_server_controller",
+        "//flare/fiber",
+        "//flare/rpc",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "service",
@@ -526,8 +526,8 @@ cc_library(
 
 # cc_test(
 #     name = "rpc_channel_test",
-#     srcs = "rpc_channel_test.cc",
-#     testdata = [
+#     srcs = ["rpc_channel_test.cc"],
+#     data = [
 #         ("testdata/", "conf/"),
 #     ],
 #     deps = [
@@ -542,45 +542,47 @@ cc_library(
 #     ],
 # )
 
-# cc_test(
-#     name = "service_test",
-#     srcs = "service_test.cc",
-#     deps = [
-#         ":call_context_factory",
-#         ":message",
-#         ":rpc_server_controller",
-#         ":service",
-#         ":std_protocol",
-#         "//flare/fiber",
-#         "//flare/init:override_flag",
-#         "//flare/rpc/internal:stream_io_adaptor",
-#         "//flare/rpc/protocol:stream_protocol",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "service_test",
+    srcs = ["service_test.cc"],
+    deps = [
+        ":call_context_factory",
+        ":message",
+        ":rpc_server_controller",
+        ":service",
+        ":std_protocol",
+        "//flare/fiber",
+        "//flare/init:override_flag",
+        "//flare/rpc/internal:stream_io_adaptor",
+        "//flare/rpc/protocol:stream_protocol",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
-# for block_size in [
-#     "4K",
-#     "64K",
-#     "1M",
-# ]:
-#     cc_test(
-#         name = "integration_test_" + block_size,
-#         srcs = "integration_test.cc",
-#         defs = ['BUFFER_BLOCK_SIZE=\\"%s\\"' % block_size],
-#         deps = [
-#             ":protobuf",
-#             "//flare/base:compression",
-#             "//flare/base:string",
-#             "//flare/base/thread:latch",
-#             "//flare/init:override_flag",
-#             "//flare/rpc",
-#             "//flare/testing:echo_service_proto_flare",
-#             "//flare/testing:endpoint",
-#             "//flare/testing:main",
-#         ],
-#     )
+[
+    cc_test(
+        name = "integration_test_" + block_size,
+        srcs = ["integration_test.cc"],
+        local_defines = ['BUFFER_BLOCK_SIZE=\\"%s\\"' % block_size],
+        deps = [
+            ":protobuf",
+            "//flare/base:compression",
+            "//flare/base:string",
+            "//flare/base/thread:latch",
+            "//flare/init:override_flag",
+            "//flare/rpc",
+            "//flare/testing:echo_service_proto_flare",
+            "//flare/testing:endpoint",
+            "//flare/testing:main",
+        ],
+    )
+    for block_size in [
+        "4K",
+        "64K",
+        "1M",
+    ]
+]
 
 cc_library(
     name = "rpc_options",
@@ -631,19 +633,19 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "baidu_std_protocol_test",
-#     srcs = "baidu_std_protocol_test.cc",
-#     deps = [
-#         ":baidu_std_protocol",
-#         ":call_context",
-#         ":message",
-#         ":service_method_locator",
-#         "//flare/init:on_init",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "baidu_std_protocol_test",
+    srcs = ["baidu_std_protocol_test.cc"],
+    deps = [
+        ":baidu_std_protocol",
+        ":call_context",
+        ":message",
+        ":service_method_locator",
+        "//flare/init:on_init",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
 proto_library(
     name = "poppy_rpc_meta_proto",
@@ -682,22 +684,22 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "poppy_protocol_test",
-#     srcs = "poppy_protocol_test.cc",
-#     deps = [
-#         ":call_context",
-#         ":message",
-#         ":poppy_protocol",
-#         ":poppy_rpc_meta_cc_proto",
-#         ":service_method_locator",
-#         "//flare/base:down_cast",
-#         "//flare/base:endian",
-#         "//flare/init:on_init",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "poppy_protocol_test",
+    srcs = ["poppy_protocol_test.cc"],
+    deps = [
+        ":call_context",
+        ":message",
+        ":poppy_protocol",
+        ":poppy_rpc_meta_cc_proto",
+        ":service_method_locator",
+        "//flare/base:down_cast",
+        "//flare/base:endian",
+        "//flare/init:on_init",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "compression",
@@ -711,14 +713,15 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "compression_test",
-#     srcs = "compression_test.cc",
-#     deps = [
-#         ":compression",
-#         "//flare/base:object_pool",
-#     ],
-# )
+cc_test(
+    name = "compression_test",
+    srcs = ["compression_test.cc"],
+    deps = [
+        ":compression",
+        "//flare/base:object_pool",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
 
 proto_library(
     name = "binlog_proto",

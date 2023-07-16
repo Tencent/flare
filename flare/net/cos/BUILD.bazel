@@ -81,20 +81,20 @@ cc_library(
     ],
 )
 
-# cc_test(
-#     name = "cos_client_test",
-#     srcs = ["cos_client_test.cc"],
-#     deps = [
-#         ":cos_client",
-#         ":cos_status",
-#         "//flare/base:buffer",
-#         "//flare/base:enum",
-#         "//flare/fiber",
-#         "//flare/rpc",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#     ],
-# )
+cc_test(
+    name = "cos_client_test",
+    srcs = ["cos_client_test.cc"],
+    deps = [
+        ":cos_client",
+        ":cos_status",
+        "//flare/base:buffer",
+        "//flare/base:enum",
+        "//flare/fiber",
+        "//flare/rpc",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
 
 cc_library(
     name = "signature",
