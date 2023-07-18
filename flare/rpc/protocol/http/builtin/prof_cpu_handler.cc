@@ -25,7 +25,7 @@
 
 #include "jsoncpp/json.h"
 
-#include "flare/base/internal/logging.h"
+#include "flare/base/logging.h"
 #include "flare/base/string.h"
 #include "flare/rpc/builtin/detail/prof_utility.h"
 
