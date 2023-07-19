@@ -46,7 +46,6 @@ cc_library(
     '//flare/base:hazptr',
     '//flare/base:random',
     '//flare/io:io_basic',
-    '//thirdparty/glog:glog',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',

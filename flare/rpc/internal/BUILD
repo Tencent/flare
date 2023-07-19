@@ -17,7 +17,6 @@ cc_library(
   hdrs = 'correlation_id.h',
   deps = [
     '//flare/base:id_alloc',
-    '//thirdparty/glog:glog',
   ],
   visibility = [
     '//flare/net/...',
@@ -42,6 +41,7 @@ cc_library(
   hdrs = 'stream_call_gate_pool.h',
   srcs = 'stream_call_gate_pool.cc',
   deps = [
+    ':stream_call_gate',
     '//flare/base:exposed_var',
     '//flare/base:function_view',
     '//flare/base:hazptr',
@@ -53,9 +53,7 @@ cc_library(
     '//flare/base/thread:latch',
     '//flare/fiber:fiber',
     '//flare/io:io_basic',
-    '//flare/rpc/internal:stream_call_gate',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/glog:glog',
   ],
   visibility = [
     '//flare:init',
@@ -68,11 +66,11 @@ cc_test(
   name = 'stream_call_gate_pool_test',
   srcs = 'stream_call_gate_pool_test.cc',
   deps = [
+    ':stream_call_gate',
     ':stream_call_gate_pool',
     '//flare/fiber:fiber',
     '//flare/testing:main',
     '//flare/testing:endpoint',
-    '//flare/rpc/internal:stream_call_gate',
     '//flare/rpc:rpc',
   ]
 )
@@ -81,9 +79,9 @@ cc_library(
   name = 'buffered_stream_provider',
   hdrs = 'buffered_stream_provider.h',
   deps = [
+    ':stream',
     '//flare/base:logging',
     '//flare/fiber:fiber',
-    '//flare/rpc/internal:stream',
   ],
   visibility = ['//flare/rpc/...'],
 )
@@ -101,9 +99,7 @@ cc_test(
 cc_library(
   name = 'error_stream_provider',
   hdrs = 'error_stream_provider.h',
-  deps = [
-    '//flare/rpc/internal:stream',
-  ],
+  deps = [':stream'],
   visibility = ['//flare/rpc/...'],
 )
 
@@ -123,6 +119,7 @@ cc_library(
   srcs = 'stream_io_adaptor.cc',
   deps = [
     ':buffered_stream_provider',
+    ':stream',
     '//flare/base:function',
     '//flare/base:function',
     '//flare/base:maybe_owning',
@@ -130,7 +127,6 @@ cc_library(
     '//flare/base:ref_ptr',
     '//flare/fiber:fiber',
     '//flare/fiber:work_queue',
-    '//flare/rpc/internal:stream',
     '//flare/rpc/protocol:message',
   ],
   visibility = ['//flare/rpc/...'],
@@ -234,6 +230,11 @@ cc_library(
   hdrs = 'stream_call_gate.h',
   srcs = ['stream_call_gate.cc'],
   deps = [
+    ':correlation_id',
+    ':correlation_map',
+    ':sharded_call_map',
+    ':stream',
+    ':stream_io_adaptor',
     '//flare/base:align',
     '//flare/base:delayed_init',
     '//flare/base:function',
@@ -246,14 +247,8 @@ cc_library(
     '//flare/io/native:native',
     '//flare/io/util:socket',
     '//flare/rpc/binlog:binlog',
-    '//flare/rpc/internal:correlation_id',
-    '//flare/rpc/internal:correlation_map',
-    '//flare/rpc/internal:sharded_call_map',
-    '//flare/rpc/internal:stream_io_adaptor',
-    '//flare/rpc/internal:stream',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/glog:glog',
     '//thirdparty/googletest:gtest_prod',
   ],
   visibility = [

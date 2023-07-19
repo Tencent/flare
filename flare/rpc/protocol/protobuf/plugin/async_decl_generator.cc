@@ -19,6 +19,7 @@
 
 #include "google/protobuf/compiler/cpp/cpp_helpers.h"
 
+#include "flare/base/logging.h"
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/protobuf/plugin/names.h"
 #include "flare/rpc/protocol/protobuf/rpc_options.h"
@@ -57,7 +58,7 @@ void AsyncDeclGenerator::GenerateService(
           "    ::flare::AsyncStreamWriter<{output_type}> writer,\n"
           "    ::flare::RpcServerController* controller);";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "virtual ::flare::Future<> {method}(\n"
           "    ::flare::AsyncStreamReader<{input_type}> reader,\n"
@@ -147,7 +148,7 @@ void AsyncDeclGenerator::GenerateService(
           "  break;\n"
           "}}";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "case {index}: {{\n"
           "  {method}(\n"
@@ -228,8 +229,6 @@ void AsyncDeclGenerator::GenerateService(
       "\n",
       fmt::arg("file", file->name()),
       fmt::arg("service", GetAsyncServiceName(service)),
-      fmt::arg("file_ns", google::protobuf::compiler::cpp::FileLevelNamespace(
-                              file->name())),
       fmt::arg("svc_idx", service->index()),
       fmt::arg("call_method_cases",
                Replace(Join(call_method_impls, "\n"), "\n", "\n    ")),
@@ -271,7 +270,7 @@ void AsyncDeclGenerator::GenerateService(
           "  {body}\n"
           "}}";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "::flare::Future<> {service}::{method}(\n"
           "    ::flare::AsyncStreamReader<{input_type}> reader,\n"
@@ -331,7 +330,7 @@ void AsyncDeclGenerator::GenerateStub(
           "    const {input_type}& request,\n"
           "    ::flare::RpcClientController* controller);";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       // Same as client-side streaming.
       pattern =
           "std::pair<\n"
@@ -434,7 +433,7 @@ void AsyncDeclGenerator::GenerateStub(
           "  return ctlr->GetAsyncStreamReader<{output_type}>();\n"
           "}}";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "std::pair<\n"
           "  ::flare::AsyncStreamReader<{output_type}>,\n"

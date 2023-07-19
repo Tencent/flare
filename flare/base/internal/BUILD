@@ -222,7 +222,6 @@ cc_library(
     '//flare/base/thread:attribute',
     '//thirdparty/curl:curl',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/glog:glog',
     '#dl',
   ],
   visibility = ['//flare/...'],

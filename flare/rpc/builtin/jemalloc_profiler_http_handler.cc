@@ -23,7 +23,6 @@
 #include <string>
 #include <utility>
 
-#include "glog/logging.h"
 #include "jemalloc/jemalloc.h"
 #include "jsoncpp/json.h"
 

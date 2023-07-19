@@ -23,7 +23,6 @@
 #include "flare/base/thread/attribute.h"
 #include "flare/base/thread/latch.h"
 #include "flare/fiber/fiber.h"
-#include "flare/testing/main.h"
 
 DECLARE_string(flare_fiber_worker_inaccessible_cpus);
 

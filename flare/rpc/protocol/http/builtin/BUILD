@@ -156,9 +156,10 @@ cc_library(
   hdrs = 'prof_cpu_handler.h',
   srcs = 'prof_cpu_handler.cc',
   deps = [
+    '//flare/base:logging',
+    '//flare/base:string',
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:prof_utility',
-    '//thirdparty/glog:glog',
     '//thirdparty/googletest:gtest_prod',
     '//thirdparty/gperftools:profiler',
     '//thirdparty/jsoncpp:jsoncpp',

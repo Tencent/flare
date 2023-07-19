@@ -168,7 +168,6 @@ cc_library(
     '//flare/base/buffer:polymorphic_buffer',
     '//flare/base/internal:logging',
     '//flare/base/internal:singly_linked_list',
-    '//thirdparty/glog:glog',
   ],
   visibility = 'PUBLIC',
 )
@@ -610,10 +609,7 @@ cc_benchmark(
 cc_library(
   name = 'monitoring',
   hdrs = 'monitoring.h',
-  srcs = [
-    'monitoring.cc',
-    'monitoring/event.cc',
-  ],
+  srcs = 'monitoring.cc',
   deps = [
     ':chrono',
     ':deferred',
@@ -628,6 +624,8 @@ cc_library(
     '//flare/base/internal:logging',
     '//flare/base/internal:time_keeper',
     '//flare/base/monitoring:dispatcher',
+    '//flare/base/monitoring:event',
+    '//flare/base/monitoring:fwd',
     '//flare/base/monitoring:monitoring_system',
     '//flare/base/thread:out_of_duty_callback',
     '//flare/base/thread:thread_local',

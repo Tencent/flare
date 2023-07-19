@@ -32,7 +32,6 @@ cc_library(
     ':message_dispatcher',
     '//flare/rpc/load_balancer:load_balancer',
     '//flare/rpc/name_resolver:name_resolver',
-    '//thirdparty/glog:glog',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',

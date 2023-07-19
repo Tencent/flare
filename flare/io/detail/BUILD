@@ -121,7 +121,7 @@ cc_test(
 
 cc_test(
   name = 'watchdog_test',
-  srcs = ['watchdog_test.cc', 'watchdog_test.h'],
+  srcs = ['watchdog_test.cc'],
   deps = [
     '//flare/io:io_basic',
     '//flare/testing:main',

@@ -19,6 +19,7 @@
 
 #include "google/protobuf/compiler/cpp/cpp_helpers.h"
 
+#include "flare/base/logging.h"
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/protobuf/plugin/names.h"
 #include "flare/rpc/protocol/protobuf/rpc_options.h"
@@ -57,7 +58,7 @@ void SyncDeclGenerator::GenerateService(
           "    ::flare::StreamWriter<{output_type}> writer,\n"
           "    ::flare::RpcServerController* controller);";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "virtual void {method}(\n"
           "    ::flare::StreamReader<{input_type}> reader,\n"
@@ -147,7 +148,7 @@ void SyncDeclGenerator::GenerateService(
           "  break;\n"
           "}}";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "case {index}: {{\n"
           "  {method}(\n"
@@ -229,8 +230,6 @@ void SyncDeclGenerator::GenerateService(
       "\n",
       fmt::arg("file", file->name()),
       fmt::arg("service", GetSyncServiceName(service)),
-      fmt::arg("file_ns", google::protobuf::compiler::cpp::FileLevelNamespace(
-                              file->name())),
       fmt::arg("svc_idx", service->index()),
       fmt::arg("call_method_cases",
                Replace(Join(call_method_impls, "\n"), "\n", "\n    ")),
@@ -274,7 +273,7 @@ void SyncDeclGenerator::GenerateService(
           "  writer.Close();\n"
           "}}";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "void {service}::{method}(\n"
           "    ::flare::StreamReader<{input_type}> reader,\n"
@@ -335,7 +334,7 @@ void SyncDeclGenerator::GenerateStub(
           "    const {input_type}& request,\n"
           "    ::flare::RpcClientController* controller);";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       // Same as client-side streaming.
       pattern =
           "std::pair<\n"
@@ -427,7 +426,7 @@ void SyncDeclGenerator::GenerateStub(
           "  return ctlr->GetStreamReader<{output_type}>();\n"
           "}}";
     } else {
-      CHECK(client_streaming && server_streaming);
+      FLARE_CHECK(client_streaming && server_streaming);
       pattern =
           "std::pair<\n"
           "    ::flare::StreamReader<{output_type}>,\n"
