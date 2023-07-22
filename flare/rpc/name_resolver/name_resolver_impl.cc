@@ -64,7 +64,7 @@ std::unique_ptr<NameResolutionView> NameResolverImpl::StartResolving(
   if (register_updater) {
     updater_->Register(
         name,
-        [=, route_info_ptr = route_info_ptr]() {
+        [=, this, route_info_ptr = route_info_ptr]() {
           UpdateRoute(name, route_info_ptr);
         },
         FLAGS_flare_name_resolver_update_interval_seconds * 1s);

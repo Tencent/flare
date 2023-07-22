@@ -462,12 +462,12 @@ void NormalConnectionHandler::InitializeStreamContextLocked(
   StreamIoAdaptor::Operations ops = {
       .try_parse = [=](auto&& e) { return protocol->TryParse(e, pctlr); },
       .write =
-          [=](auto&& am) {
+          [=, this](auto&& am) {
             return WriteMessage(am, protocol, pctlr, correlation_id);
           },
-      .restart_read = [=] { return conn_->RestartRead(); },
-      .on_close = [=] { return OnStreamClosed(correlation_id); },
-      .on_cleanup = [=] { return OnStreamCleanup(correlation_id); }};
+      .restart_read = [=, this] { return conn_->RestartRead(); },
+      .on_close = [=, this] { return OnStreamClosed(correlation_id); },
+      .on_cleanup = [=, this] { return OnStreamCleanup(correlation_id); }};
   ctx.io_adaptor = std::make_unique<StreamIoAdaptor>(
       FLAGS_flare_rpc_server_stream_concurrency, std::move(ops));
 }

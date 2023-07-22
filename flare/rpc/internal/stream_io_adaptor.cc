@@ -74,7 +74,7 @@ void StreamIoAdaptor::NotifyError(StreamError error) {
 }
 
 void StreamIoAdaptor::NotifyWriteCompletion() {
-  work_queue_.Push([=] { os_provider_->OnWriteCompletion(true); });
+  work_queue_.Push([=, this] { os_provider_->OnWriteCompletion(true); });
 }
 
 void StreamIoAdaptor::Break() {

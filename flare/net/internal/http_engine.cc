@@ -310,7 +310,8 @@ class CurlClient {
     extra_fds[0].fd = notifier_->Fd();
     extra_fds[0].events = CURL_WAIT_POLLIN;
     while (!exiting_.load(std::memory_order_relaxed)) {
-      CURLMcode mc = curl_multi_perform(multi_handle_, &still_running_);
+      [[maybe_unused]] CURLMcode mc =
+          curl_multi_perform(multi_handle_, &still_running_);
       CheckMultiInfo();
       AddHandlers();
 

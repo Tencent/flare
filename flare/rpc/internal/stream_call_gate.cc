@@ -221,7 +221,7 @@ StreamCallGate::StreamCall(std::uint64_t correlation_id,
   rpc::detail::StreamIoAdaptor::Operations ops = {
       .try_parse = try_parse,
       .write =
-          [=](auto&& e) {
+          [=, this](auto&& e) {
             // `controller` must be alive. `write` is called synchronously from
             // `stream.Write()`. If the user destroyed the controller before
             // writing, he should be quite aware what he's doing.

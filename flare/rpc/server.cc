@@ -219,7 +219,7 @@ void Server::ListenOn(const Endpoint& addr, int backlog) {
       "warning for UTs.",
       EndpointGetPort(addr));
   listening_on_ = addr;
-  listen_cb_ = [=] {
+  listen_cb_ = [=, this] {
     // Create listening socket.
     auto fd = io::util::CreateListener(addr, backlog);
     FLARE_CHECK(!!fd, "Cannot create listener.");

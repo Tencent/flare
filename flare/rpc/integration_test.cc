@@ -97,7 +97,7 @@ class DummyRelay : public testing::RelayService {
     ctlr->SetTimeout(100ms);
     req.set_body(request->body());
 
-    auto my_done = NewCallback([=] {
+    auto my_done = NewCallback([=, this] {
       if (ctlr->Failed()) {
         ++failure_;
         flare::down_cast<RpcServerController>(controller)

@@ -53,7 +53,7 @@ bool DecodeHex(std::string_view from, std::string* to) {
     return false;
   }
   to->reserve(from.size() / 2);
-  for (int i = 0; i != from.size(); i += 2) {
+  for (size_t i = 0; i != from.size(); i += 2) {
     auto v = detail::AsciiCodeFromHexCharPair(from[i], from[i + 1]);
     if (v == -1) {
       return false;
