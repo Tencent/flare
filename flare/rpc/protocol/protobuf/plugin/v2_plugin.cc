@@ -309,13 +309,13 @@ void V2Generator::GenerateEpilogue(const google::protobuf::FileDescriptor* file,
 //   first place, or
 //
 // - Do some dirty hack.
-// struct StreamingResponseInitializer {
-//   StreamingResponseInitializer() {
-//     google::protobuf::internal::ExtensionSet::RegisterExtension(
-//         google::protobuf::MethodOptions::internal_default_instance(), 10003,
-//         8, false, false);
-//   }
-// } streaming_response_initializer;
+struct StreamingResponseInitializer {
+  StreamingResponseInitializer() {
+    google::protobuf::internal::ExtensionSet::RegisterExtension(
+        google::protobuf::MethodOptions::internal_default_instance(), 10004, 8,
+        false, false);
+  }
+} streaming_response_initializer;
 
 int main(int argc, char* argv[]) {
   // Make warning about using `gdt.stream_response` looks sane.
