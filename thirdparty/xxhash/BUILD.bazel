@@ -1,0 +1,22 @@
+cc_library(
+    name = "xxhash",
+    srcs = ["xxhash.c"],
+    hdrs = ["xxhash.h"],
+    include_prefix = "xxhash",
+    visibility = ["//visibility:public"],
+)
+
+cc_test(
+    name = "xxhash_test",
+    srcs = ["xxhash_test.cc"],
+    deps = [
+        ":xxhash",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_binary(
+    name = "xxhsum",
+    srcs = ["xxhsum.c"],
+    deps = [":xxhash"],
+)

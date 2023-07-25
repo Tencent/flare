@@ -63,7 +63,9 @@ void InitializeOpenSSL() {
 void DestroyOpenSSL() {
   if (!ssl_lock) return;
 
+#ifndef FLARE_WITH_BORINGSSL
   ENGINE_cleanup();
+#endif
   CRYPTO_set_locking_callback(nullptr);
   uint32_t ssl_lock_num = CRYPTO_num_locks();
   for (int i = 0; i < ssl_lock_num; ++i) {

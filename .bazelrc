@@ -1,0 +1,20 @@
+# This file tries to group and simplify build options for flare
+
+build --cxxopt=-std=c++2a --host_cxxopt=-std=c++2a
+
+build:llvm --action_env=CXX=clang++ --action_env=CC=clang
+
+build:dbg --compilation_mode=dbg
+
+build:opt --compilation_mode=opt
+
+build --copt=-Wno-sign-compare
+
+build:san-common --config=dbg --strip=never --copt=-O0 --copt=-fno-omit-frame-pointer
+
+build:asan --config=san-common --copt=-fsanitize=address --linkopt=-fsanitize=address
+
+# ASAN hits ODR violations with shared linkage due to rules_proto.
+build:asan --dynamic_mode=off
+
+test --test_output=errors

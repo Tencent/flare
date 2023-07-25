@@ -1,0 +1,153 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "types",
+    hdrs = ["types.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        "//flare/base:logging",
+        "//flare/base:type_index",
+        "//flare/base/internal:meta",
+    ],
+)
+
+cc_library(
+    name = "ref_counted",
+    hdrs = ["ref_counted.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:object_pool",
+        "//flare/base:ref_ptr",
+    ],
+)
+
+cc_test(
+    name = "ref_counted_test",
+    srcs = ["ref_counted_test.cc"],
+    deps = [
+        ":ref_counted",
+        "//flare/testing:main",
+    ],
+)
+
+cc_library(
+    name = "disabled",
+    srcs = ["disabled.cc"],
+    hdrs = ["disabled.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":types",
+    ],
+)
+
+cc_test(
+    name = "disabled_test",
+    srcs = ["disabled_test.cc"],
+    deps = [
+        ":disabled",
+        "//flare/base:object_pool",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "thread_local",
+    srcs = ["thread_local.cc"],
+    hdrs = ["thread_local.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":types",
+        "//flare/base:chrono",
+        "//flare/base:deferred",
+        "//flare/base:demangle",
+        "//flare/base:erased_ptr",
+        "//flare/base:logging",
+        "//flare/base/internal:annotation",
+    ],
+)
+
+cc_test(
+    name = "thread_local_test",
+    srcs = ["thread_local_test.cc"],
+    deps = [
+        ":thread_local",
+        "//flare/base:object_pool",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "memory_node_shared",
+    srcs = ["memory_node_shared.cc"],
+    hdrs = ["memory_node_shared.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":types",
+        "//flare/base:align",
+        "//flare/base:chrono",
+        "//flare/base:deferred",
+        "//flare/base:demangle",
+        "//flare/base:erased_ptr",
+        "//flare/base:exposed_var",
+        "//flare/base:likely",
+        "//flare/base:logging",
+        "//flare/base:never_destroyed",
+        "//flare/base/internal:annotation",
+        "//flare/base/internal:background_task_host",
+        "//flare/base/internal:cpu",
+        "//flare/base/internal:doubly_linked_list",
+        "//flare/base/internal:time_keeper",
+        "//flare/base/thread:spinlock",
+    ],
+)
+
+cc_test(
+    name = "memory_node_shared_test",
+    srcs = ["memory_node_shared_test.cc"],
+    deps = [
+        "//flare/base:object_pool",
+        "//flare/base:random",
+        "//flare/base/thread:latch",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "memory_node_shared_benchmark",
+    srcs = ["memory_node_shared_benchmark.cc"],
+    deps = [
+        "//flare/base:object_pool",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "global",
+    srcs = ["global.cc"],
+    hdrs = ["global.h"],
+    visibility = ["//flare/base:__pkg__"],
+    deps = [
+        ":types",
+    ],
+)
+
+cc_test(
+    name = "global_test",
+    srcs = ["global_test.cc"],
+    deps = [
+        "//flare/base:object_pool",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

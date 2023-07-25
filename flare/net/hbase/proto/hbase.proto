@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+syntax = "proto2";
+
 // This file contains protocol buffers that are shared throughout HBase
 package flare.hbase;
 

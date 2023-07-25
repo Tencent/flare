@@ -1,0 +1,293 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+load("//bazel:cc_flare_library.bzl", "cc_flare_library")
+
+cc_library(
+    name = "endpoint",
+    srcs = ["endpoint.cc"],
+    hdrs = ["endpoint.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:handle",
+        "//flare/base:random",
+        "//flare/base/net:endpoint",
+    ],
+)
+
+cc_library(
+    name = "main",
+    srcs = ["main.cc"],
+    hdrs = ["main.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare:init",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_github_google_glog//:glog",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "hooking_mock",
+    srcs = ["hooking_mock.cc"],
+    hdrs = ["hooking_mock.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:logging",
+        "//flare/base:never_destroyed",
+        "//flare/base/internal:macro",
+        "//flare/init:on_init",
+        "//flare/testing/detail:dirty_hook",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_test(
+    name = "hooking_mock_test",
+    srcs = ["hooking_mock_test.cc"],
+    deps = [
+        ":hooking_mock",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "rpc_mock",
+    srcs = ["rpc_mock.cc"],
+    hdrs = ["rpc_mock.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:callback",
+        "//flare/base:down_cast",
+        "//flare/base:status",
+        "//flare/base:string",
+        "//flare/base/internal:lazy_init",
+        "//flare/init:on_init",
+        "//flare/rpc:protobuf",
+        "//flare/rpc/protocol/protobuf",
+        "//flare/rpc/protocol/protobuf:mock_channel",
+        "//flare/testing/detail:gmock_actions",
+        "//flare/testing/detail:implicitly_casting",
+        "@com_google_googletest//:gtest",
+        "@com_google_protobuf//:protobuf",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "rpc_mock_test",
+    srcs = ["rpc_mock_test.cc"],
+    deps = [
+        ":echo_service_proto_flare",
+        ":main",
+        ":rpc_mock",
+        "//flare/rpc",
+    ],
+)
+
+cc_library(
+    name = "rpc_controller",
+    srcs = ["rpc_controller.cc"],
+    hdrs = ["rpc_controller.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/rpc:protobuf",
+        "//flare/rpc/protocol/protobuf:rpc_client_controller",
+        "//flare/rpc/protocol/protobuf:rpc_server_controller",
+    ],
+)
+
+cc_library(
+    name = "hbase_controller",
+    srcs = ["hbase_controller.cc"],
+    hdrs = ["hbase_controller.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/net/hbase:hbase_client_controller",
+        "//flare/net/hbase:hbase_server_controller",
+    ],
+)
+
+proto_library(
+    name = "message_proto",
+    srcs = ["message.proto"],
+)
+
+cc_proto_library(
+    name = "message_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":message_proto"],
+)
+
+proto_library(
+    name = "echo_service_proto",
+    srcs = ["echo_service.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/rpc:rpc_options_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "echo_service_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":echo_service_proto"],
+)
+
+cc_flare_library(
+    name = "echo_service_proto_flare",
+    srcs = ["echo_service.proto"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":echo_service_cc_proto",
+        "//flare/rpc:rpc_options_cc_proto",
+    ],
+)
+
+proto_library(
+    name = "relay_service_proto",
+    srcs = ["relay_service.proto"],
+    visibility = ["//visibility:public"],
+    deps = ["//flare/rpc:rpc_options_proto"],
+)
+
+cc_proto_library(
+    name = "relay_service_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":relay_service_proto"],
+)
+
+cc_flare_library(
+    name = "relay_service_proto_flare",
+    srcs = ["relay_service.proto"],
+    visibility = ["//visibility:public"],
+    deps = [":relay_service_cc_proto"],
+)
+
+cc_library(
+    name = "http_mock",
+    srcs = ["http_mock.cc"],
+    hdrs = ["http_mock.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base/internal:lazy_init",
+        "//flare/init:on_init",
+        "//flare/net/http:http_client",
+        "//flare/testing/detail:gmock_actions",
+        "@com_google_googletest//:gtest",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "http_mock_test",
+    srcs = ["http_mock_test.cc"],
+    deps = [
+        ":http_mock",
+        ":main",
+        "//flare/fiber",
+    ],
+)
+
+cc_library(
+    name = "redis_mock",
+    srcs = ["redis_mock.cc"],
+    hdrs = ["redis_mock.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:function",
+        "//flare/base/internal:lazy_init",
+        "//flare/init:on_init",
+        "//flare/net/redis",
+        "//flare/net/redis:mock_channel",
+        "//flare/net/redis:reader",
+        "//flare/testing/detail:gmock_actions",
+        "@com_google_googletest//:gtest",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "redis_mock_test",
+    srcs = ["redis_mock_test.cc"],
+    deps = [
+        ":main",
+        ":redis_mock",
+        "//flare/net/redis",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
+    name = "naked_server",
+    srcs = ["naked_server.cc"],
+    hdrs = ["naked_server.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base:function",
+        "//flare/base:handle",
+        "//flare/base:ref_ptr",
+        "//flare/base/net:endpoint",
+        "//flare/fiber",
+        "//flare/io:io_basic",
+        "//flare/io/native",
+        "//flare/io/util:socket",
+    ],
+)
+
+cc_test(
+    name = "naked_server_test",
+    srcs = ["naked_server_test.cc"],
+    deps = [
+        ":endpoint",
+        ":main",
+        ":naked_server",
+        "//flare/io/native",
+        "//flare/io/util:socket",
+    ],
+)
+
+cc_library(
+    name = "cos_mock",
+    srcs = ["cos_mock.cc"],
+    hdrs = ["cos_mock.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:demangle",
+        "//flare/base:function",
+        "//flare/base:logging",
+        "//flare/base/internal:lazy_init",
+        "//flare/init:on_init",
+        "//flare/net/cos:channel",
+        "//flare/net/cos:cos_client",
+        "//flare/testing/detail:gmock_actions",
+        "//flare/testing/detail:implicitly_casting",
+        "@com_google_googletest//:gtest",
+    ],
+    alwayslink = True,
+)
+
+cc_test(
+    name = "cos_mock_test",
+    srcs = ["cos_mock_test.cc"],
+    deps = [
+        ":cos_mock",
+        ":main",
+        "//flare/net/cos:cos_client",
+        "//flare/net/cos/ops/object:get_object",
+        "@com_google_googletest//:gtest",
+    ],
+)

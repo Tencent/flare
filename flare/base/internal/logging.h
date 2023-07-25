@@ -284,55 +284,61 @@
       << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
                                                __VA_ARGS__)
 
-#ifdef _MSC_VER
-#define FLARE_UNREACHABLE(...)                                              \
-  do {                                                                      \
-    LOG(FATAL) << "UNREACHABLE. "                                           \
-               << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
-                                                        ##__VA_ARGS__);     \
+// Clang 10 has not implemented P1381R1 yet, therefore the "cold lambda" trick
+// won't work quite right if structured binding identifiers are accessed during
+// evaluating log message.
+#if defined(__clang__) && __clang__ <= 10
+
+#define FLARE_UNREACHABLE(...)                                         \
+  do {                                                                 \
+    LOG(FATAL) << "UNREACHABLE. "                                      \
+               << ::flare::internal::logging::FormatLog(               \
+                      __FILE__, __LINE__ __VA_OPT__(, )##__VA_ARGS__); \
   } while (0)
-#define FLARE_NOT_IMPLEMENTED(...)                                          \
-  do {                                                                      \
-    LOG(FATAL) << "Not implemented. "                                       \
-               << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
-                                                        ##__VA_ARGS__);     \
+#define FLARE_NOT_IMPLEMENTED(...)                                     \
+  do {                                                                 \
+    LOG(FATAL) << "Not implemented. "                                  \
+               << ::flare::internal::logging::FormatLog(               \
+                      __FILE__, __LINE__ __VA_OPT__(, )##__VA_ARGS__); \
   } while (0)
-#define FLARE_UNEXPECTED(...)                                               \
-  do {                                                                      \
-    LOG(FATAL) << "UNEXPECTED. "                                            \
-               << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
-                                                        ##__VA_ARGS__);     \
+#define FLARE_UNEXPECTED(...)                                          \
+  do {                                                                 \
+    LOG(FATAL) << "UNEXPECTED. "                                       \
+               << ::flare::internal::logging::FormatLog(               \
+                      __FILE__, __LINE__ __VA_OPT__(, )##__VA_ARGS__); \
   } while (0)
+
 #else
-#define FLARE_UNREACHABLE(...)                                                \
-  do {                                                                        \
-    [&]() __attribute__((noreturn, noinline, cold)) {                         \
-      LOG(FATAL) << "UNREACHABLE. "                                           \
-                 << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
-                                                          ##__VA_ARGS__);     \
-      __builtin_unreachable();                                                \
-    }                                                                         \
-    ();                                                                       \
+
+#define FLARE_UNREACHABLE(...)                                           \
+  do {                                                                   \
+    [&]() __attribute__((noreturn, noinline, cold)) {                    \
+      LOG(FATAL) << "UNREACHABLE. "                                      \
+                 << ::flare::internal::logging::FormatLog(               \
+                        __FILE__, __LINE__ __VA_OPT__(, )##__VA_ARGS__); \
+      __builtin_unreachable();                                           \
+    }                                                                    \
+    ();                                                                  \
   } while (0)
-#define FLARE_NOT_IMPLEMENTED(...)                                            \
-  do {                                                                        \
-    [&]() __attribute__((noreturn, noinline, cold)) {                         \
-      LOG(FATAL) << "Not implemented. "                                       \
-                 << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
-                                                          ##__VA_ARGS__);     \
-      __builtin_unreachable();                                                \
-    }                                                                         \
-    ();                                                                       \
+#define FLARE_NOT_IMPLEMENTED(...)                                       \
+  do {                                                                   \
+    [&]() __attribute__((noreturn, noinline, cold)) {                    \
+      LOG(FATAL) << "Not implemented. "                                  \
+                 << ::flare::internal::logging::FormatLog(               \
+                        __FILE__, __LINE__ __VA_OPT__(, )##__VA_ARGS__); \
+      __builtin_unreachable();                                           \
+    }                                                                    \
+    ();                                                                  \
   } while (0)
-#define FLARE_UNEXPECTED(...)                                                 \
-  do {                                                                        \
-    [&]() __attribute__((noreturn, noinline, cold)) {                         \
-      LOG(FATAL) << "UNEXPECTED. "                                            \
-                 << ::flare::internal::logging::FormatLog(__FILE__, __LINE__, \
-                                                          ##__VA_ARGS__);     \
-      __builtin_unreachable();                                                \
-    }                                                                         \
-    ();                                                                       \
+#define FLARE_UNEXPECTED(...)                                            \
+  do {                                                                   \
+    [&]() __attribute__((noreturn, noinline, cold)) {                    \
+      LOG(FATAL) << "UNEXPECTED. "                                       \
+                 << ::flare::internal::logging::FormatLog(               \
+                        __FILE__, __LINE__ __VA_OPT__(, )##__VA_ARGS__); \
+      __builtin_unreachable();                                           \
+    }                                                                    \
+    ();                                                                  \
   } while (0)
 #endif
 

@@ -1,0 +1,262 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "context",
+    srcs = select({
+        "@platforms//cpu:x86_64": glob(["x86_64/*.S"]),
+        "@platforms//cpu:aarch64": glob(["aarch64/*.S"]),
+        "@platforms//cpu:ppc": glob(["ppc64le/*.S"]),
+        "//conditions:default": [],
+    }),
+)
+
+cc_test(
+    name = "context_benchmark",
+    srcs = ["context_benchmark.cc"],
+    deps = [
+        ":context",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "runnable_entity",
+    hdrs = ["runnable_entity.h"],
+    deps = [
+        "//flare/base:casting",
+    ],
+)
+
+cc_library(
+    name = "run_queue",
+    srcs = ["run_queue.cc"],
+    hdrs = ["run_queue.h"],
+    deps = [
+        ":assembly",
+        ":runnable_entity",
+        "//flare/base:align",
+        "//flare/base:likely",
+        "//flare/base:logging",
+        "//flare/base/thread:spinlock",
+    ],
+)
+
+cc_test(
+    name = "run_queue_test",
+    srcs = ["run_queue_test.cc"],
+    deps = [
+        ":run_queue",
+        "//flare/base:random",
+        "//flare/base/thread:latch",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "assembly",
+    hdrs = ["assembly.h"],
+)
+
+cc_test(
+    name = "assembly_benchmark",
+    srcs = ["assembly_benchmark.cc"],
+    deps = [
+        ":assembly",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "fiber_impl",
+    srcs = [
+        "fiber_desc.cc",
+        "fiber_entity.cc",
+        "fiber_worker.cc",
+        "scheduling_group.cc",
+        "timer_worker.cc",
+        "waitable.cc",
+    ],
+    hdrs = [
+        "fiber_desc.h",
+        "fiber_entity.h",
+        "fiber_worker.h",
+        "scheduling_group.h",
+        "timer_worker.h",
+        "waitable.h",
+    ],
+    visibility = [
+        "//flare/fiber:__subpackages__",
+        "//flare/net/internal:__pkg__",  # !!! FIXME.
+    ],
+    deps = [
+        ":assembly",
+        ":context",
+        ":run_queue",
+        ":runnable_entity",
+        ":stack_allocator",
+        "//flare/base:align",
+        "//flare/base:casting",
+        "//flare/base:chrono",
+        "//flare/base:deferred",
+        "//flare/base:delayed_init",
+        "//flare/base:erased_ptr",
+        "//flare/base:exposed_var",
+        "//flare/base:function",
+        "//flare/base:id_alloc",
+        "//flare/base:logging",
+        "//flare/base:object_pool",
+        "//flare/base:random",
+        "//flare/base:ref_ptr",
+        "//flare/base:string",
+        "//flare/base:tsc",
+        "//flare/base/internal:annotation",
+        "//flare/base/internal:builtin_monitoring",
+        "//flare/base/internal:doubly_linked_list",
+        "//flare/base/object_pool:ref_counted",
+        "//flare/base/thread:attribute",
+        "//flare/base/thread:latch",
+        "//flare/base/thread:out_of_duty_callback",
+        "//flare/base/thread:spinlock",
+        "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+cc_test(
+    name = "fiber_desc_test",
+    srcs = ["fiber_desc_test.cc"],
+    deps = [
+        ":fiber_impl",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fiber_entity_test",
+    srcs = ["fiber_entity_test.cc"],
+    deps = [
+        ":fiber_impl",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "scheduling_group_test",
+    srcs = ["scheduling_group_test.cc"],
+    tags = ["exclusive"],
+    deps = [
+        ":fiber_impl",
+        ":testing",
+        "//flare/base:chrono",
+        "//flare/base:random",
+        "//flare/base:string",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "timer_worker_test",
+    srcs = ["timer_worker_test.cc"],
+    deps = [
+        ":fiber_impl",
+        "//flare/base:chrono",
+        "//flare/base:random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "fiber_worker_test",
+    srcs = ["fiber_worker_test.cc"],
+    deps = [
+        ":fiber_impl",
+        "//flare/base:random",
+        "//flare/base/internal:cpu",
+        "//flare/fiber/detail:testing",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "waitable_test",
+    srcs = ["waitable_test.cc"],
+    deps = [
+        ":fiber_impl",
+        "//flare/base:random",
+        "//flare/fiber/detail:testing",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "stack_allocator",
+    srcs = ["stack_allocator.cc"],
+    hdrs = ["stack_allocator.h"],
+    deps = [
+        "//flare/base:logging",
+        "//flare/base:object_pool",
+        "//flare/base/internal:annotation",
+        "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+cc_test(
+    name = "stack_allocator_test",
+    srcs = ["stack_allocator_test.cc"],
+    # Death test in this UT does not get along well with heap checker.
+    # heap_check = "",
+    deps = [
+        ":stack_allocator",
+        "//flare/base:logging",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "scheduling_parameters",
+    srcs = ["scheduling_parameters.cc"],
+    hdrs = ["scheduling_parameters.h"],
+    visibility = ["//flare/fiber:__subpackages__"],
+    deps = [
+        "//flare/base:enum",
+        "//flare/base:logging",
+        "//flare/base/internal:cpu",
+    ],
+)
+
+cc_test(
+    name = "scheduling_parameters_test",
+    srcs = ["scheduling_parameters_test.cc"],
+    deps = [
+        ":scheduling_parameters",
+        "//flare/base:logging",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+# For internal use only. For non-flare developers, use `flare/testing/main.h`
+# instead.
+cc_library(
+    name = "testing",
+    hdrs = ["testing.h"],
+    visibility = ["//flare/fiber:__subpackages__"],
+    deps = [
+        ":fiber_impl",
+        "//flare/fiber",
+    ],
+)

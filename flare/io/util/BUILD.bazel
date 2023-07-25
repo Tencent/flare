@@ -1,0 +1,128 @@
+# Copyright (C) 2019 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "socket",
+    srcs = ["socket.cc"],
+    hdrs = ["socket.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        "//flare/base:buffer",
+        "//flare/base:handle",
+        "//flare/base/net:endpoint",
+        "//flare/fiber:alternatives",
+        "@com_github_fmtlib_fmt//:fmt",
+    ],
+)
+
+cc_test(
+    name = "socket_test",
+    srcs = ["socket_test.cc"],
+    deps = [
+        ":socket",
+        "//flare/base:string",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
+
+cc_library(
+    name = "rate_limiter",
+    srcs = ["rate_limiter.cc"],
+    hdrs = ["rate_limiter.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/base:chrono",
+        "//flare/base:logging",
+        "//flare/base:maybe_owning",
+        "//flare/base:string",
+        "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+cc_test(
+    name = "rate_limiter_test",
+    srcs = ["rate_limiter_test.cc"],
+    deps = [
+        ":rate_limiter",
+        "//flare/base:chrono",
+        "//flare/base:random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "rate_limiter_integration_test",
+    srcs = ["rate_limiter_integration_test.cc"],
+    deps = [
+        "//flare/fiber",
+        "//flare/init:override_flag",
+        "//flare/rpc",
+        "//flare/rpc/load_balancer:round_robin",
+        "//flare/rpc/name_resolver:list",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+    ],
+)
+
+cc_library(
+    name = "stream_io",
+    hdrs = ["stream_io.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//flare/io/detail:eintr_safe",
+    ],
+)
+
+cc_library(
+    name = "ssl_stream_io",
+    srcs = ["ssl_stream_io.cc"],
+    hdrs = ["ssl_stream_io.h"],
+    deps = [
+        ":http_proxy_stream_io",
+        ":stream_io",
+        "//flare/base:logging",
+        "//flare/fiber:alternatives",
+        "//flare/io/detail:eintr_safe",
+        "@com_github_google_boringssl//:ssl",
+    ],
+)
+
+cc_library(
+    name = "openssl",
+    srcs = ["openssl.cc"],
+    hdrs = ["openssl.h"],
+    local_defines = ["FLARE_WITH_BORINGSSL"],
+    visibility = [
+        "//flare/init:__pkg__",
+    ],
+    deps = [
+        "@com_github_google_boringssl//:crypto",
+        "@com_github_google_boringssl//:ssl",
+    ],
+)
+
+cc_library(
+    name = "http_proxy_stream_io",
+    srcs = ["http_proxy_stream_io.cc"],
+    hdrs = ["http_proxy_stream_io.h"],
+    deps = [
+        ":stream_io",
+        "//flare/base:down_cast",
+        "//flare/base:logging",
+        "//flare/base:string",
+        "//flare/fiber:alternatives",
+    ],
+)

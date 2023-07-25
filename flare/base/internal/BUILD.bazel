@@ -1,0 +1,500 @@
+# Copyright (C) 2023 THL A29 Limited, a Tencent company. All rights reserved.
+#
+# Licensed under the BSD 3-Clause License (the "License"); you may not use this
+# file except in compliance with the License. You may obtain a copy of the
+# License at
+#
+# https://opensource.org/licenses/BSD-3-Clause
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+cc_library(
+    name = "annotation",
+    hdrs = ["annotation.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":logging",
+    ],
+    defines = ["FLARE_USE_SLOW_TLS_MODEL"],
+)
+
+cc_library(
+    name = "background_task_host",
+    srcs = ["background_task_host.cc"],
+    hdrs = ["background_task_host.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":cpu",
+        ":thread_pool",
+        "//flare/base:function",
+        "//flare/base:never_destroyed",
+        "//flare/base:random",
+        "//flare/base/internal:logging",
+        "//flare/base/thread:attribute",
+        "@com_github_gflags_gflags//:gflags",
+    ],
+)
+
+cc_test(
+    name = "background_task_host_test",
+    srcs = ["background_task_host_test.cc"],
+    deps = [
+        ":background_task_host",
+        "//flare/base/thread:latch",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "circular_buffer",
+    hdrs = ["circular_buffer.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        "//flare/base:likely",
+    ],
+)
+
+cc_test(
+    name = "circular_buffer_test",
+    srcs = ["circular_buffer_test.cc"],
+    deps = [
+        ":circular_buffer",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "circular_buffer_benchmark",
+    srcs = ["circular_buffer_benchmark.cc"],
+    deps = [
+        ":circular_buffer",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "dpc",
+    srcs = ["dpc.cc"],
+    hdrs = ["dpc.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":background_task_host",
+        ":cpu",
+        ":time_keeper",
+        "//flare/base:chrono",
+        "//flare/base:function",
+        "//flare/base:object_pool",
+        "//flare/base/thread/thread_local:ref_counted",
+    ],
+)
+
+cc_test(
+    name = "dpc_test",
+    srcs = ["dpc_test.cc"],
+    deps = [
+        ":dpc",
+        "//flare/base:write_mostly",
+        "//flare/fiber",
+        "//flare/testing:main",
+    ],
+)
+
+cc_test(
+    name = "dpc_benchmark",
+    srcs = ["dpc_benchmark.cc"],
+    deps = [
+        ":background_task_host",
+        ":dpc",
+        "//flare:init",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "lazy_init",
+    hdrs = ["lazy_init.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        "//flare/base:never_destroyed",
+    ],
+)
+
+cc_test(
+    name = "lazy_init_test",
+    srcs = ["lazy_init_test.cc"],
+    deps = [
+        ":lazy_init",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "early_init",
+    hdrs = ["early_init.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = ["//flare/base:never_destroyed"],
+)
+
+cc_test(
+    name = "early_init_test",
+    srcs = ["early_init_test.cc"],
+    deps = [
+        ":early_init",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "doubly_linked_list",
+    hdrs = ["doubly_linked_list.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":logging",
+    ],
+)
+
+cc_test(
+    name = "doubly_linked_list_test",
+    srcs = ["doubly_linked_list_test.cc"],
+    deps = [
+        ":doubly_linked_list",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "singly_linked_list",
+    hdrs = ["singly_linked_list.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":logging",
+    ],
+)
+
+cc_test(
+    name = "singly_linked_list_test",
+    srcs = ["singly_linked_list_test.cc"],
+    deps = [
+        ":singly_linked_list",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "index_alloc",
+    srcs = ["index_alloc.cc"],
+    hdrs = ["index_alloc.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        "//flare/base:never_destroyed",
+    ],
+)
+
+cc_test(
+    name = "index_alloc_test",
+    srcs = ["index_alloc_test.cc"],
+    deps = [
+        ":index_alloc",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "cpu",
+    srcs = ["cpu.cc"],
+    hdrs = ["cpu.h"],
+    linkopts = ["-ldl"],
+    visibility = [
+        "//flare:__subpackages__",
+        # '//yadcc/...',  # FIXME: Move `cpu` out to `flare/base`.
+    ],
+    deps = [
+        ":logging",
+        "//flare/base:string",
+        "//flare/base/thread:attribute",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_github_google_glog//:glog",
+    ],
+)
+
+cc_test(
+    name = "cpu_test",
+    srcs = ["cpu_test.cc"],
+    deps = [
+        ":cpu",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "curl",
+    srcs = ["curl.cc"],
+    hdrs = ["curl.h"],
+    linkopts = ["-ldl"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":logging",
+        "//flare/base:deferred",
+        "//flare/base:expected",
+        "//flare/base:function",
+        "//flare/base:logging",
+        "//flare/base:never_destroyed",
+        "//flare/base/thread:attribute",
+        "@com_github_curl_curl//:curl",
+    ],
+)
+
+cc_library(
+    name = "memory_barrier",
+    srcs = ["memory_barrier.cc"],
+    hdrs = ["memory_barrier.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":logging",
+        "//flare/base:never_destroyed",
+    ],
+)
+
+cc_test(
+    name = "memory_barrier_benchmark",
+    srcs = ["memory_barrier_benchmark.cc"],
+    deps = [
+        ":memory_barrier",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "time_view",
+    hdrs = ["time_view.h"],
+    visibility = ["//visibility:public"],  # FIXME: Move this out to `flare/base`
+    deps = [
+        ":meta",
+        "//flare/base:chrono",
+    ],
+)
+
+cc_test(
+    name = "time_view_test",
+    srcs = ["time_view_test.cc"],
+    tags = ["exclusive"],
+    deps = [
+        ":time_view",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "time_keeper",
+    srcs = ["time_keeper.cc"],
+    hdrs = ["time_keeper.h"],
+    linkopts = ["-pthread"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":background_task_host",
+        "//flare/base:function",
+        "//flare/base:never_destroyed",
+        "//flare/base:ref_ptr",
+    ],
+)
+
+cc_test(
+    name = "time_keeper_test",
+    srcs = ["time_keeper_test.cc"],
+    tags = ["exclusive"],
+    deps = [
+        ":time_keeper",
+        "//flare/base:chrono",
+        "//flare/testing:main",
+    ],
+)
+
+cc_library(
+    name = "logging",
+    srcs = ["logging.cc"],
+    hdrs = ["logging.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        "//flare/base:likely",
+        "//flare/base/internal:macro",
+        "@com_github_fmtlib_fmt//:fmt",
+        "@com_github_google_glog//:glog",
+    ],
+)
+
+cc_test(
+    name = "logging_test",
+    srcs = ["logging_test.cc"],
+    deps = [
+        ":logging",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "biased_mutex",
+    hdrs = ["biased_mutex.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":annotation",
+        ":memory_barrier",
+    ],
+)
+
+cc_test(
+    name = "biased_mutex_test",
+    srcs = ["biased_mutex_test.cc"],
+    deps = [
+        ":biased_mutex",
+        "//flare/base:chrono",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "biased_mutex_benchmark",
+    srcs = ["biased_mutex_benchmark.cc"],
+    deps = [
+        ":biased_mutex",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "thread_pool",
+    srcs = ["thread_pool.cc"],
+    hdrs = ["thread_pool.h"],
+    linkopts = ["-pthread"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":cpu",
+        ":logging",
+        "//flare/base:function",
+        "//flare/base/thread:attribute",
+    ],
+)
+
+cc_test(
+    name = "thread_pool_test",
+    srcs = ["thread_pool_test.cc"],
+    deps = [
+        ":thread_pool",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "case_insensitive_hash_map",
+    hdrs = ["case_insensitive_hash_map.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":hash_map",
+    ],
+)
+
+cc_test(
+    name = "case_insensitive_hash_map_test",
+    srcs = ["case_insensitive_hash_map_test.cc"],
+    deps = [
+        ":case_insensitive_hash_map",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "case_insensitive_hash_map_benchmark",
+    srcs = ["case_insensitive_hash_map_benchmark.cc"],
+    deps = [
+        ":case_insensitive_hash_map",
+        "//flare/base:random",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "hash_map",
+    hdrs = ["hash_map.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":logging",
+        ":meta",
+        "//flare/base:logging",
+    ],
+)
+
+cc_test(
+    name = "hash_map_test",
+    srcs = ["hash_map_test.cc"],
+    deps = [
+        ":hash_map",
+        "//flare/base:random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "hash_map_benchmark",
+    srcs = ["hash_map_benchmark.cc"],
+    deps = [
+        ":hash_map",
+        "@com_github_google_benchmark//:benchmark_main",
+    ],
+)
+
+cc_library(
+    name = "macro",
+    srcs = ["macro_inl.h"],
+    hdrs = ["macro.h"],
+    visibility = ["//flare:__subpackages__"],
+)
+
+cc_library(
+    name = "builtin_monitoring",
+    hdrs = ["builtin_monitoring.h"],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        "//flare/base:delayed_init",
+        "//flare/base:monitoring",
+        "//flare/base/monitoring:init",
+    ],
+)
+
+# cc_test(
+#   name = 'builtin_monitoring_test',
+#   srcs = 'builtin_monitoring_test.cc',
+#   deps = [
+#     ':builtin_monitoring',
+#     '//flare/base:down_cast',
+#     '//flare/base/monitoring:monitoring_system',
+#     '//flare/init:override_flag',
+#     '//flare/testing:main',
+#   ],
+#   testdata = [
+#     ('testdata', 'conf')
+#   ]
+# )
+
+cc_library(
+    name = "copyable_atomic",
+    hdrs = ["copyable_atomic.h"],
+    visibility = ["//flare:__subpackages__"],
+)
+
+cc_test(
+    name = "copyable_atomic_test",
+    srcs = ["copyable_atomic_test.cc"],
+    deps = [
+        ":copyable_atomic",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "meta",
+    hdrs = ["meta.h"],
+    visibility = ["//flare:__subpackages__"],
+)

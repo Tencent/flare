@@ -1,0 +1,17 @@
+cc_library(
+    name = "rapidxml",
+    hdrs = ["rapidxml.h"],
+    include_prefix = "rapidxml",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//thirdparty/rapidxml/1.13:rapidxml",
+    ],
+)
+
+cc_binary(
+    name = "rapidxml_test",
+    srcs = ["rapidxml_test.cpp"],
+    deps = [
+        ":rapidxml",
+    ],
+)
