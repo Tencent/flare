@@ -303,6 +303,8 @@ void V2Generator::GenerateEpilogue(const google::protobuf::FileDescriptor* file,
 
 }  // namespace flare::protobuf::plugin
 
+#ifndef FLARE_BUILD_WITH_BAZEL
+
 // To recognize service option `gdt.streaming_response`, we need either:
 //
 // - Link with `//common/rpc:rpc_options_proto`, which we want to avoid in the
@@ -312,10 +314,12 @@ void V2Generator::GenerateEpilogue(const google::protobuf::FileDescriptor* file,
 struct StreamingResponseInitializer {
   StreamingResponseInitializer() {
     google::protobuf::internal::ExtensionSet::RegisterExtension(
-        google::protobuf::MethodOptions::internal_default_instance(), 10004, 8,
+        google::protobuf::MethodOptions::internal_default_instance(), 10003, 8,
         false, false);
   }
 } streaming_response_initializer;
+
+#endif
 
 int main(int argc, char* argv[]) {
   // Make warning about using `gdt.stream_response` looks sane.

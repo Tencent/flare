@@ -106,6 +106,7 @@ cc_binary(
     srcs = [
         "v2_plugin.cc",
     ],
+    local_defines = ["FLARE_BUILD_WITH_BAZEL"],
     visibility = ["//visibility:public"],
     deps = [
         ":async_decl_generator",
