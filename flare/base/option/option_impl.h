@@ -69,8 +69,9 @@ class OptionImpl {
         name_(std::move(name)),
         value_(ParseDefaultValue(std::move(default_value))) {
     option_id_ = option::OptionService::Instance()->RegisterOptionWatcher<T>(
-        provider, &name_, fixed,
-        [=](std::optional<T> value) { return OnChanged(std::move(value)); });
+        provider, &name_, fixed, [=, this](std::optional<T> value) {
+          return OnChanged(std::move(value));
+        });
   }
   ~OptionImpl() {
     option::OptionService::Instance()->DeregisterOptionWatcher(option_id_);
@@ -146,8 +147,9 @@ class OptionImpl<std::optional<T>, Parser> {
         name_(std::move(name)),
         value_(ParseDefaultValue(std::move(default_value))) {
     option_id_ = option::OptionService::Instance()->RegisterOptionWatcher<T>(
-        provider, &name_, fixed,
-        [=](std::optional<T> value) { return OnChanged(std::move(value)); });
+        provider, &name_, fixed, [=, this](std::optional<T> value) {
+          return OnChanged(std::move(value));
+        });
   }
   ~OptionImpl() {
     option::OptionService::Instance()->DeregisterOptionWatcher(option_id_);

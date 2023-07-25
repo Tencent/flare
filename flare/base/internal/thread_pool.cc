@@ -30,7 +30,7 @@ ThreadPool::ThreadPool(std::size_t workers, const std::vector<int>& affinity,
                        int nice_value) {
   workers_.resize(workers);
   for (auto&& t : workers_) {
-    t = std::thread([=] {
+    t = std::thread([=, this] {
       if (nice_value) {
         FLARE_PCHECK(nice(nice_value));
       }

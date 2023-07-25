@@ -126,7 +126,7 @@ void DryRunConnectionHandler::ProcessOneDryRunContext(
   }
 
   fiber::internal::StartFiberDetached(
-      [=, log_reader = std::move(log_reader)]() mutable {
+      [=, this, log_reader = std::move(log_reader)]() mutable {
         ServiceDryRunFor(std::move(log_reader), handler);
         FinishCall();
       });
