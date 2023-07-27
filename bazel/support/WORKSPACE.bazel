@@ -1,0 +1,21 @@
+workspace(name = "hello_flare")
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+FLARE_COMMID_ID = "1d60bd710b97b34c3b32224ffcb4393214fbc6ec"
+
+git_repository(
+    name = "com_github_tencent_flare",
+    commit = FLARE_COMMID_ID,
+    remote = "https://github.com/Tencent/flare.git",
+)
+
+load("@com_github_tencent_flare//bazel:deps.bzl", "flare_dependencies")
+
+flare_dependencies()
+
+load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
+
+# # This sets up some common toolchains for building targets. For more details, please see
+# # https://github.com/bazelbuild/rules_foreign_cc/tree/main/docs#rules_foreign_cc_dependencies
+rules_foreign_cc_dependencies()
