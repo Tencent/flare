@@ -250,7 +250,8 @@ cc_test(
     srcs = ["integration_test.cc"],
     # Internally we also redistribute this UT to dedicated test machine. Linking
     # statically make redistribution a bit easier.
-    linkshared = False,
+    # linkshared = False,
+    linkstatic = True,
     deps = [
         ":rpc",
         "//flare/base:down_cast",

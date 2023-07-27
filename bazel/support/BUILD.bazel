@@ -1,0 +1,7 @@
+cc_binary(
+    name = "main",
+    srcs = ["main.cc"],
+    deps = [
+        "@com_github_tencent_flare//flare/base:logging",
+    ],
+)

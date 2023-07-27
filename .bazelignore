@@ -26,3 +26,6 @@ build32_debug/
 build32_release/
 build64_debug/
 build64_release/
+
+# Example
+bazel/support

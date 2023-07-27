@@ -12,8 +12,6 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-load("@com_google_protobuf//:protobuf.bzl", "proto_gen")
-
 def _CCSrcs(srcs):
     ret = [s[:-len(".proto")] + ".flare.pb.cc" for s in srcs]
     return ret
@@ -21,7 +19,6 @@ def _CCSrcs(srcs):
 def _CcHdrs(srcs):
     ret = [s[:-len(".proto")] + ".flare.pb.h" for s in srcs]
     return ret
-
 
 def cc_flare_library(
         name,
@@ -37,7 +34,7 @@ def cc_flare_library(
         srcs = srcs,
         outs = gen_srcs + gen_hdrs,
         cmd = "$(location @com_google_protobuf//:protoc) " +
-              "--proto_path=. " + 
+              "--proto_path=. " +
               "-I=external/com_google_protobuf/src -I=. " +
               "--plugin=protoc-gen-flare_rpc=$(location //flare/rpc/protocol/protobuf/plugin:v2_plugin) " +
               "--flare_rpc_out=$(GENDIR) " +
@@ -47,14 +44,14 @@ def cc_flare_library(
             "//flare/rpc/protocol/protobuf/plugin:v2_plugin",
             "//flare/rpc:rpc_options.proto",
             "@com_google_protobuf//:well_known_protos",
-        ]   
+        ],
     )
 
     native.cc_library(
         name = name,
         srcs = gen_srcs,
         hdrs = gen_hdrs,
-        deps = [":flare_gen_" + name, "//flare/rpc:protobuf"] + deps,
+        deps = ["//flare/rpc:protobuf"] + deps,
         visibility = visibility,
         **kargs
     )
