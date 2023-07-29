@@ -90,9 +90,9 @@ typename AllocImpl<Traits>::Type AllocImpl<Traits>::SlowNext() {
                 "Not supported due to implementation limitations.");
 
   // Get more IDs from global counter...
-  Type read, next;
+  Type read = global.load(std::memory_order_relaxed);
+  Type next;
   do {
-    read = global.load(std::memory_order_relaxed);
     FLARE_CHECK_GE(read, Traits::kMin);
     FLARE_CHECK_LE(read, Traits::kMax);
     current = read;
