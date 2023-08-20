@@ -43,7 +43,11 @@ bool ResolveDomainQuery(const std::string& hostname, std::uint16_t port,
                         std::vector<Endpoint>* addresses,
                         int* error_code = nullptr) {
   if (auto eps = flare::ResolveDomain(hostname, port); eps) {
-    addresses->swap(eps.value());
+    if (addresses->empty()) {
+      addresses->swap(eps.value());
+    } else {
+      addresses->insert(addresses->end(), eps->begin(), eps->end());
+    }
   } else {
     SetErrorCode(error_code, eps.error());
     return false;
@@ -98,27 +102,59 @@ bool IsValidDomain(const std::string& domain) {
 }
 
 /**
- * convert error code to human readable string.
+ * getaddrinfo() returns 0 if it succeeds, or one of the following nonzero error
+ * codes:
  *
  *  Possible error codes, see netdb.h:
  *
- *  NETDB_SUCCESS
- *     No problem.
+ *  EAI_ADDRFAMILY
+ *     The specified network host does not have any network addresses in the
+ *     requested address family.
  *
- *  HOST_NOT_FOUND
- *     The specified host is unknown.
+ *  EAI_AGAIN
+ *     The name server returned a temporary failure indication.  Try again
+ *     later.
  *
- *  NO_ADDRESS or NO_DATA
- *     The requested name is valid but does not have an IP address.
+ *  EAI_BADFLAGS
+ *     hints.ai_flags contains invalid flags; or, hints.ai_flags included
+ *     AI_CANONNAME and name was NULL.
  *
- *  NO_RECOVERY
- *     A non-recoverable name server error occurred.
+ *  EAI_FAIL
+ *     The name server returned a permanent failure indication.
  *
- *  TRY_AGAIN
- *     A temporary error occurred on an authoritative name server.  Try again
- * later.
+ *  EAI_FAMILY
+ *     The requested address family is not supported.
+ *
+ *  EAI_MEMORY
+ *     Out of memory.
+ *
+ *  EAI_NODATA
+ *     The specified network host exists, but does not have any network
+ *     addresses defined.
+ *
+ *  EAI_NONAME
+ *     The node or service is not known; or both node and service are NULL; or
+ *     AI_NUMERICSERV was specified in hints.ai_flags and service was not a
+ *     numeric port-number string.
+ *
+ *  EAI_SERVICE
+ *     The  requested  service is not available for the requested socket type.
+ *     It may be available through another socket type.  For example, this error
+ *     could occur if service was "shell" (a service available only on stream
+ *     sockets), and either hints.ai_protocol was IPPROTO_UDP, or
+ *     hints.ai_socktype was SOCK_DGRAM; or the error could occur if service was
+ *     not NULL, and hints.ai_socktype was SOCK_RAW (a socket type that  does
+ *     not support the concept of services).
+ *
+ *  EAI_SOCKTYPE
+ *     The requested socket type is not supported.  This could occur, for
+ *     example, if hints.ai_socktype and hints.ai_protocol are inconsistent
+ *     (e.g., SOCK_DGRAM and IPPROTO_TCP, respectively).
+ *
+ *  EAI_SYSTEM Other system error;
+ *     errno is set to indicate the error.
  */
-std::string ErrorString(int error_code) { return hstrerror(error_code); }
+std::string ErrorString(int error_code) { return gai_strerror(error_code); }
 
 }  // namespace
 

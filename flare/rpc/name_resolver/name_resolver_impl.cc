@@ -42,14 +42,15 @@ NameResolverImpl::GetRouteInfo(const std::string& name) {
     }
   }
   std::scoped_lock lk(name_mutex_);
-  // double check
-  if (auto iter = name_route_.find(name); iter != name_route_.end()) {
-    return {iter->second, false};
+
+  auto [route_iter, ok] =
+      name_route_.emplace(name, std::make_shared<RouteInfo>());
+
+  if (ok) {
+    UpdateRoute(name, route_iter->second);
   }
-  auto route_iter =
-      name_route_.insert({name, std::make_shared<RouteInfo>()}).first;
-  UpdateRoute(name, route_iter->second);
-  return {route_iter->second, true};
+
+  return {route_iter->second, ok};
 }
 
 std::unique_ptr<NameResolutionView> NameResolverImpl::StartResolving(

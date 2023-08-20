@@ -77,7 +77,8 @@ bool List::GetRouteTable(const std::string& name,
                isdigit(hostname.back())) {
       new_address->push_back(EndpointFromIpv4(hostname, port));
     } else {
-      flare::name_resolver::util::ResolveDomain(hostname, port, new_address);
+      return flare::name_resolver::util::ResolveDomain(hostname, port,
+                                                       new_address);
     }
   }
   return true;

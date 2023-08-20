@@ -48,8 +48,8 @@ void NameResolverUpdater::Register(const std::string& address,
                                    std::chrono::seconds interval) {
   std::scoped_lock lk(updater_mutex_);
   if (auto iter = updater_.find(address); iter == updater_.end()) {
-    updater_.insert(
-        std::make_pair(address, UpdaterInfo(std::move(updater), interval)));
+    updater_.emplace(std::piecewise_construct, std::forward_as_tuple(address),
+                     std::forward_as_tuple(std::move(updater), interval));
   } else {
     FLARE_LOG_ERROR("Duplicate Register for address {}", address);
   }
@@ -67,12 +67,12 @@ void NameResolverUpdater::WorkProc() {
         }
       }
     }
-    if (!need_update.empty()) {
-      for (auto&& updater_info : need_update) {
-        updater_info->updater();  // may be blocking
-        updater_info->update_time = std::chrono::steady_clock::now();
-      }
+
+    for (auto&& updater_info : need_update) {
+      updater_info->updater();  // may be blocking
+      updater_info->update_time = std::chrono::steady_clock::now();
     }
+
     std::unique_lock lk(updater_mutex_);
     cond_.wait_for(lk, 1s,
                    [this] { return stopped_.load(std::memory_order_relaxed); });
