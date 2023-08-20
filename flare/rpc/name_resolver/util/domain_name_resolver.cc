@@ -43,11 +43,7 @@ bool ResolveDomainQuery(const std::string& hostname, std::uint16_t port,
                         std::vector<Endpoint>* addresses,
                         int* error_code = nullptr) {
   if (auto eps = flare::ResolveDomain(hostname, port); eps) {
-    if (addresses->empty()) {
-      addresses->swap(eps.value());
-    } else {
-      addresses->insert(addresses->end(), eps->begin(), eps->end());
-    }
+    addresses->swap(eps.value());
   } else {
     SetErrorCode(error_code, eps.error());
     return false;
