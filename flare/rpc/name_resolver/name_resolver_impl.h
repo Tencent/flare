@@ -49,7 +49,7 @@ class NameResolverImpl : public NameResolver {
  protected:
   // Subclass wanting to update their route info periodically should call
   // this method to initialize `updater_`.
-  NameResolverUpdater* GetUpdater();
+  static NameResolverUpdater* GetUpdater();
   // If name does not exist in the route, we will insert.
   // Returns the pointer of routeinfo and if it's the first time.
   std::pair<std::shared_ptr<RouteInfo>, bool> GetRouteInfo(
