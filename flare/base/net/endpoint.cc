@@ -38,7 +38,7 @@ namespace flare {
 
 namespace {
 
-constexpr auto offset_sun_path = offsetof(sockaddr_un, sun_path);
+constexpr auto kOffsetSunPath = offsetof(sockaddr_un, sun_path);
 
 std::string SockAddrToString(const sockaddr* addr, socklen_t length) {
   auto af = addr->sa_family;
@@ -60,9 +60,9 @@ std::string SockAddrToString(const sockaddr* addr, socklen_t length) {
       auto p = reinterpret_cast<const sockaddr_un*>(addr);
       if (p->sun_path[0] == '\0' && p->sun_path[1] != '\0') {
         return Format("@{}", std::string_view(p->sun_path + 1,
-                                              length - 1 - offset_sun_path));
+                                              length - 1 - kOffsetSunPath));
       } else {
-        return std::string(p->sun_path, length - offset_sun_path);
+        return std::string(p->sun_path, length - kOffsetSunPath);
       }
     }
     default: {
@@ -175,9 +175,9 @@ Endpoint EndpointFromUnix(std::string_view path) {
   }
   p->sun_family = AF_UNIX;
 
-  static_assert(offset_sun_path == sizeof(sockaddr_un) - sizeof(p->sun_path));
+  static_assert(kOffsetSunPath == sizeof(sockaddr_un) - sizeof(p->sun_path));
 
-  *er.RetrieveLength() = offset_sun_path + path.size();
+  *er.RetrieveLength() = kOffsetSunPath + path.size();
 
   return er.Build();
 }
@@ -417,7 +417,7 @@ std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(std::string_view s,
   }
   p->sun_family = AF_UNIX;
 
-  *er.RetrieveLength() = offset_sun_path + s.size();
+  *er.RetrieveLength() = kOffsetSunPath + s.size();
 
   return er.Build();
 }
