@@ -52,6 +52,14 @@ TEST(Endpoint, ToString3) {
             Format("{}", EndpointFromIpv4("192.0.2.1", 5678)));
 }
 
+TEST(Endpoint, ToString4) {
+  auto ep = EndpointFromUnix("/tmp/test.sock");
+  ASSERT_EQ("/tmp/test.sock", ep.ToString());
+
+  auto ep2 = EndpointFromUnix("@/tmp/test2.sock");
+  ASSERT_EQ("@/tmp/test2.sock", ep2.ToString());
+}
+
 TEST(Endpoint, MoveToEmpty) {
   Endpoint ep;
   auto ep2 = EndpointFromIpv4("192.0.2.1", 5678);
@@ -132,6 +140,12 @@ TEST(Endpoint, GetIpPortV6) {
   ASSERT_TRUE(ep);
   ASSERT_EQ("2001:db8:8714:3a90::12", EndpointGetIp(*ep));
   ASSERT_EQ(1234, EndpointGetPort(*ep));
+}
+
+TEST(Endpoint, GetUnixDomain) {
+  auto ep = TryParse<Endpoint>("/tmp/test10086.sock", from_unix);
+  ASSERT_TRUE(ep);
+  ASSERT_EQ("/tmp/test10086.sock", ep->ToString());
 }
 
 TEST(Endpoint, ResolveDomainName) {

@@ -135,6 +135,7 @@ bool operator==(const Endpoint& left, const Endpoint& right);
 
 Endpoint EndpointFromIpv4(const std::string& ip, std::uint16_t port);
 Endpoint EndpointFromIpv6(const std::string& ip, std::uint16_t port);
+Endpoint EndpointFromUnix(std::string_view path);
 
 // Stringify IP (no port) part of `endpoint`. It's your responsibility to make
 // sure `endpoint` is indeed representing an IP address (whether it's a v4 IP or
@@ -194,6 +195,10 @@ inline constexpr struct from_ipv4_t {
 inline constexpr struct from_ipv6_t {
   constexpr explicit from_ipv6_t() = default;
 } from_ipv6;
+
+inline constexpr struct from_unix_t {
+  constexpr explicit from_unix_t() = default;
+} from_unix;
 
 // Same as `os << endpoint.ToString()`.
 //
@@ -256,6 +261,7 @@ template <>
 struct TryParseTraits<Endpoint, void> {
   static std::optional<Endpoint> TryParse(std::string_view s, from_ipv4_t);
   static std::optional<Endpoint> TryParse(std::string_view s, from_ipv6_t);
+  static std::optional<Endpoint> TryParse(std::string_view s, from_unix_t);
   static std::optional<Endpoint> TryParse(std::string_view s);
 };
 

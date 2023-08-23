@@ -23,6 +23,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -37,7 +38,9 @@ namespace flare {
 
 namespace {
 
-std::string SockAddrToString(const sockaddr* addr) {
+constexpr auto kOffsetSunPath = offsetof(sockaddr_un, sun_path);
+
+std::string SockAddrToString(const sockaddr* addr, socklen_t length) {
   auto af = addr->sa_family;
   switch (af) {
     case AF_INET: {
@@ -56,9 +59,10 @@ std::string SockAddrToString(const sockaddr* addr) {
     case AF_UNIX: {
       auto p = reinterpret_cast<const sockaddr_un*>(addr);
       if (p->sun_path[0] == '\0' && p->sun_path[1] != '\0') {
-        return "@"s + &p->sun_path[1];
+        return Format("@{}", std::string_view(p->sun_path + 1,
+                                              length - 1 - kOffsetSunPath));
       } else {
-        return p->sun_path;
+        return std::string(p->sun_path, length - kOffsetSunPath);
       }
     }
     default: {
@@ -123,7 +127,7 @@ std::string Endpoint::ToString() const {
     // before calling `ToString()` each time is way too complicated.
     return "(null)";
   }
-  return SockAddrToString(Get());
+  return SockAddrToString(Get(), Length());
 }
 
 bool operator==(const Endpoint& left, const Endpoint& right) {
@@ -153,6 +157,28 @@ Endpoint EndpointFromIpv6(const std::string& ip, std::uint16_t port) {
   p->sin6_port = htons(port);
   p->sin6_family = AF_INET6;
   *er.RetrieveLength() = sizeof(sockaddr_in6);
+  return er.Build();
+}
+
+Endpoint EndpointFromUnix(std::string_view path) {
+  EndpointRetriever er;
+
+  auto addr = er.RetrieveAddr();
+  auto p = reinterpret_cast<sockaddr_un*>(addr);
+  memset(p, 0, sizeof(sockaddr_un));
+  FLARE_PCHECK(path.size() <= sizeof(p->sun_path), "path is too long");
+  if (path[0] == '@') {
+    p->sun_path[0] = '\0';
+    memcpy(p->sun_path + 1, path.data() + 1, path.size() - 1);
+  } else {
+    memcpy(p->sun_path, path.data(), path.size());
+  }
+  p->sun_family = AF_UNIX;
+
+  static_assert(kOffsetSunPath == sizeof(sockaddr_un) - sizeof(p->sun_path));
+
+  *er.RetrieveLength() = kOffsetSunPath + path.size();
+
   return er.Build();
 }
 
@@ -366,6 +392,33 @@ std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(std::string_view s,
   p->sin6_port = htons(*port);
   p->sin6_family = AF_INET6;
   *er.RetrieveLength() = sizeof(sockaddr_in6);
+  return er.Build();
+}
+
+// TODO(kangjinci): almost always succeeds, need to distinguish between ipv4 and
+// ipv6
+std::optional<Endpoint> TryParseTraits<Endpoint>::TryParse(std::string_view s,
+                                                           from_unix_t) {
+  EndpointRetriever er;
+
+  auto addr = er.RetrieveAddr();
+  auto p = reinterpret_cast<sockaddr_un*>(addr);
+  memset(p, 0, sizeof(sockaddr_un));
+
+  if (s.size() > sizeof(p->sun_path)) {
+    return {};
+  }
+
+  if (s[0] == '@') {
+    p->sun_path[0] = '\0';
+    memcpy(p->sun_path + 1, s.data() + 1, s.size() - 1);
+  } else {
+    memcpy(p->sun_path, s.data(), s.size());
+  }
+  p->sun_family = AF_UNIX;
+
+  *er.RetrieveLength() = kOffsetSunPath + s.size();
+
   return er.Build();
 }
 
