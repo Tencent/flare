@@ -28,6 +28,7 @@ TEST(String, TryParseIntegral) {
   ASSERT_FALSE(TryParse<int>(std::string(123456, 'a')));
   ASSERT_FALSE(TryParse<int>(""));
   ASSERT_FALSE(TryParse<int>("a"));
+  ASSERT_FALSE(TryParse<int>("1-2"));
   ASSERT_FALSE(TryParse<std::int8_t>(std::to_string(INT8_MAX + 1LL)));
   ASSERT_FALSE(TryParse<std::int8_t>(std::to_string(INT8_MIN - 1LL)));
   ASSERT_FALSE(TryParse<std::uint8_t>(std::to_string(UINT8_MAX + 1LL)));
@@ -44,7 +45,9 @@ TEST(String, TryParseIntegral) {
   ASSERT_FALSE(TryParse<std::int64_t>(std::to_string(INT64_MIN) + "0"));
   ASSERT_FALSE(TryParse<std::uint64_t>(std::to_string(UINT64_MAX) + "0"));
   ASSERT_FALSE(TryParse<std::uint64_t>("-1"));
+
   ASSERT_TRUE(TryParse<int>("0"));
+  ASSERT_TRUE(TryParse<std::int64_t>(std::to_string(INT64_MAX)));
   ASSERT_TRUE(TryParse<std::int8_t>("0"));
   ASSERT_TRUE(TryParse<std::uint8_t>("0"));
   ASSERT_TRUE(TryParse<std::int16_t>("0"));
@@ -79,12 +82,13 @@ TEST(String, TryParseFloatingPoint) {
   ASSERT_FALSE(TryParse<long double>(""));
   ASSERT_FALSE(TryParse<double>("a"));
   ASSERT_FALSE(TryParse<long double>("a"));
-  ASSERT_FALSE(TryParse<float>(std::to_string(HUGE_VALF * 10)));
-  ASSERT_FALSE(TryParse<float>(std::to_string(-HUGE_VALF * 10)));
-  ASSERT_FALSE(TryParse<double>(std::to_string(HUGE_VAL * 10)));
-  ASSERT_FALSE(TryParse<double>(std::to_string(-HUGE_VAL * 10)));
-  ASSERT_FALSE(TryParse<long double>(std::to_string(HUGE_VALL * 10)));
-  ASSERT_FALSE(TryParse<long double>(std::to_string(-HUGE_VALL * 10)));
+
+  ASSERT_TRUE(TryParse<float>(std::to_string(HUGE_VALF)));
+  ASSERT_TRUE(TryParse<float>(std::to_string(-HUGE_VALF)));
+  ASSERT_TRUE(TryParse<double>(std::to_string(HUGE_VAL)));
+  ASSERT_TRUE(TryParse<double>(std::to_string(-HUGE_VAL)));
+  ASSERT_TRUE(TryParse<long double>(std::to_string(HUGE_VALL)));
+  ASSERT_TRUE(TryParse<long double>(std::to_string(-HUGE_VALL)));
 
   for (int i = 0; i != 100000; ++i) {
     auto x = 1.0 * Random() * Random();
