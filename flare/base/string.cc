@@ -15,6 +15,7 @@
 #include "flare/base/string.h"
 
 #include <array>
+#include <charconv>
 #include <climits>
 #include <cstdlib>
 #include <optional>
@@ -55,6 +56,13 @@ std::optional<T> TryParseImpl(F fptr, const char* s,
   if (FLARE_UNLIKELY(s[0] == 0)) {
     return std::nullopt;
   }
+
+  struct LastErrorStasher {
+    LastErrorStasher() : last_errno(errno) { errno = 0; }
+    ~LastErrorStasher() { errno = last_errno; }
+    int last_errno;
+  } _;
+
   char* end;
   auto result = fptr(s, &end, args...);
   if (end != s + strlen(s)) {  // Return value `0` is also handled by this test.
@@ -241,9 +249,6 @@ bool IEquals(std::string_view first, std::string_view second) {
   return true;
 }
 
-// TODO(luobogao): Once we have `from_chars` at hand, use it instead (so as to
-// support `std::string_view` efficiently).
-
 std::optional<bool> TryParseTraits<bool>::TryParse(
     std::string_view s, bool recognizes_alphabet_symbol, bool ignore_case) {
   if (auto num_opt = flare::TryParse<int>(s); num_opt) {
@@ -266,32 +271,12 @@ template <class T>
 std::optional<T>
 TryParseTraits<T, std::enable_if_t<std::is_integral_v<T>>>::TryParse(
     std::string_view s, int base) {
-  // `strtoll` expects a terminating null, therefore we copy `s` into this
-  // temporary buffer before calling that method.
-  //
-  // Comparing to constructing a `std::string` here, this saves us a memory
-  // allocation.
-  char temp_buffer[129];
-  if (FLARE_UNLIKELY(s.size() > 128)) {  // Out-of-range anyway.
+  T value;
+  auto [ptr, ec] = std::from_chars(s.begin(), s.end(), value, base);
+  if (ec != std::errc() || ptr != s.end()) {
     return {};
   }
-
-  memcpy(temp_buffer, s.data(), s.size());
-  temp_buffer[s.size()] = 0;
-
-  // Here we always use the largest type to hold the result, and check if the
-  // result is actually larger than what `T` can hold.
-  //
-  // It's not very efficient, though.
-  if constexpr (std::is_signed_v<T>) {
-    auto opt = TryParseImpl<std::int64_t>(&strtoll, temp_buffer,
-                                          {LLONG_MIN, LLONG_MAX}, base);
-    return TryNarrowCast<T>(opt);
-  } else {
-    auto opt =
-        TryParseImpl<std::uint64_t>(&strtoull, temp_buffer, {ULLONG_MAX}, base);
-    return TryNarrowCast<T>(opt);
-  }
+  return value;
 }
 
 template <class T>
