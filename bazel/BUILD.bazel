@@ -11,3 +11,9 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations under
 # the License.
+
+cc_binary(
+    name = "generate_resource_lib",
+    srcs = ["resource_library_main.cc"],
+    visibility = ["//visibility:public"],
+)
