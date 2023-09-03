@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+load("//bazel:resource_library.bzl", "resource_library")
+
 cc_library(
     name = "builtin",
     hdrs = [],
@@ -22,10 +24,10 @@ cc_library(
         ":misc_handler",
         ":options_handler",
         ":prof_cpu_handler",
-        # ":rpc_form_handler",
+        ":rpc_form_handler",
         ":rpc_reflect_handler",
         ":rpc_statistics_handler",
-        # ":static_resource_http_handler",
+        ":static_resource_http_handler",
     ],
 )
 
@@ -139,22 +141,22 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "rpc_statistics_handler_test",
-#     srcs = ["rpc_statistics_handler_test.cc"],
-#     deps = [
-#         ":rpc_statistics_handler",
-#         "//flare/base:down_cast",
-#         "//flare/net/http:http_client",
-#         "//flare/rpc",
-#         "//flare/rpc/load_balancer:round_robin",
-#         "//flare/rpc/name_resolver:list",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#         "@com_github_jsoncpp//:jsoncpp",
-#     ],
-# )
+cc_test(
+    name = "rpc_statistics_handler_test",
+    srcs = ["rpc_statistics_handler_test.cc"],
+    deps = [
+        ":rpc_statistics_handler",
+        "//flare/base:down_cast",
+        "//flare/net/http:http_client",
+        "//flare/rpc",
+        "//flare/rpc/load_balancer:round_robin",
+        "//flare/rpc/name_resolver:list",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+        "@com_github_jsoncpp//:jsoncpp",
+    ],
+)
 
 cc_library(
     name = "prof_cpu_handler",
@@ -179,18 +181,18 @@ cc_test(
     ],
 )
 
-# cc_library(
-#     name = "static_resource_http_handler",
-#     srcs = ["static_resource_http_handler.cc"],
-#     hdrs = ["static_resource_http_handler.h"],
-#     deps = [
-#         ":static_resources",
-#         "//flare/rpc:http",
-#     ],
-#     alwayslink = True,
-# )
+cc_library(
+    name = "static_resource_http_handler",
+    srcs = ["static_resource_http_handler.cc"],
+    hdrs = ["static_resource_http_handler.h"],
+    deps = [
+        ":static_resources",
+        "//flare/rpc:http",
+    ],
+    alwayslink = True,
+)
 
-filegroup(
+resource_library(
     name = "static_resources",
     srcs = [
         "resources/static/antd-4.8.2.css",
@@ -205,18 +207,18 @@ filegroup(
     ],
 )
 
-# cc_library(
-#     name = "rpc_form_handler",
-#     srcs = ["rpc_form_handler.cc"],
-#     hdrs = ["rpc_form_handler.h"],
-#     deps = [
-#         ":static_resources",
-#         "//flare/base:string",
-#         "//flare/rpc:http",
-#         "@com_github_olafvdspek_ctemplate//:ctemplate",
-#     ],
-#     alwayslink = True,
-# )
+cc_library(
+    name = "rpc_form_handler",
+    srcs = ["rpc_form_handler.cc"],
+    hdrs = ["rpc_form_handler.h"],
+    deps = [
+        ":static_resources",
+        "//flare/base:string",
+        "//flare/rpc:http",
+        "@com_github_olafvdspek_ctemplate//:ctemplate",
+    ],
+    alwayslink = True,
+)
 
 cc_library(
     name = "rpc_reflect_handler",
@@ -232,19 +234,19 @@ cc_library(
     alwayslink = True,
 )
 
-# cc_test(
-#     name = "rpc_reflect_handler_test",
-#     srcs = ["rpc_reflect_handler_test.cc"],
-#     deps = [
-#         ":rpc_reflect_handler",
-#         "//flare/base/net:endpoint",
-#         "//flare/net/http:http_client",
-#         "//flare/rpc",
-#         "//flare/rpc/protocol/protobuf:service_method_locator",
-#         "//flare/testing:echo_service_proto_flare",
-#         "//flare/testing:endpoint",
-#         "//flare/testing:main",
-#         "@com_github_jsoncpp//:jsoncpp",
-#         "@com_google_protobuf//:protobuf",
-#     ],
-# )
+cc_test(
+    name = "rpc_reflect_handler_test",
+    srcs = ["rpc_reflect_handler_test.cc"],
+    deps = [
+        ":rpc_reflect_handler",
+        "//flare/base/net:endpoint",
+        "//flare/net/http:http_client",
+        "//flare/rpc",
+        "//flare/rpc/protocol/protobuf:service_method_locator",
+        "//flare/testing:echo_service_proto_flare",
+        "//flare/testing:endpoint",
+        "//flare/testing:main",
+        "@com_github_jsoncpp//:jsoncpp",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
