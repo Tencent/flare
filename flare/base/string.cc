@@ -30,7 +30,7 @@ constexpr std::array<char, 256> kLowerChars = []() {
   std::array<char, 256> cs{};
   for (std::size_t index = 0; index != 256; ++index) {
     if (index >= 'A' && index <= 'Z') {
-      cs[index] = index - 'A' + 'a';
+      cs[index] = index ^ 32;
     } else {
       cs[index] = index;
     }
@@ -42,7 +42,7 @@ constexpr std::array<char, 256> kUpperChars = []() {
   std::array<char, 256> cs{};
   for (std::size_t index = 0; index != 256; ++index) {
     if (index >= 'a' && index <= 'z') {
-      cs[index] = index - 'a' + 'A';
+      cs[index] = index ^ 32;
     } else {
       cs[index] = index;
     }
