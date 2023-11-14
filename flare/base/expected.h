@@ -15,6 +15,7 @@
 #ifndef FLARE_BASE_EXPECTED_H_
 #define FLARE_BASE_EXPECTED_H_
 
+#include <functional>
 #include <initializer_list>
 #include <optional>
 #include <type_traits>
