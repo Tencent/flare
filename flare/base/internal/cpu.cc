@@ -15,6 +15,7 @@
 #include "flare/base/internal/cpu.h"
 
 #include <dlfcn.h>
+#include <string.h>
 #include <sys/sysinfo.h>
 #include <syscall.h>
 #include <unistd.h>
@@ -26,6 +27,7 @@
 #include <vector>
 
 #include "gflags/gflags.h"
+#include "glog/logging.h"
 #include "glog/raw_logging.h"
 
 #include "flare/base/internal/logging.h"
