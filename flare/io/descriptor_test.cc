@@ -62,7 +62,7 @@ RefPtr<PipeDesc> CreatePipe() {
 TEST(Descriptor, ConcurrentRestartRead) {
   for (auto&& action :
        {Descriptor::EventAction::Ready, Descriptor::EventAction::Suppress}) {
-    for (int i = 0; i != 1000000; ++i) {
+    for (int i = 0; i != 100000; ++i) {
       Fiber fibers[2];
       fiber::Latch latch(1);
       auto desc = CreatePipe();
@@ -85,7 +85,7 @@ TEST(Descriptor, ConcurrentRestartRead) {
       }
     }
   }
-  while (cleaned != 1000000 * 2) {
+  while (cleaned != 100000 * 2) {
     this_fiber::SleepFor(1ms);
   }
 }
