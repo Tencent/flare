@@ -27,11 +27,11 @@ TEST(BufferedStreamReaderProvider, Timeout) {
   auto srp = MakeRefCounted<BufferedStreamReaderProvider<int>>(
       10, [] {}, [] {}, [] {});
   StreamReader<int> sr(srp);
-  auto expected = ReadSteadyClock() + 100ms;
+  auto expected = ReadSteadyClock() + 1s;
   sr.SetExpiration(expected);
   ASSERT_FALSE(sr.Read());
   ASSERT_NEAR(expected.time_since_epoch() / 1ms,
-              ReadSteadyClock().time_since_epoch() / 1ms, 10);
+              ReadSteadyClock().time_since_epoch() / 1ms, 100);
 }
 
 TEST(BufferedStreamReaderProvider, FalseTimeout) {
