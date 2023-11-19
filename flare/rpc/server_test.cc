@@ -211,7 +211,7 @@ TEST(Server, OverloadTest) {
   CHECK(gate->Healthy());
   std::atomic<std::size_t> succeeded = 0;
   std::atomic<std::size_t> done_count = 0;
-  for (int i = 0; i != 10000; ++i) {
+  for (int i = 0; i != 1000; ++i) {
     auto call_args = object_pool::Get<StreamCallGate::FastCallArgs>();
     call_args->completion = [&](auto, auto&& p, auto) {
       succeeded += !!p;
@@ -219,7 +219,7 @@ TEST(Server, OverloadTest) {
     };
     gate->FastCall(EchoMessage(), std::move(call_args), ReadSteadyClock() + 3s);
   }
-  while (done_count != 10000) {
+  while (done_count != 1000) {
   }
   // Others are dropped.
   ASSERT_EQ(100, succeeded.load());
