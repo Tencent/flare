@@ -287,7 +287,7 @@ std::uint64_t BloomFilter<HashGen>::GetOptimalBits(double p, std::uint64_t n,
 
 template <class HashGen>
 std::uint64_t BloomFilter<HashGen>::GetNextPowerOfTwo(std::uint64_t value) {
-  return value < 2 ? value : 1 << (64 - __builtin_clzl(value - 1));
+  return value < 2 ? value : 1ULL << (64 - __builtin_clzl(value - 1));
 }
 
 template <class HashGen>
