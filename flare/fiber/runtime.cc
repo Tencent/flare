@@ -152,7 +152,7 @@ const std::vector<int>& GetFiberWorkerAccessibleCPUs();
 const std::vector<internal::numa::Node>& GetFiberWorkerAccessibleNodes();
 
 std::uint64_t DivideRoundUp(std::uint64_t divisor, std::uint64_t dividend) {
-  return divisor / dividend + (divisor % dividend != 0);
+  return (divisor + dividend - 1) / dividend;
 }
 
 // Call `f` in a thread with the specified affinity.
