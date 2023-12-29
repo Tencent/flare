@@ -25,16 +25,26 @@ cc_library(
 
 cc_library(
     name = "consistent_hash",
-    srcs = [],
-    hdrs = [],
+    srcs = ["consistent_hash.cc"],
+    hdrs = ["consistent_hash.h"],
     visibility = ["//visibility:public"],
-    deps = [],
+    deps = [
+        ":load_balancer",
+        "//flare/base:hazptr",
+        "//flare/base:string",
+        "//flare/io:io_basic",
+    ],
+    alwayslink = True,
 )
 
 cc_test(
     name = "consistent_hash_test",
-    srcs = [],
+    srcs = ["consistent_hash_test.cc"],
     deps = [
+        ":consistent_hash",
+        "//flare/base:random",
+        "//flare/base:string",
+        "//flare/base/net:endpoint",
         "@com_google_googletest//:gtest_main",
     ],
 )
