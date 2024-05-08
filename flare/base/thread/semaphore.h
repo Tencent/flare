@@ -133,7 +133,7 @@ template <class Clock, class Duration>
 bool BasicCountingSemaphore<Mutex, ConditionVariable, kLeastMaxValue>::
     try_acquire_until(std::chrono::time_point<Clock, Duration> expires_at) {
   std::unique_lock lk(lock_);
-  if (!cv_.wait_for(lk, expires_at, [&] { return current_ != 0; })) {
+  if (!cv_.wait_until(lk, expires_at, [&] { return current_ != 0; })) {
     return false;
   }
   --current_;
