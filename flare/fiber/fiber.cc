@@ -98,6 +98,10 @@ void Fiber::join() {
 
 bool Fiber::joinable() const { return !!join_impl_; }
 
+Fiber::Id Fiber::get_id() const noexcept {
+  return reinterpret_cast<Fiber::Id>(join_impl_.Get());
+}
+
 Fiber::Fiber(Fiber&&) noexcept = default;
 Fiber& Fiber::operator=(Fiber&&) noexcept = default;
 

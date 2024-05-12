@@ -15,6 +15,7 @@
 #ifndef FLARE_FIBER_FIBER_H_
 #define FLARE_FIBER_FIBER_H_
 
+#include <cstdint>
 #include <limits>
 #include <utility>
 #include <vector>
@@ -53,7 +54,7 @@ class Fiber {
   static constexpr auto kUnspecifiedSchedulingGroup =
       std::numeric_limits<std::size_t>::max();
 
-  using Id = struct InternalOpaqueId*;
+  using Id = std::uintptr_t;
 
   struct Attributes {
     // How the fiber is launched.
@@ -135,6 +136,8 @@ class Fiber {
 
   // Test if we can call `join()` on this object.
   bool joinable() const;
+
+  Id get_id() const noexcept;
 
   // Movable but not copyable
   Fiber(Fiber&&) noexcept;
