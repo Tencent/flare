@@ -41,7 +41,7 @@ namespace exposed_var {
 template <class T>
 Json::Value ToJsonValue(const T& t) {
   // Tests if `t.ToString()` is well-formed.
-  auto has_to_string = FLARE_INTERNAL_IS_VALID(x.ToString());
+  [[maybe_unused]] auto has_to_string = FLARE_INTERNAL_IS_VALID(x.ToString());
 
   if constexpr (std::is_same_v<T, Json::Value>) {
     // `t` itself is already a JSON value.
