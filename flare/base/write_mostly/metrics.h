@@ -22,10 +22,9 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest_prod.h"
-
 #include "flare/base/align.h"
 #include "flare/base/chrono.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/internal/time_keeper.h"
 #include "flare/base/thread/spinlock.h"
 #include "flare/base/write_mostly/write_mostly.h"
@@ -101,7 +100,7 @@ class WriteMostlyMetrics {
   }
 
  private:
-  FRIEND_TEST(MetricsTest, Get);
+  FLARE_FRIEND_TEST(MetricsTest, Get);
   void Purge() {
     auto entry = std::make_unique<write_mostly::detail::MetricsStats<T>>();
     std::scoped_lock _(records_lock_);

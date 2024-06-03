@@ -20,8 +20,8 @@
 #include <unordered_map>
 
 #include "google/protobuf/service.h"
-#include "gtest/gtest_prod.h"
 
+#include "flare/base/internal/test_prod.h"
 #include "flare/net/hbase/proto/rpc.pb.h"
 #include "flare/rpc/protocol/stream_protocol.h"
 
@@ -53,8 +53,8 @@ class HbaseServerProtocol : public StreamProtocol {
   MessageCutStatus TryCompleteHandshake(NoncontiguousBuffer* buffer);
 
  private:
-  FRIEND_TEST(HbaseProtocol, ClientToServer);
-  FRIEND_TEST(HbaseProtocol, ServerToClient);
+  FLARE_FRIEND_TEST(HbaseProtocol, ClientToServer);
+  FLARE_FRIEND_TEST(HbaseProtocol, ServerToClient);
 
   struct ServiceDesc;
   struct MethodDesc;

@@ -17,10 +17,9 @@
 
 #include <vector>
 
-#include "gtest/gtest_prod.h"
-
 #include "flare/base/align.h"
 #include "flare/base/buffer.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/io/util/stream_io.h"
 
 namespace flare {
@@ -71,7 +70,7 @@ class alignas(hardware_destructive_interference_size) WritingBufferList {
   bool Append(NoncontiguousBuffer buffer, std::uintptr_t ctx);
 
  private:
-  FRIEND_TEST(WritingBufferList, Torture);
+  FLARE_FRIEND_TEST(WritingBufferList, Torture);
 
   struct Node {
     std::atomic<Node*> next;

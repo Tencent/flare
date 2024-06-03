@@ -48,8 +48,8 @@ cc_library(
     '//flare/base:likely',
     '//flare/base:object_pool',
     '//flare/base/internal:annotation',
+    '//flare/base/internal:test_prod',
     '//flare/io/util:stream_io',
-    '//thirdparty/googletest:gtest_prod',
   ],
   visibility = ['//flare/...'],
 )

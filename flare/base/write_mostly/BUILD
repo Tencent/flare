@@ -62,8 +62,8 @@ cc_library(
     '//flare/base:align',
     '//flare/base:chrono',
     '//flare/base/internal:time_keeper',
+    '//flare/base/internal:test_prod',
     '//flare/base/thread:spinlock',
-    '//thirdparty/googletest:gtest_prod',
   ],
   visibility = ['//flare/base:write_mostly'],
 )

@@ -19,9 +19,9 @@
 #include <string>
 
 #include "google/protobuf/service.h"
-#include "gtest/gtest_prod.h"
 
 #include "flare/base/buffer.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/internal/time_view.h"
 #include "flare/base/net/endpoint.h"
 #include "flare/net/hbase/proto/rpc.pb.h"
@@ -79,9 +79,9 @@ class HbaseControllerCommon : public google::protobuf::RpcController {
   void Reset() override;
 
  protected:
-  FRIEND_TEST(HbaseControllerCommon, RemotePeer);
-  FRIEND_TEST(HbaseControllerCommon, RequestCellBlock);
-  FRIEND_TEST(HbaseControllerCommon, ResponseCellBlock);
+  FLARE_FRIEND_TEST(HbaseControllerCommon, RemotePeer);
+  FLARE_FRIEND_TEST(HbaseControllerCommon, RequestCellBlock);
+  FLARE_FRIEND_TEST(HbaseControllerCommon, ResponseCellBlock);
   friend struct testing::detail::HbaseControllerMaster;
 
   // Set local & remote peer address.

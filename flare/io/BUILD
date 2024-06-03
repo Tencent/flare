@@ -68,6 +68,7 @@ cc_library(
     '//flare/base:string',
     '//flare/base:tsc',
     '//flare/base/internal:memory_barrier',
+    '//flare/base/internal:test_prod',
     '//flare/base/net:endpoint',
     '//flare/base/thread:latch',
     '//flare/fiber:fiber',
@@ -77,7 +78,6 @@ cc_library(
     '//flare/io/util:socket',
     '//flare/io/util:stream_io',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/googletest:gtest_prod',
   ],
   visibility = 'PUBLIC',
 )

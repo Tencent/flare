@@ -22,11 +22,11 @@
 #include <vector>
 
 #include "google/protobuf/service.h"
-#include "gtest/gtest_prod.h"
 #include "jsoncpp/value.h"
 
 #include "flare/base/deferred.h"
 #include "flare/base/internal/hash_map.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/maybe_owning.h"
 #include "flare/rpc/protocol/stream_service.h"
 
@@ -80,11 +80,11 @@ class Service : public StreamService {  // Only `StreamService` is supported
                                    const ProtoMessage& resp);
 
  private:
-  FRIEND_TEST(ServiceFastCallTest, RejectedDelayedFastCall);
-  FRIEND_TEST(ServiceFastCallTest, AcceptedDelayedFastCall);
-  FRIEND_TEST(ServiceFastCallTest, RejectedMaxOngoingFastCall);
-  FRIEND_TEST(ServiceFastCallTest, AcceptedMaxOngoingFastCall);
-  FRIEND_TEST(ServiceFastCallTest, MaxOngoingFlag);
+  FLARE_FRIEND_TEST(ServiceFastCallTest, RejectedDelayedFastCall);
+  FLARE_FRIEND_TEST(ServiceFastCallTest, AcceptedDelayedFastCall);
+  FLARE_FRIEND_TEST(ServiceFastCallTest, RejectedMaxOngoingFastCall);
+  FLARE_FRIEND_TEST(ServiceFastCallTest, AcceptedMaxOngoingFastCall);
+  FLARE_FRIEND_TEST(ServiceFastCallTest, MaxOngoingFlag);
 
   struct alignas(64) AlignedInt {
     std::atomic<int> value{};

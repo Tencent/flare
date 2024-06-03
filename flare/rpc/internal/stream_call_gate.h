@@ -23,11 +23,11 @@
 #include <utility>
 
 #include "gflags/gflags.h"
-#include "gtest/gtest_prod.h"
 
 #include "flare/base/align.h"
 #include "flare/base/delayed_init.h"
 #include "flare/base/function.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/maybe_owning.h"
 #include "flare/base/net/endpoint.h"
 #include "flare/base/object_pool.h"
@@ -146,7 +146,7 @@ class StreamCallGate : private StreamConnectionHandler,
   EventLoop* GetEventLoop();
 
  private:
-  FRIEND_TEST(StreamCallGatePoolTest, RemoveBrokenGate);
+  FLARE_FRIEND_TEST(StreamCallGatePoolTest, RemoveBrokenGate);
 
   struct alignas(hardware_destructive_interference_size) FastCallContext {
     fiber::Mutex lock;

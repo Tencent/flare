@@ -24,9 +24,9 @@
 
 #include "gflags/gflags_declare.h"
 #include "google/protobuf/service.h"
-#include "gtest/gtest_prod.h"
 
 #include "flare/base/internal/lazy_init.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/ref_ptr.h"
 
 DECLARE_int32(flare_rpc_channel_max_packet_size);
@@ -136,7 +136,7 @@ class RpcChannel : public google::protobuf::RpcChannel {
  private:
   struct RpcCompletionDesc;
 
-  FRIEND_TEST(Channel, L5);
+  FLARE_FRIEND_TEST(Channel, L5);
   void CallMethodWritingBinlog(const google::protobuf::MethodDescriptor* method,
                                RpcClientController* controller,
                                const google::protobuf::Message* request,

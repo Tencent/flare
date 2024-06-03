@@ -456,3 +456,9 @@ cc_library(
   hdrs = 'meta.h',
   visibility = ['//flare/...'],
 )
+
+cc_library(
+  name = 'test_prod',
+  hdrs = 'test_prod.h',
+  visibility = ['//flare/...'],
+)

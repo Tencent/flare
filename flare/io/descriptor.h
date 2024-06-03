@@ -21,11 +21,10 @@
 #include <memory>
 #include <string>
 
-#include "gtest/gtest_prod.h"
-
 #include "flare/base/align.h"
 #include "flare/base/enum.h"
 #include "flare/base/handle.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/ref_ptr.h"
 #include "flare/fiber/mutex.h"
 
@@ -122,7 +121,7 @@ class alignas(hardware_destructive_interference_size) Descriptor
   void WaitForCleanup();
 
  private:
-  FRIEND_TEST(Descriptor, ConcurrentRestartRead);
+  FLARE_FRIEND_TEST(Descriptor, ConcurrentRestartRead);
   friend class EventLoop;
   struct SeldomlyUsed;
 

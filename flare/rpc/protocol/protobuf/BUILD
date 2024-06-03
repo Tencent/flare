@@ -356,10 +356,10 @@ cc_library(
     ':call_context',
     ':rpc_controller_common',
     '//flare/base:status',
+    '//flare/base/internal:test_prod',
     '//flare/rpc/internal:stream_call_gate_pool',
     '//flare/rpc/protocol:controller',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/googletest:gtest_prod',
   ],
   visibility = ['//flare/testing:rpc_controller'],
 )
@@ -412,8 +412,8 @@ cc_library(
   deps = [
     ':rpc_controller_common',
     '//flare/base:string',
+    '//flare/base/internal:test_prod',
     '//flare/rpc/internal:session_context',
-    '//thirdparty/googletest:gtest_prod',
     '//thirdparty/protobuf:protobuf',
   ],
   visibility = ['//flare/testing:rpc_controller'],
@@ -453,6 +453,7 @@ cc_library(
     '//flare/base:maybe_owning',
     '//flare/base:string',
     '//flare/base/internal:hash_map',
+    '//flare/base/internal:test_prod',
     '//flare/fiber:fiber',
     '//flare/rpc:rpc_options_proto',
     '//flare/rpc/binlog:binlog',
@@ -464,7 +465,6 @@ cc_library(
     '//flare/rpc/protocol:stream_service',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/googletest:gtest_prod',
   ],
   visibility = ['//flare/rpc:*'],
 )
@@ -506,6 +506,7 @@ cc_library(
     '//flare/base:string',
     '//flare/base/buffer:zero_copy_stream',
     '//flare/base/internal:lazy_init',
+    '//flare/base/internal:test_prod',
     '//flare/base/net:endpoint',
     '//flare/fiber:fiber',
     '//flare/rpc:message_dispatcher_factory',
@@ -518,7 +519,6 @@ cc_library(
     '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/googletest:gtest_prod',
     '//thirdparty/opentracing-cpp:opentracing',
   ]
 )

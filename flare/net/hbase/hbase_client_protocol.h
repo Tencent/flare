@@ -17,8 +17,7 @@
 
 #include <memory>
 
-#include "gtest/gtest_prod.h"
-
+#include "flare/base/internal/test_prod.h"
 #include "flare/net/hbase/proto/rpc.pb.h"
 #include "flare/rpc/protocol/stream_protocol.h"
 
@@ -44,8 +43,8 @@ class HbaseClientProtocol : public StreamProtocol {
                     Controller* controller) override;
 
  private:
-  FRIEND_TEST(HbaseProtocol, ClientToServer);
-  FRIEND_TEST(HbaseProtocol, ServerToClient);
+  FLARE_FRIEND_TEST(HbaseProtocol, ClientToServer);
+  FLARE_FRIEND_TEST(HbaseProtocol, ServerToClient);
 
   // TODO(luobogao): It would be better if the framework itself supports
   // handshaking. That way we won't need this special flag.

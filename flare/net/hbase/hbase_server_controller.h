@@ -17,8 +17,7 @@
 
 #include <string>
 
-#include "gtest/gtest_prod.h"
-
+#include "flare/base/internal/test_prod.h"
 #include "flare/net/hbase/hbase_controller_common.h"
 
 namespace flare {
@@ -48,7 +47,7 @@ class HbaseServerController : public hbase::HbaseControllerCommon {
   void Reset() override;
 
  private:
-  FRIEND_TEST(HbaseServerController, ConnectionHeader);
+  FLARE_FRIEND_TEST(HbaseServerController, ConnectionHeader);
   friend class HbaseService;
 
   // Only pointer (not value) is saved.
