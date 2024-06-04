@@ -26,8 +26,7 @@
 #include <utility>
 #include <vector>
 
-#include "gtest/gtest_prod.h"
-
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/protobuf/rpc_controller_common.h"
 
@@ -258,9 +257,9 @@ class RpcServerController : public protobuf::RpcControllerCommon {
   void Reset() override;
 
  private:
-  FRIEND_TEST(RpcServerController, Basics);
-  FRIEND_TEST(RpcServerController, Timeout);
-  FRIEND_TEST(RpcServerController, Compression);
+  FLARE_FRIEND_TEST(RpcServerController, Basics);
+  FLARE_FRIEND_TEST(RpcServerController, Timeout);
+  FLARE_FRIEND_TEST(RpcServerController, Compression);
 
   friend class protobuf::Service;
   friend class protobuf::PassiveCallContextFactory;

@@ -19,8 +19,7 @@
 #include <mutex>
 #include <string>
 
-#include "gtest/gtest_prod.h"
-
+#include "flare/base/internal/test_prod.h"
 #include "flare/rpc/http_handler.h"
 
 namespace flare::rpc::builtin {
@@ -33,7 +32,7 @@ class ProfCpuHandler : public HttpHandler {
              HttpServerContext* context) override;
 
  private:
-  FRIEND_TEST(ProfCpuHandler, All);
+  FLARE_FRIEND_TEST(ProfCpuHandler, All);
 
   void DoStart(const HttpRequest& request, HttpResponse* response,
                HttpServerContext* context);

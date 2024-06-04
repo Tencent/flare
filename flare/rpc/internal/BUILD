@@ -241,6 +241,7 @@ cc_library(
     '//flare/base:maybe_owning',
     '//flare/base:object_pool',
     '//flare/base/internal:early_init',
+    '//flare/base/internal:test_prod',
     '//flare/base/net:endpoint',
     '//flare/fiber:fiber',
     '//flare/io:io_basic',
@@ -249,7 +250,6 @@ cc_library(
     '//flare/rpc/binlog:binlog',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/googletest:gtest_prod',
   ],
   visibility = [
     '//flare/net/...',

@@ -28,11 +28,11 @@
 
 #include "gflags/gflags.h"
 #include "google/protobuf/service.h"
-#include "gtest/gtest_prod.h"
 
 #include "flare/base/down_cast.h"
 #include "flare/base/exposed_var.h"
 #include "flare/base/handle.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/maybe_owning.h"
 #include "flare/base/net/endpoint.h"
 #include "flare/base/ref_ptr.h"
@@ -217,7 +217,7 @@ class Server {
   T* GetBuiltinNativeService();
 
  private:
-  FRIEND_TEST(Server, RemoveIdleConnection);
+  FLARE_FRIEND_TEST(Server, RemoveIdleConnection);
 
   friend class rpc::detail::NormalConnectionHandler;
   friend class rpc::detail::DryRunConnectionHandler;

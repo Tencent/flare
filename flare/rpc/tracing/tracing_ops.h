@@ -22,12 +22,12 @@
 #include <variant>
 #include <vector>
 
-#include "gtest/gtest_prod.h"
 #include "opentracing-cpp/span.h"
 #include "opentracing-cpp/tracer.h"
 #include "opentracing/ext/tags.h"
 
 #include "flare/base/chrono.h"
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/maybe_owning.h"
 #include "flare/base/never_destroyed.h"
 #include "flare/base/string.h"
@@ -140,8 +140,8 @@ class QuickerSpan {
   bool Tracing() const noexcept { return !!span_; }
 
  private:
-  FRIEND_TEST(TracingOps, Noop);
-  FRIEND_TEST(TracingOps, DummyProvider);
+  FLARE_FRIEND_TEST(TracingOps, Noop);
+  FLARE_FRIEND_TEST(TracingOps, DummyProvider);
 
   enum class Operation { StandardTag, FrameworkTag, UserTag, Log };
 

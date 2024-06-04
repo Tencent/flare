@@ -158,9 +158,9 @@ cc_library(
   deps = [
     '//flare/base:logging',
     '//flare/base:string',
+    '//flare/base/internal:test_prod',
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:prof_utility',
-    '//thirdparty/googletest:gtest_prod',
     '//thirdparty/gperftools:profiler',
     '//thirdparty/jsoncpp:jsoncpp',
   ],

@@ -18,9 +18,8 @@
 #include <memory>
 #include <utility>
 
-#include "gtest/gtest_prod.h"
-
 #include "flare/base/internal/logging.h"
+#include "flare/base/internal/test_prod.h"
 
 namespace flare {
 
@@ -143,7 +142,7 @@ class MaybeOwning {
   // This is dangerous as we could not check for `Owning()` at compile time.
 
  private:
-  FRIEND_TEST(MaybeOwning, Reset);
+  FLARE_FRIEND_TEST(MaybeOwning, Reset);
 
   // Reset the pointer we have.
   //

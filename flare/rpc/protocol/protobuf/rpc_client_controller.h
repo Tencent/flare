@@ -22,8 +22,8 @@
 #include <string>
 
 #include "gflags/gflags_declare.h"
-#include "gtest/gtest_prod.h"
 
+#include "flare/base/internal/test_prod.h"
 #include "flare/base/status.h"
 #include "flare/rpc/internal/stream_call_gate_pool.h"
 #include "flare/rpc/protocol/protobuf/call_context.h"
@@ -187,7 +187,7 @@ class RpcClientController : public protobuf::RpcControllerCommon {
   void Reset() override;
 
  private:  // We need package visibility here.
-  FRIEND_TEST(RpcClientController, Basics);
+  FLARE_FRIEND_TEST(RpcClientController, Basics);
   friend class RpcChannel;  // It needs access to several private methods below.
   friend class protobuf::RpcChannelForDryRun;
   friend class testing::detail::MockRpcChannel;

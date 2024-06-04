@@ -239,7 +239,7 @@ cc_library(
   srcs = [],
   deps = [
     '//flare/base/internal:logging',
-    '//thirdparty/googletest:gtest_prod',
+    '//flare/base/internal:test_prod',
   ],
   visibility = 'PUBLIC',
 )

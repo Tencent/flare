@@ -141,10 +141,10 @@ cc_library(
     '//flare/base:buffer',
     '//flare/base:logging',
     '//flare/base/internal:time_view',
+    '//flare/base/internal:test_prod',
     '//flare/base/net:endpoint',
     '//flare/net/hbase/proto:constants',
     '//flare/net/hbase/proto:rpc_proto',
-    '//thirdparty/googletest:gtest_prod',
     '//thirdparty/protobuf:protobuf',
   ]
 )
@@ -184,7 +184,7 @@ cc_library(
   deps = [
     ':hbase_controller_common',
     '//flare/base/internal:early_init',
-    '//thirdparty/googletest:gtest_prod',
+    '//flare/base/internal:test_prod',
   ],
   visibility = 'PUBLIC',
 )
@@ -211,11 +211,11 @@ cc_library(
     '//flare/base:endian',
     '//flare/base:logging',
     '//flare/base/buffer:zero_copy_stream',
+    '//flare/base/internal:test_prod',
     '//flare/net/hbase/proto:rpc_proto',
     '//flare/rpc/protocol:controller',
     '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
-    '//thirdparty/googletest:gtest_prod',
   ]
 )
 
@@ -232,10 +232,10 @@ cc_library(
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base/buffer:zero_copy_stream',
+    '//flare/base/internal:test_prod',
     '//flare/net/hbase/proto:rpc_proto',
     '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
-    '//thirdparty/googletest:gtest_prod',
   ]
 )
 
