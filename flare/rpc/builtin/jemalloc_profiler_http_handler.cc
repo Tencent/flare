@@ -16,6 +16,7 @@
 
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <chrono>
 #include <memory>
@@ -23,6 +24,7 @@
 #include <string>
 #include <utility>
 
+#define JEMALLOC_MANGLE
 #include "jemalloc/jemalloc.h"
 #include "jsoncpp/json.h"
 

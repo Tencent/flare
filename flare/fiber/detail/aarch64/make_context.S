@@ -68,9 +68,14 @@
 .file "make_context.S"
 .text
 .align  2
+#ifdef __APPLE__
+.global _make_context
+_make_context:
+#else
 .global make_context
 .type   make_context, %function
 make_context:
+#endif
     # shift address in x0 (allocated stack) to lower 16 byte boundary
     and x0, x0, ~0xF
 
@@ -88,6 +93,8 @@ make_context:
     # No need to fill something into `x0`, it's already what we should return.
     ret
 
+#ifdef __linux__
 .size   make_context,.-make_context
 # Mark that we don't need executable stack.
 .section .note.GNU-stack,"",%progbits
+#endif

@@ -33,6 +33,10 @@ using namespace std::literals;
 
 namespace flare {
 
+using io::detail::kPollerError;
+using io::detail::kPollerRead;
+using io::detail::kPollerWrite;
+
 ExposedMetrics<std::uint64_t, flare::detail::TscToDuration<std::uint64_t>>
     read_event_fire_to_completion_latency(
         "flare/io/latency/event_fire_to_completion/read");
@@ -48,11 +52,11 @@ struct Descriptor::SeldomlyUsed {
 
   std::atomic<bool> cleanup_queued{false};
 
-  // Incremented whenever `EPOLLERR` is seen.
+  // Incremented whenever `kPollerError` is seen.
   //
-  // FIXME: Can we really see more than one `EPOLLERR` in practice?
+  // FIXME: Can we really see more than one `kPollerError` in practice?
   std::atomic<std::size_t> error_events{};
-  std::atomic<bool> error_seen{};  // Prevent multiple `EPOLLERR`s.
+  std::atomic<bool> error_seen{};  // Prevent multiple `kPollerError`s.
 
   // Set to non-`None` once a cleanup event is pending. If multiple events
   // triggered cleanup (e.g., an error occurred and the descriptor is
@@ -71,8 +75,8 @@ Descriptor::Descriptor(Handle fd, Event events, const std::string& name)
                    .seldomly_used = std::make_unique<SeldomlyUsed>()} {
   static_assert(offsetof(Descriptor, read_mostly_) ==
                 hardware_destructive_interference_size);
-  restart_read_count_ = (read_mostly_.event_mask & EPOLLIN) ? 1 : 0;
-  restart_write_count_ = (read_mostly_.event_mask & EPOLLOUT) ? 1 : 0;
+  restart_read_count_ = (read_mostly_.event_mask & kPollerRead) ? 1 : 0;
+  restart_write_count_ = (read_mostly_.event_mask & kPollerWrite) ? 1 : 0;
   if (name.empty()) {
     read_mostly_.seldomly_used->name = Format("{}", fmt::ptr(this));
   } else {
@@ -143,20 +147,20 @@ const std::string& Descriptor::GetName() const {
 }
 
 void Descriptor::FireEvents(int mask, std::uint64_t polled_at) {
-  if (FLARE_UNLIKELY(mask & EPOLLERR)) {
-    // `EPOLLERR` is handled first. In this case other events are ignored. You
-    // don't want to read from / write to a file descriptor in error state.
+  if (FLARE_UNLIKELY(mask & kPollerError)) {
+    // `kPollerError` is handled first. In this case other events are ignored.
+    // You don't want to read from / write to a file descriptor in error state.
     //
     // @sa: https://stackoverflow.com/a/37079607
     FireErrorEvent(polled_at);
     return;
   }
-  if (mask & EPOLLIN) {
+  if (mask & kPollerRead) {
     // TODO(luobogao): For the moment `EPOLLRDHUP` is not enabled in
     // `EventLoop`.
     FireReadEvent(polled_at);
   }
-  if (mask & EPOLLOUT) {
+  if (mask & kPollerWrite) {
     FireWriteEvent(polled_at);
   }
 }
@@ -270,7 +274,7 @@ void Descriptor::FireErrorEvent(std::uint64_t fired_at) {
 
   if (read_mostly_.seldomly_used->error_seen.exchange(
           true, std::memory_order_relaxed)) {
-    FLARE_VLOG(10, "Unexpected: Multiple `EPOLLERR` received.");
+    FLARE_VLOG(10, "Unexpected: Multiple `kPollerError` received.");
     return;
   }
 
@@ -328,20 +332,21 @@ void Descriptor::SuppressReadAndClearReadEventCount() {
       // `StreamIoAdaptor`'s internal buffer is filled up.
 
       FLARE_CHECK_NE(reached, -1);
-      FLARE_CHECK(GetEventMask() & EPOLLIN);  // Were `EPOLLIN` to be removed,
-                                              // it's us who remove it.
+      FLARE_CHECK(GetEventMask() &
+                  kPollerRead);  // Were `kPollerRead` to be removed,
+                                 // it's us who remove it.
       if (reached == 0) {
-        SetEventMask(GetEventMask() & ~EPOLLIN);
+        SetEventMask(GetEventMask() & ~kPollerRead);
         GetEventLoop()->RearmDescriptor(this);
       } else {
         // Otherwise things get tricky. In this case we left system's buffer
         // un-drained, and `RestartRead` happens before us. From system's
         // perspective, this scenario just looks like we haven't drained its
-        // buffer yet, so it won't return a `EPOLLIN` again.
+        // buffer yet, so it won't return a `kPollerRead` again.
         //
         // We have to either emulate one or remove and re-add the descriptor to
         // the event loop in this case.
-        FireEvents(EPOLLIN, ReadTsc() /* Not quite precise. */);
+        FireEvents(kPollerRead, ReadTsc() /* Not quite precise. */);
       }
     }  // The descriptor is leaving otherwise, nothing to do.
   });
@@ -359,12 +364,12 @@ void Descriptor::SuppressWriteAndClearWriteEventCount() {
 
       FLARE_CHECK(reached == 0 || reached == 1,
                   "Unexpected restart-write count: {}", reached);
-      FLARE_CHECK(GetEventMask() & EPOLLOUT);
+      FLARE_CHECK(GetEventMask() & kPollerWrite);
       if (reached == 0) {
-        SetEventMask(GetEventMask() & ~EPOLLOUT);
+        SetEventMask(GetEventMask() & ~kPollerWrite);
         GetEventLoop()->RearmDescriptor(this);
       } else {
-        FireEvents(EPOLLOUT, ReadTsc());
+        FireEvents(kPollerWrite, ReadTsc());
       }
     }  // The descriptor is leaving otherwise, nothing to do.
   });
@@ -382,8 +387,8 @@ void Descriptor::RestartReadNow() {
       // NOT `CHECK`-ed, though. @sa: `SuppressReadAndClearReadEventCount()`.
 
       if (count == 0) {  // We changed it from 0 to 1.
-        FLARE_CHECK_EQ(GetEventMask() & EPOLLIN, 0);
-        SetEventMask(GetEventMask() | EPOLLIN);
+        FLARE_CHECK_EQ(GetEventMask() & kPollerRead, 0);
+        SetEventMask(GetEventMask() | kPollerRead);
         GetEventLoop()->RearmDescriptor(this);
       }  // Otherwise `Suppress` will see `restart_read_count_` non-zero, and
          // deal with it properly.
@@ -399,8 +404,8 @@ void Descriptor::RestartWriteNow() {
       FLARE_CHECK(count == 0 || count == 1,
                   "Unexpected restart-write count: {}", count);
       if (count == 0) {
-        FLARE_CHECK_EQ(GetEventMask() & EPOLLOUT, 0);
-        SetEventMask(GetEventMask() | EPOLLOUT);
+        FLARE_CHECK_EQ(GetEventMask() & kPollerWrite, 0);
+        SetEventMask(GetEventMask() | kPollerWrite);
         GetEventLoop()->RearmDescriptor(this);
       }
     }

@@ -402,6 +402,7 @@ cc_library(
     '//flare/rpc/protocol:controller',
     '//flare/rpc/protocol/protobuf:call_context',
     '//flare/rpc/protocol/protobuf:rpc_meta_proto',
+    '//thirdparty/gflags:gflags',
   ]
 )
 

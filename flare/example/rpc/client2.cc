@@ -16,6 +16,8 @@
 //
 // This one is used by Flare developer for internal testing purpose.
 
+#include "gflags/gflags.h"
+
 #include "flare/base/thread/latch.h"
 #include "flare/example/rpc/echo_service.flare.pb.h"
 #include "flare/example/rpc/relay_service.flare.pb.h"

@@ -34,7 +34,7 @@ namespace binary_version {  // @sa: `common/base/binary_version.cc`.
 // Not declare as const intentionally, otherwise the compiler will inline access
 // to it.
 [[gnu::weak]] int kSvnInfoCount = 0;
-[[gnu::weak]] extern const char* const kSvnInfo[];
+[[gnu::weak]] extern const char* const kSvnInfo[] = {};
 [[gnu::weak]] extern const char kBuildType[] = "Unknown";
 [[gnu::weak]] extern const char kBuildTime[] = "Unknown";
 [[gnu::weak]] extern const char kBuilderName[] = "Unknown";
@@ -75,7 +75,18 @@ std::string GetVersionInfo() {
   if (kSvnInfoCount > 0) {
     std::string line_breaker(100, '-');  // ----------
     oss << "Sources:\n" << line_breaker << "\n";
+    // `kSvnInfo` is a weak zero-length placeholder unless a real
+    // `binary_version.cc` overrides it (the `kSvnInfoCount > 0` guard above
+    // keeps this loop in bounds at runtime). gcc's static array-bounds
+    // analyzer can't see that, so suppress it locally.
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
     for (int i = 0; i < kSvnInfoCount; ++i) oss << kSvnInfo[i];
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
     oss << line_breaker << "\n";
   }
 

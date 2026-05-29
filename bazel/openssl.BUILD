@@ -15,12 +15,25 @@ configure_make(
     configure_options = [
         "--libdir=lib"
     ],
+    # On macOS rules_foreign_cc sets AR to Apple's `/usr/bin/libtool`, whose
+    # CLI is incompatible with the `ar`-style `$(AR) r <archive> <objs>` that
+    # openssl's Makefile uses. Force a real `ar`.
+    env = select({
+        "@platforms//os:macos": {"AR": "/usr/bin/ar"},
+        "//conditions:default": {},
+    }),
     out_binaries = ["openssl"],
     lib_source = ":all",
-    out_shared_libs = [
-        "libssl.so",
-        "libcrypto.so",
-    ],
+    out_shared_libs = select({
+        "@platforms//os:macos": [
+            "libssl.dylib",
+            "libcrypto.dylib",
+        ],
+        "//conditions:default": [
+            "libssl.so",
+            "libcrypto.so",
+        ],
+    }),
     out_static_libs = [
         "libssl.a",
         "libcrypto.a",

@@ -270,8 +270,7 @@ cc_library(
     '//flare/base:function',
     '//flare/base:never_destroyed',
     '//flare/base:ref_ptr',
-    '#pthread',
-  ],
+  ] + (['#pthread'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = ['//flare/...'],
 )
 
@@ -342,8 +341,7 @@ cc_library(
     ':logging',
     '//flare/base:function',
     '//flare/base/thread:attribute',
-    '#pthread',
-  ],
+  ] + (['#pthread'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = ['//flare/...'],
 )
 
@@ -408,6 +406,7 @@ cc_benchmark(
 cc_library(
   name = 'macro',
   hdrs = 'macro.h',
+  srcs = ['macro_inl.h'],
   visibility = ['//flare/...'],
 )
 

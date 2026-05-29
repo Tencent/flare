@@ -93,10 +93,20 @@ ssize_t WritingBufferList::FlushTo(AbstractStreamIo* io, std::size_t max_bytes,
   // newly-added buffers, and it does cause some (small) performance
   // degradation. However, it won't affect the whole algorithm's correctness.
   auto head = head_.load(std::memory_order_acquire);
+  // `tail_` can be `nullptr` when a previous `FlushTo` drained the entire list
+  // (CAS `tail_` to `nullptr` at line 151) but left `head_` pointing to the
+  // stale last node. The next `Append` will restore `head_`. Until then, we
+  // treat the list as empty.
+  //
+  // `head_` can also be `nullptr` if `Append` has never been called.
+  if (!tail_.load(std::memory_order_relaxed)) {
+    *emptied = true;
+    *short_write = false;
+    return 0;
+  }
   auto current = head;
-  FLARE_CHECK(current);  // It can't be. `Append` should have already updated
-                         // it.
-  FLARE_CHECK(tail_.load(std::memory_order_relaxed), "The buffer is empty.");
+  FLARE_CHECK(current);  // `Append` should have updated it before setting
+                         // `tail_`.
   while (current) {
     for (auto iter = current->buffer.begin();
          iter != current->buffer.end() && nv != std::size(iov) &&

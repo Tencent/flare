@@ -12,6 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+#include "gflags/gflags.h"
+
 #include "flare/base/callback.h"
 #include "flare/example/rpc/echo_service.flare.pb.h"
 #include "flare/example/rpc/relay_service.pb.h"

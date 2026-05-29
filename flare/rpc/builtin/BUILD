@@ -18,22 +18,27 @@
 #
 # The framework can't do this automatically for you, sorry.
 
-cc_library(
-  name = 'tcmalloc_profiler_http_handler',
-  hdrs = [],
-  srcs = [
-    'tcmalloc_profiler_http_handler.cc',
-    'tcmalloc_profiler_http_handler.h',
-  ],
-  deps = [
-    '//flare/rpc:http',
-    '//flare/rpc/builtin/detail:prof_utility',
-    '//thirdparty/gperftools:tcmalloc_and_profiler',
-    '//thirdparty/jsoncpp:jsoncpp',
-  ],
-  link_all_symbols = True,
-  visibility = 'PUBLIC',
-)
+_is_darwin = blade.cc_toolchain.target_os == 'darwin'
+
+if not _is_darwin:
+    # gperftools / tcmalloc is Linux-only. The header and library are not
+    # available on macOS.
+    cc_library(
+      name = 'tcmalloc_profiler_http_handler',
+      hdrs = [],
+      srcs = [
+        'tcmalloc_profiler_http_handler.cc',
+        'tcmalloc_profiler_http_handler.h',
+      ],
+      deps = [
+        '//flare/rpc:http',
+        '//flare/rpc/builtin/detail:prof_utility',
+        '//thirdparty/jsoncpp:jsoncpp',
+        '//thirdparty/gperftools:tcmalloc_and_profiler',
+      ],
+      link_all_symbols = True,
+      visibility = 'PUBLIC',
+    )
 
 cc_library(
   name = 'jemalloc_profiler_http_handler',

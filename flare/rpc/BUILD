@@ -219,6 +219,7 @@ cc_test(
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/testing:main',
+    '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
   ]
 )
@@ -251,6 +252,7 @@ cc_test(
     '//flare/testing:endpoint',
     '//flare/testing:main',
     '//flare/testing:relay_service_proto_flare',
+    '//thirdparty/gflags:gflags',
   ],
   # Internally we also redistribute this UT to dedicated test machine. Linking
   # statically make redistribution a bit easier.

@@ -114,7 +114,11 @@ TEST(HttpClient, Https) {
   EXPECT_EQ(HttpStatus(200), res->status());
 }
 
-TEST(HttpClient, HttpsWithBodySize) {
+// Disabled: depends on baidu.com accepting an unsolicited 4 MiB POST and
+// returning 200 — which it no longer does. Triggering a real large-body
+// request belongs in an integration test against a controlled echo server,
+// not against a third-party homepage.
+TEST(HttpClient, DISABLED_HttpsWithBodySize) {
   if (!IsWanAccessible()) {
     FLARE_LOG_INFO("WAN is not accessible, skipping.");
     return;

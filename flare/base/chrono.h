@@ -49,13 +49,25 @@ inline struct CoarseClockInitializer {
 
 }  // namespace detail::chrono
 
-// Same as `std::chrono::steady_clock::now()`, except that this one can be
-// faster if `std`'s counterpart is implemented in terms of `syscall` (this is
-// the case for libstdc++ `configure`d on CentOS6 with default options).
-std::chrono::steady_clock::time_point ReadSteadyClock();
+// Originally bypassed `std::chrono::steady_clock::now()` for performance on
+// CentOS6 where libstdc++ could fall back to a real `syscall` via
+// `_GLIBCXX_USE_CLOCK_GETTIME_SYSCALL`. That optimisation is unnecessary on
+// any modern toolchain (vDSO is universal now), and using `clock_gettime`
+// directly risks clock epoch mismatch:
+//
+// On macOS (Darwin 24 / macOS 15), `CLOCK_MONOTONIC` and
+// `std::chrono::steady_clock::now()` disagree on epoch — `CLOCK_MONOTONIC`
+// can be ahead by accumulated sleep/suspend time. Mixing time_points from
+// the two clocks (extracting `time_since_epoch()` and reconstructing a
+// `steady_clock::time_point`) silently shifts absolute time, which broke
+// `TimerWorker::cv_.wait_until()`.
+inline std::chrono::steady_clock::time_point ReadSteadyClock() {
+  return std::chrono::steady_clock::now();
+}
 
-// Same as `std::chrono::system_clock::now()`.
-std::chrono::system_clock::time_point ReadSystemClock();
+inline std::chrono::system_clock::time_point ReadSystemClock() {
+  return std::chrono::system_clock::now();
+}
 
 // This method is faster than `ReadSteadyClock`, but it only provide a precision
 // in (several) milliseconds (deviates less than 10ms.).
@@ -73,8 +85,9 @@ inline std::chrono::steady_clock::time_point ReadCoarseSteadyClock() {
 // Same as `ReadCoarseSteadyClock` except it's for `std::system_clock`.
 inline std::chrono::system_clock::time_point ReadCoarseSystemClock() {
   return std::chrono::system_clock::time_point(
-      detail::chrono::async_updated_timestamps.system_clock_time_since_epoch
-          .load(std::memory_order_relaxed));
+      std::chrono::duration_cast<std::chrono::system_clock::duration>(
+          detail::chrono::async_updated_timestamps.system_clock_time_since_epoch
+              .load(std::memory_order_relaxed)));
 }
 
 // Read UNIX timestamp, i.e., seconds since 01/01/1970.

@@ -14,6 +14,7 @@
 
 #include "flare/rpc/internal/stream_call_gate_pool.h"
 
+#include "gflags/gflags.h"
 #include "gtest/gtest.h"
 
 #include "flare/fiber/this_fiber.h"

@@ -1,0 +1,152 @@
+--- a/configure
++++ b/configure
+@@ -17166,6 +17166,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -17362,6 +17365,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -17611,6 +17617,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -18045,6 +18054,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -20509,6 +20521,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -30216,6 +30231,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -34003,6 +34021,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -35988,6 +36009,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -36477,6 +36501,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -36932,6 +36959,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -37183,6 +37213,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -38199,6 +38232,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -38593,6 +38629,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -40524,6 +40563,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+@@ -40631,6 +40673,9 @@
+    old=$LD_LIBRARY_PATH
+    LD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
+    export LD_LIBRARY_PATH
++   old=$DYLD_LIBRARY_PATH
++   DYLD_LIBRARY_PATH=$CURL_LIBRARY_PATH:$old
++   export DYLD_LIBRARY_PATH
+    if test "$cross_compiling" = yes; then :
+   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+ $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}

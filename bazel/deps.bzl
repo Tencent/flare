@@ -19,10 +19,10 @@ def flare_dependencies():
         http_archive(
             name = "com_github_google_glog",
             urls = [
-                "https://github.com/google/glog/archive/refs/tags/v0.4.0.zip",
+                "https://github.com/google/glog/archive/refs/tags/v0.7.1.zip",
             ],
-            strip_prefix = "glog-0.4.0",
-            sha256 = "9e1b54eb2782f53cd8af107ecf08d2ab64b8d0dc2b7f5594472f3bd63ca85cdc",
+            strip_prefix = "glog-0.7.1",
+            sha256 = "c17d85c03ad9630006ef32c7be7c65656aba2e7e2fbfc82226b7e680c771fc88",
         )
 
     if not native.existing_rule("com_github_gflags_gflags"):
@@ -55,11 +55,10 @@ def flare_dependencies():
         http_archive(
             name = "zlib",
             build_file = Label("//bazel:zlib.BUILD"),
-            sha256 = "d14c38e313afc35a9a8760dadf26042f51ea0f5d154b0630a31da0540107fb98",
-            strip_prefix = "zlib-1.2.13",
+            sha256 = "bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16",
+            strip_prefix = "zlib-1.3.2",
             urls = [
-                "https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.xz",
-                "https://zlib.net/zlib-1.2.13.tar.xz",
+                "https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz",
             ],
         )
 
@@ -111,9 +110,12 @@ def flare_dependencies():
         http_archive(
             name = "com_github_openssl_openssl",
             build_file = Label("//bazel:openssl.BUILD"),
-            sha256 = "ecd0c6ffb493dd06707d38b14bb4d8c2288bb7033735606569d8f90f89669d16",
-            strip_prefix = "openssl-1.0.2u",
-            urls = ["https://www.openssl.org/source/old/1.0.2/openssl-1.0.2u.tar.gz"],
+            sha256 = "cf3098950cb4d853ad95c0841f1f9c6d3dc102dccfcacd521d93925208b76ac8",
+            strip_prefix = "openssl-1.1.1w",
+            urls = [
+                "https://www.openssl.org/source/openssl-1.1.1w.tar.gz",
+                "https://www.openssl.org/source/old/1.1.1/openssl-1.1.1w.tar.gz",
+            ],
         )
 
     if not native.existing_rule("com_github_nghttp2_nghttp2"):
@@ -142,6 +144,10 @@ def flare_dependencies():
         http_archive(
             name = "com_github_opentracing_opentracing_cpp",
             build_file = Label("//bazel:opentracing-cpp.BUILD"),
+            # opentracing-cpp 1.5.1 bundles a variant impl using std::result_of,
+            # which C++20 removed. Replace with std::invoke_result.
+            patches = [Label("//bazel:opentracing-cpp-cxx20.patch")],
+            patch_args = ["-p1"],
             urls = ["https://github.com/opentracing/opentracing-cpp/archive/refs/tags/v1.5.1.zip"],
             strip_prefix = "opentracing-cpp-1.5.1",
             sha256 = "7a007a4cd987fb86ce05eeec8fe9e9f2052988c835bb6c738ec00bc167750f81",

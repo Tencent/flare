@@ -14,18 +14,22 @@
 
 #include "flare/base/thread/attribute.h"
 
+#ifdef __linux__
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#include <sched.h>
+#endif
 
 #include <pthread.h>
-#include <sched.h>
 
 #include <string>
 
 #include "flare/base/logging.h"
 
 namespace flare {
+
+#ifdef __linux__
 
 int TrySetCurrentThreadAffinity(const std::vector<int>& affinity) {
   FLARE_CHECK(!affinity.empty());
@@ -60,8 +64,42 @@ std::vector<int> GetCurrentThreadAffinity() {
   return result;
 }
 
+#else  // !__linux__
+
+#include <unistd.h>  // sysconf.
+
+int TrySetCurrentThreadAffinity(const std::vector<int>& affinity) {
+  return 0;  // Not supported.
+}
+
+void SetCurrentThreadAffinity(const std::vector<int>& affinity) {
+  // Not supported, silently ignored.
+}
+
+std::vector<int> GetCurrentThreadAffinity() {
+  // macOS / other non-Linux: return all available CPUs.
+  int nproc = sysconf(_SC_NPROCESSORS_ONLN);
+  if (nproc <= 0) {
+    nproc = static_cast<int>(std::thread::hardware_concurrency());
+  }
+  if (nproc <= 0) {
+    nproc = 1;
+  }
+  std::vector<int> result(nproc);
+  for (int i = 0; i < nproc; ++i) {
+    result[i] = i;
+  }
+  return result;
+}
+
+#endif  // __linux__
+
 void SetCurrentThreadName(const std::string& name) {
+#ifdef __linux__
   auto rc = pthread_setname_np(pthread_self(), name.c_str());
+#else
+  auto rc = pthread_setname_np(name.c_str());
+#endif
   if (rc != 0) {
     FLARE_LOG_WARNING("Cannot set name for thread [{}]: [{}] {}",
                       reinterpret_cast<const void*>(pthread_self()), rc,

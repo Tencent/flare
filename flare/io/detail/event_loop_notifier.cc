@@ -15,47 +15,87 @@
 #include "flare/io/detail/event_loop_notifier.h"
 
 #include <fcntl.h>
+#ifdef __linux__
 #include <sys/eventfd.h>
+#endif
 #include <unistd.h>
 
 #include "flare/base/logging.h"
-#include "flare/fiber/alternatives.h"
 #include "flare/io/detail/eintr_safe.h"
 
 namespace flare::io::detail {
 
+#ifndef __linux__
 namespace {
 
-Handle CreateEvent() {
-  Handle fd(eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK));
-  FLARE_PCHECK(fd, "Cannot create eventfd.");
-  return fd;
+std::pair<Handle, Handle> CreatePipePair() {
+  int fds[2];
+  FLARE_PCHECK(::pipe(fds) == 0, "Cannot create pipe for event loop notifier.");
+  // Set both ends non-blocking and close-on-exec.
+  for (int i = 0; i < 2; ++i) {
+    auto flags = fcntl(fds[i], F_GETFL);
+    FLARE_PCHECK(flags != -1);
+    FLARE_PCHECK(fcntl(fds[i], F_SETFL, flags | O_NONBLOCK) == 0);
+    auto fdflags = fcntl(fds[i], F_GETFD);
+    FLARE_PCHECK(fdflags != -1);
+    FLARE_PCHECK(fcntl(fds[i], F_SETFD, fdflags | FD_CLOEXEC) == 0);
+  }
+  return {Handle(fds[0]), Handle(fds[1])};
 }
 
 }  // namespace
+#endif  // !__linux__
 
-EventLoopNotifier::EventLoopNotifier() : fd_(CreateEvent()) {}
+EventLoopNotifier::EventLoopNotifier() {
+#ifdef __linux__
+  fd_ = Handle(::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC));
+  FLARE_PCHECK(fd_.Get() != -1,
+               "Cannot create eventfd for event loop notifier.");
+#else
+  auto p = CreatePipePair();
+  read_fd_ = std::move(p.first);
+  write_fd_ = std::move(p.second);
+#endif
+}
 
-int EventLoopNotifier::fd() const noexcept { return fd_.Get(); }
+int EventLoopNotifier::fd() const noexcept {
+#ifdef __linux__
+  return fd_.Get();
+#else
+  return read_fd_.Get();
+#endif
+}
 
 void EventLoopNotifier::Notify() noexcept {
-  std::uint64_t v = 1;
-  PCHECK(io::detail::EIntrSafeWrite(fd(), &v, sizeof(v)) == sizeof(v));
+#ifdef __linux__
+  uint64_t u = 1;
+  auto rc = io::detail::EIntrSafeWrite(fd_.Get(), &u, sizeof(u));
+  PCHECK(rc == sizeof(u));
+#else
+  char v = 1;
+  auto rc = io::detail::EIntrSafeWrite(write_fd_.Get(), &v, sizeof(v));
+  PCHECK(rc == sizeof(v));
+#endif
 }
 
 void EventLoopNotifier::Reset() noexcept {
-  std::uint64_t v;
+#ifdef __linux__
+  uint64_t u;
   int rc;
-
-  // Keep reading until EOF is met.
-  //
-  // This shouldn't take too long, as there should be only
-  // number-of-Notify-calls bytes readable anyway.
   do {
-    rc = io::detail::EIntrSafeRead(fd(), &v, sizeof(v));
-    PCHECK(rc >= 0 || fiber::GetLastError() == EAGAIN ||
-           fiber::GetLastError() == EWOULDBLOCK);
+    rc = io::detail::EIntrSafeRead(fd_.Get(), &u, sizeof(u));
   } while (rc > 0);
+  FLARE_CHECK(rc == -1 || rc == 0);
+#else
+  char v;
+  int rc;
+  // Keep reading until EAGAIN.
+  do {
+    rc = io::detail::EIntrSafeRead(read_fd_.Get(), &v, sizeof(v));
+  } while (rc > 0);
+  // rc == 0 means EOF (should not happen), rc == -1 means EAGAIN (expected).
+  FLARE_CHECK(rc == -1 || rc == 0);
+#endif
 }
 
 }  // namespace flare::io::detail

@@ -15,9 +15,15 @@
 #include "flare/net/internal/http_engine.h"
 
 #include <fcntl.h>
+#ifdef __linux__
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <sys/timerfd.h>
+#endif
+
+#include <unistd.h>
+
+#include "gflags/gflags.h"
 
 #include <algorithm>
 #include <mutex>
@@ -53,9 +59,18 @@ namespace internal {
 class Notifier {
  public:
   bool Init() {
+#ifdef __linux__
     fd_ = eventfd(0, 0);
     if (fd_ < 0) return false;
     return SetupFd(fd_);
+#else
+    int fds[2];
+    if (pipe(fds) != 0) return false;
+    read_fd_ = fds[0];
+    write_fd_ = fds[1];
+    if (!SetupFd(read_fd_) || !SetupFd(write_fd_)) return false;
+    return true;
+#endif
   }
 
   bool SetupFd(int fd) {
@@ -74,22 +89,43 @@ class Notifier {
   }
 
   void Read() {
+#ifdef __linux__
     eventfd_t u;
     while (eventfd_read(fd_, &u) == 0) {
-      // Empty body
     }
+#else
+    char buf[256];
+    while (read(read_fd_, buf, sizeof(buf)) > 0) {
+    }
+#endif
   }
 
   bool Notify() {
+#ifdef __linux__
     DCHECK_GE(fd_, 0);
     eventfd_t u = 1;
     return eventfd_write(fd_, u) == 0;
+#else
+    char v = 1;
+    return write(write_fd_, &v, 1) == 1;
+#endif
   }
 
-  int Fd() { return fd_; }
+  int Fd() {
+#ifdef __linux__
+    return fd_;
+#else
+    return read_fd_;
+#endif
+  }
 
  private:
+#ifdef __linux__
   int fd_;
+#else
+  int read_fd_;
+  int write_fd_;
+#endif
 };
 
 class CallContextQueue {
@@ -119,6 +155,7 @@ class CallContextQueue {
 
 int SockCallback(CURL* e, curl_socket_t s, int what, void* cbp, void* sockp);
 
+#ifdef __linux__
 int MultiTimerCallback(CURLM* multi, long timeout_ms, int* tfd) {  // NOLINT
   struct itimerspec its;
   if (timeout_ms > 0) {
@@ -141,6 +178,7 @@ int MultiTimerCallback(CURLM* multi, long timeout_ms, int* tfd) {  // NOLINT
   timerfd_settime(*tfd, /*flags=*/0, &its, nullptr);
   return 0;
 }
+#endif  // __linux__
 
 class CurlClient {
  public:
@@ -160,8 +198,14 @@ class CurlClient {
       flare::SetCurrentThreadAffinity(
           fiber::detail::GetSchedulingGroup(group)->Affinity());
       if (FLAGS_flare_http_engine_use_epoll) {
+#ifdef __linux__
         InitEpoll();
         LoopEpoll();
+#else
+        FLARE_LOG_WARNING(
+            "epoll is not supported on this platform, falling back to poll.");
+        LoopPoll();
+#endif
       } else {
         LoopPoll();
       }
@@ -172,11 +216,16 @@ class CurlClient {
 
   ~CurlClient() {
     worker_.join();
-    struct itimerspec its;
-    timerfd_settime(tfd_, 0, &its, nullptr);
+#ifdef __linux__
+    if (FLAGS_flare_http_engine_use_epoll) {
+      struct itimerspec its;
+      timerfd_settime(tfd_, 0, &its, nullptr);
+    }
+#endif
     curl_multi_cleanup(multi_handle_);
   }
 
+#ifdef __linux__
   void InitEpoll() {
     epfd_ = epoll_create1(EPOLL_CLOEXEC);
     FLARE_CHECK(epfd_ != -1, "epoll_create1 failed");
@@ -204,7 +253,9 @@ class CurlClient {
     ev.data.fd = notifier_->Fd();
     epoll_ctl(epfd_, EPOLL_CTL_ADD, notifier_->Fd(), &ev);
   }
+#endif  // __linux__
 
+#ifdef __linux__
   void TimerCallback(int revents) {
     uint64_t count = 0;
     ssize_t err = read(tfd_, &count, sizeof(uint64_t));
@@ -225,7 +276,9 @@ class CurlClient {
                              &still_running_);
     CheckMultiInfo();
   }
+#endif  // __linux__
 
+#ifdef __linux__
   void EventCallback(int fd, int revents) {
     int action = ((revents & EPOLLIN) ? CURL_CSELECT_IN : 0) |
                  ((revents & EPOLLOUT) ? CURL_CSELECT_OUT : 0);
@@ -234,6 +287,7 @@ class CurlClient {
 
     CheckMultiInfo();
   }
+#endif  // __linux__
 
   void CheckMultiInfo() {
     CURLMsg* msg;
@@ -278,6 +332,7 @@ class CurlClient {
     }
   }
 
+#ifdef __linux__
   void LoopEpoll() {
     struct epoll_event events[128];
     while (!exiting_.load(std::memory_order_relaxed)) {
@@ -303,6 +358,7 @@ class CurlClient {
       }
     }
   }
+#endif  // __linux__
 
   void LoopPoll() {
     int numfds;
@@ -341,13 +397,17 @@ class CurlClient {
   }
 
   CURLM* multi_handle_;
+#ifdef __linux__
   int epfd_;
+#endif
 
  private:
   std::atomic<bool> exiting_{false};
   std::thread worker_;
 
+#ifdef __linux__
   int tfd_;
+#endif
   Notifier* notifier_;
   std::size_t group_;
   CallContextQueue* call_context_queue_;
@@ -383,6 +443,7 @@ class CurlClientGroup {
 
 std::vector<std::unique_ptr<CurlClientGroup>> curl_client_groups;
 
+#ifdef __linux__
 struct SockInfo {
   curl_socket_t sockfd;
   CURL* easy;
@@ -442,6 +503,7 @@ int SockCallback(CURL* e, curl_socket_t s, int what, void* cbp, void* sockp) {
   }
   return 0;
 }
+#endif  // __linux__
 
 size_t HttpWriteCallback(char* ptr, size_t size, size_t nmemb, void* pstr) {
   auto bytes = size * nmemb;
@@ -470,10 +532,10 @@ int HttpDebugCallback(CURL* handle, curl_infotype type, char* data, size_t size,
   std::string_view data_view(data, size);
   if (type == CURLINFO_TEXT || type == CURLINFO_HEADER_IN ||
       type == CURLINFO_HEADER_OUT) {
-    FLARE_LOG_INFO("[{}] {}", type, data_view);
+    FLARE_LOG_INFO("[{}] {}", static_cast<int>(type), data_view);
   } else if (type == CURLINFO_DATA_IN || type == CURLINFO_DATA_OUT) {
     if (FLAGS_flare_http_engine_enable_debug_body) {
-      FLARE_LOG_INFO("[{}] {}", type, data_view);
+      FLARE_LOG_INFO("[{}] {}", static_cast<int>(type), data_view);
     }  // Ignored otherwise.
   }    // Everything else is ignored.
   return 0;

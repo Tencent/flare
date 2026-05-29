@@ -25,9 +25,12 @@
 namespace flare::fiber {
 
 struct AwesomeLogSink : public google::LogSink {
+  // Don't hide the deprecated `tm`-based overload.
+  using google::LogSink::send;
   void send(google::LogSeverity severity, const char* full_filename,
-            const char* base_filename, int line, const struct ::tm* tm_time,
-            const char* message, size_t message_len) override {
+            const char* base_filename, int line,
+            const google::LogMessageTime& time, const char* message,
+            size_t message_len) override {
     last.assign(message, message_len);
   }
   std::string last;

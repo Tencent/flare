@@ -16,7 +16,9 @@
 #define FLARE_IO_DETAIL_EINTR_SAFE_H_
 
 #include <errno.h>
+#ifdef __linux__
 #include <sys/epoll.h>
+#endif
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <unistd.h>
@@ -82,8 +84,10 @@ inline ssize_t EIntrSafeWriteV(int fd, const iovec* iov, int iovcnt) {
 }
 
 int EIntrSafeAccept(int sockfd, sockaddr* addr, socklen_t* addrlen);
+#ifdef __linux__
 int EIntrSafeEpollWait(int epfd, epoll_event* events, int maxevents,
                        int timeout);
+#endif
 ssize_t EIntrSafeRecvFrom(int sockfd, void* buf, size_t len, int flags,
                           sockaddr* src_addr, socklen_t* addrlen);
 ssize_t EIntrSafeSendTo(int sockfd, const void* buf, size_t len, int flags,

@@ -116,9 +116,7 @@ cc_library(
   srcs = 'chrono.cc',
   deps = [
     ':align',
-    '#pthread',
-    '#rt',
-  ],
+  ] + (['#pthread', '#rt'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = 'PUBLIC',
 )
 

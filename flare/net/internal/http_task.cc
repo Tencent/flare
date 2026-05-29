@@ -15,9 +15,6 @@
 #include "flare/net/internal/http_task.h"
 
 #include <fcntl.h>
-#include <sys/epoll.h>
-#include <sys/eventfd.h>
-#include <sys/timerfd.h>
 
 #include <algorithm>
 #include <vector>

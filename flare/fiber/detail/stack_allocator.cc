@@ -14,7 +14,9 @@
 
 #include "flare/fiber/detail/stack_allocator.h"
 
+#ifdef __linux__
 #include <malloc.h>  // `memalign`.
+#endif
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -170,7 +172,12 @@ inline std::size_t GetAllocationSize() {
 
 UserStack* CreateUserStackImpl() {
   auto p = mmap(nullptr, GetAllocationSize(), PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANONYMOUS | MAP_STACK, 0, 0);
+                MAP_PRIVATE | MAP_ANONYMOUS
+#ifdef MAP_STACK
+                    | MAP_STACK
+#endif
+                ,
+                0, 0);
   FLARE_LOG_FATAL_IF(p == nullptr, "{}", kOutOfMemoryError);
   FLARE_CHECK_EQ(reinterpret_cast<std::uintptr_t>(p) % kPageSize, 0);
   if (FLAGS_flare_fiber_stack_enable_guard_page) {
@@ -210,9 +217,8 @@ SystemStack* CreateSystemStackImpl() {
   // Rather simple.. Memory allocator should handle it well. We don't even have
   // to make it aligned to page boundary.
 
-  // Using POSIX `memalign` here, C++17 `aligned_alloc` is not available on
-  // CentOS 6.
-  auto stack = memalign(kAlign, kSystemStackSize);
+  void* stack = nullptr;
+  FLARE_CHECK_EQ(posix_memalign(&stack, kAlign, kSystemStackSize), 0);
   FLARE_CHECK(reinterpret_cast<std::uintptr_t>(stack) % kAlign == 0);
   auto stack_bottom = reinterpret_cast<char*>(stack) + kSystemStackSize;
 

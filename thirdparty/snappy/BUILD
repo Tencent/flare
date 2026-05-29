@@ -1,5 +1,7 @@
 include('//thirdparty/foreign_build.bld')
 
+_is_linux = blade.cc_toolchain.target_os == 'linux'
+
 cmake_build(name='snappy_build',
             source_package='snappy-1.1.8.tar.gz',
             package_name='snappy',
@@ -21,8 +23,7 @@ foreign_cc_library(
     deps=[
         ':snappy_build',
         '//thirdparty/zlib:z',
-        '#rt',
-    ],
+    ] + (['#rt'] if _is_linux else []),
     visibility='PUBLIC',
     has_dynamic=True,
 )

@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+_is_darwin = blade.cc_toolchain.target_os == 'darwin'
+
 cc_binary(
   name = 'server',
   srcs = [
@@ -23,10 +25,11 @@ cc_binary(
     '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/rpc:rpc',
-    '//flare/rpc/builtin:tcmalloc_profiler_http_handler',
     '//thirdparty/gflags:gflags',
+  ] + ([] if _is_darwin else [
+    '//flare/rpc/builtin:tcmalloc_profiler_http_handler',
     '//thirdparty/gperftools:tcmalloc_and_profiler',
-  ]
+  ])
 )
 
 cc_binary(
@@ -42,8 +45,7 @@ cc_binary(
     '//flare/rpc:rpc',
     '//flare/rpc/builtin:jemalloc_profiler_http_handler',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/gperftools:profiler',
-  ]
+  ] + ([] if _is_darwin else ['//thirdparty/gperftools:profiler'])
 )
 
 cc_binary(
@@ -57,8 +59,7 @@ cc_binary(
     '//flare/base/thread:latch',
     '//flare/net/http:http_client',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/gperftools:tcmalloc_and_profiler',
-  ]
+  ] + ([] if _is_darwin else ['//thirdparty/gperftools:tcmalloc_and_profiler'])
 )
 
 cc_binary(
@@ -73,8 +74,9 @@ cc_binary(
     '//flare/net/http:http_client',
     '//flare/init:override_flag',
     '//flare/rpc:rpc',
-    '//flare/rpc/builtin:tcmalloc_profiler_http_handler',
     '//thirdparty/gflags:gflags',
+  ] + ([] if _is_darwin else [
+    '//flare/rpc/builtin:tcmalloc_profiler_http_handler',
     '//thirdparty/gperftools:tcmalloc_and_profiler',
-  ]
+  ])
 )

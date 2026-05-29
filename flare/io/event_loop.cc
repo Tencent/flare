@@ -14,9 +14,6 @@
 
 #include "flare/io/event_loop.h"
 
-#include <fcntl.h>
-#include <sys/epoll.h>
-
 #include <memory>
 #include <utility>
 #include <vector>
@@ -33,6 +30,7 @@
 #include "flare/fiber/this_fiber.h"
 #include "flare/io/descriptor.h"
 #include "flare/io/detail/eintr_safe.h"
+#include "flare/io/detail/poller.h"
 #include "flare/io/detail/timed_call.h"
 #include "flare/io/detail/watchdog.h"
 #include "flare/io/util/socket.h"
@@ -52,8 +50,8 @@ namespace {
 
 FiberLocal<EventLoop*> current_event_loop;
 
-constexpr auto kEpollError = EPOLLERR;
-constexpr auto kExtraEpollFlags = EPOLLET;  // `EPOLLONESHOT`?
+constexpr auto kPollerErrorMask = io::detail::kPollerError;
+constexpr auto kExtraPollerFlags = io::detail::kPollerET;
 
 struct EventLoopWorker {
   std::unique_ptr<EventLoop> event_loop;
@@ -85,43 +83,26 @@ std::uint32_t HashFd(int fd) {
 }  // namespace
 
 EventLoop::EventLoop() {
-  // @sa: https://linux.die.net/man/2/epoll_create1
-  //
-  // > Since Linux 2.6.8, the size argument is ignored, but must be greater than
-  // > zero; see NOTES below.
-  //
-  // > epoll_create1() was added to the kernel in version 2.6.27. Library
-  // > support is provided in glibc starting with version 2.9.
-  //
-  // We use `epoll_create` here since `epoll_create1` is not available on
-  // CentOS 6. `epoll_create` does not support `EPOLL_CLOEXEC` though.
-  epfd_.Reset(epoll_create(1));
-  FLARE_PCHECK(epfd_.Get() != -1);
-  auto oldflags = fcntl(epfd_.Get(), F_GETFD);
-  FLARE_PCHECK(oldflags != -1);
-  FLARE_PCHECK(fcntl(epfd_.Get(), F_SETFD, oldflags | FD_CLOEXEC) == 0);
+  poller_ = io::detail::CreatePoller();
 
   // `EventLoopNotifier` is different in that its `OnReadable` must be called
   // synchronously (to avoid wake-up loss), and hence must be handled
   // individually.
-  epoll_event ee;
-  ee.events = EPOLLIN | EPOLLERR;
-  ee.data.ptr = static_cast<void*>(&notifier_);
-  FLARE_CHECK(epoll_ctl(epfd_.Get(), EPOLL_CTL_ADD, notifier_.fd(), &ee) == 0,
-              "Failed to add notifier to event loop.");
+  poller_->Add(notifier_.fd(),
+               io::detail::kPollerRead | io::detail::kPollerError,
+               static_cast<void*>(&notifier_));
 }
 
 EventLoop::~EventLoop() {
-  // Does not makes much sense as both `notifier_.fd()` and `epfd_` it self is
+  // Does not make much sense as both `notifier_.fd()` and the poller are
   // going to be closed anyway.
-  FLARE_PCHECK(
-      epoll_ctl(epfd_.Get(), EPOLL_CTL_DEL, notifier_.fd(), nullptr) == 0,
-      "Failed to remove notifier from event loop.");
+  poller_->Remove(notifier_.fd());
 }
 
 void EventLoop::AttachDescriptor(Descriptor* desc, bool enabled) {
   desc->Ref();
-  desc->SetEventMask(desc->GetEventMask() | kEpollError | kExtraEpollFlags);
+  desc->SetEventMask(desc->GetEventMask() | kPollerErrorMask |
+                     kExtraPollerFlags);
 
   // We must call `SetEventLoop()` **before** adding the descriptor into the
   // event loop. Otherwise the descriptor may get a `nullptr` from
@@ -135,27 +116,19 @@ void EventLoop::AttachDescriptor(Descriptor* desc, bool enabled) {
 
 void EventLoop::EnableDescriptor(Descriptor* desc) {
   FLARE_CHECK(!desc->Enabled(), "The descriptor has already been enabled.");
-  epoll_event ee;
-
   desc->SetEnabled(true);
-  ee.events = desc->GetEventMask();
-  ee.data.ptr = static_cast<void*>(desc);
-  FLARE_PCHECK(epoll_ctl(epfd_.Get(), EPOLL_CTL_ADD, desc->fd(), &ee) == 0,
-               "Failed to add fd #{} to epoll.", desc->fd());
+  auto mask = desc->GetEventMask();
+  poller_->Add(desc->fd(), mask, static_cast<void*>(desc));
   FLARE_VLOG(20, "Added descriptor [{}] with event mask [{}].", desc->GetName(),
-             +ee.events);
+             mask);
 }
 
 void EventLoop::RearmDescriptor(Descriptor* desc) {
   FLARE_CHECK(desc->Enabled(), "The descriptor is not enabled.");
-  epoll_event ee;
-
-  ee.events = desc->GetEventMask() | kEpollError | kExtraEpollFlags;
-  ee.data.ptr = static_cast<void*>(desc);
+  auto mask = desc->GetEventMask() | kPollerErrorMask | kExtraPollerFlags;
   FLARE_VLOG(20, "Rearming descriptor [{}] with event mask [{}].",
-             desc->GetName(), +ee.events);
-  FLARE_PCHECK(epoll_ctl(epfd_.Get(), EPOLL_CTL_MOD, desc->fd(), &ee) == 0,
-               "Failed to modify fd #{} in epoll.", desc->fd());
+             desc->GetName(), mask);
+  poller_->Modify(desc->fd(), mask, static_cast<void*>(desc));
 }
 
 void EventLoop::DisableDescriptor(Descriptor* desc) {
@@ -163,12 +136,7 @@ void EventLoop::DisableDescriptor(Descriptor* desc) {
   FLARE_CHECK_EQ(EventLoop::Current(), this,
                  "This method must be called in event loop's context.");
   FLARE_CHECK(desc->Enabled(), "The descriptor is not enabled.");
-  // http://man7.org/linux/man-pages/man2/epoll_ctl.2.html
-  //
-  // > In kernel versions before 2.6.9, the EPOLL_CTL_DEL operation required
-  // > a non - null pointer in event, even though this argument is ignored.
-  FLARE_PCHECK(epoll_ctl(epfd_.Get(), EPOLL_CTL_DEL, desc->fd(), nullptr) == 0,
-               "Failed to remove fd #{} from epoll.", desc->fd());
+  poller_->Remove(desc->fd());
   FLARE_VLOG(20, "Removed descriptor [{}].", desc->GetName());
   desc->SetEnabled(false);
 }
@@ -247,13 +215,10 @@ void EventLoop::Join() {
 EventLoop* EventLoop::Current() { return *current_event_loop; }
 
 void EventLoop::WaitAndRunEvents(std::chrono::milliseconds wait_for) {
-  // FIXME: Need we use `epoll_pwait` instead to handle signal more
-  // gracefully? (I'd say code using signal is fundamentally broken anyway.)
   constexpr auto kDescriptorsPerLoop = 128;
-  epoll_event evs[kDescriptorsPerLoop];
-  auto nfds = io::detail::EIntrSafeEpollWait(epfd_.Get(), evs, std::size(evs),
-                                             wait_for / 1ms);
-  FLARE_PCHECK(nfds >= 0, "Unexpected: epoll_wait failed.");
+  io::detail::PollerEvent evs[kDescriptorsPerLoop];
+  auto nfds = poller_->Wait(evs, std::size(evs), wait_for / 1ms);
+  FLARE_PCHECK(nfds >= 0, "Unexpected: poller wait failed.");
 
   // Run event handlers.
   io::detail::TimedCall([&] { RunEventHandlers(evs, evs + nfds); }, 5ms,
@@ -281,31 +246,25 @@ void EventLoop::RunUserTasks() {
   }
 }
 
-void EventLoop::RunEventHandlers(epoll_event* begin, epoll_event* end) {
+void EventLoop::RunEventHandlers(io::detail::PollerEvent* begin,
+                                 io::detail::PollerEvent* end) {
   auto start_tsc = ReadTsc();
   ScopedDeferred _([&] {
     run_event_handlers_latency->Report(TscElapsed(start_tsc, ReadTsc()));
   });
   events_per_poll->Report(end - begin);
 
-  static_assert(static_cast<int>(Descriptor::Event::Read) == EPOLLIN,
-                "We're using `EPOLLIN` and `Descriptor::Event::Read` "
-                "interchangably.");
-  static_assert(static_cast<int>(Descriptor::Event::Write) == EPOLLOUT,
-                "We're using `EPOLLOUT` and `Descriptor::Event::Write` "
-                "interchangably.");
-
   while (begin != end) {
     // FIXME: This `if` is ugly.
-    if (FLARE_UNLIKELY(begin->data.ptr == static_cast<void*>(&notifier_))) {
-      FLARE_CHECK((begin->events & EPOLLERR) == 0,
+    if (FLARE_UNLIKELY(begin->user_data == static_cast<void*>(&notifier_))) {
+      FLARE_CHECK((begin->events & io::detail::kPollerError) == 0,
                   "Unexpected error on event loop notifier.");
       notifier_.Reset();
       ++begin;
       continue;
     }
 
-    auto desc = reinterpret_cast<Descriptor*>(begin->data.ptr);
+    auto desc = reinterpret_cast<Descriptor*>(begin->user_data);
     FLARE_CHECK(desc);
     desc->FireEvents(begin->events, start_tsc);
     ++begin;

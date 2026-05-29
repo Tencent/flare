@@ -1,5 +1,7 @@
 include('../foreign_build.bld')
 
+_is_linux = blade.cc_toolchain.target_os == 'linux'
+
 autotools_build(
     name='jemalloc_build',
     source_package='jemalloc-5.2.1.tar.gz',
@@ -18,9 +20,7 @@ foreign_cc_library(
     name='jemalloc',
     deps=[
         ':jemalloc_build',
-        '#pthread',
-        '#rt',
-    ],
+    ] + (['#pthread', '#rt'] if _is_linux else []),
     has_dynamic=True,
     visibility='PUBLIC',
 )

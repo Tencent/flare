@@ -4,6 +4,7 @@
 // Author: Shixuan YU <shixuanyu@tencent.com>
 
 #include <signal.h>
+#include <sys/time.h>
 #include <atomic>
 #include <chrono>
 #include <iostream>
@@ -22,7 +23,7 @@ DEFINE_bool(info, false, "log level info or warning");
 using namespace std::literals;
 
 template <class T>
-inline T ReadClock(int type) {
+inline T ReadClock(clockid_t type) {
   timespec ts;
   clock_gettime(type, &ts);
   return T((ts.tv_sec * 1'000'000'000LL + ts.tv_nsec) * 1ns);

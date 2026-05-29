@@ -29,6 +29,12 @@ DECLARE_string(flare_fiber_worker_inaccessible_cpus);
 namespace flare::fiber {
 
 TEST(Runtime, All) {
+#ifndef __linux__
+  GTEST_SKIP() << "Hard CPU affinity is Linux-only; macOS' thread_policy_set "
+                  "is advisory and the kernel routinely keeps all CPUs in "
+                  "the mask, so `flare_fiber_worker_inaccessible_cpus` cannot "
+                  "be observed here.";
+#else
   google::FlagSaver _;
   FLAGS_flare_fiber_worker_inaccessible_cpus = "-1";
 
@@ -46,6 +52,7 @@ TEST(Runtime, All) {
   });
   latch.wait();
   TerminateRuntime();
+#endif
 }
 
 }  // namespace flare::fiber

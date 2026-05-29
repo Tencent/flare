@@ -12,9 +12,11 @@ cmake_build(
         '-DBUILD_TESTING=OFF',
         '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
         '-DCMAKE_BUILD_TYPE=Release',
+        '-DCMAKE_CXX_STANDARD=17',
     ],
     strip_include_prefix='opentracing',
     generate_dynamic=True,
+    patches=['variant.patch', 'cxx17.patch'],
 )
 
 foreign_cc_library(

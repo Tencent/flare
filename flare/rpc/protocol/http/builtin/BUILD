@@ -12,20 +12,25 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
-cc_library(
-  name = 'builtin',
-  hdrs = [],
-  deps = [
+_is_darwin = blade.cc_toolchain.target_os == 'darwin'
+
+_builtin_deps = [
     ':exposed_vars_handler',
     ':gflags_handler',
     ':misc_handler',
     ':options_handler',
-    ':prof_cpu_handler',
     ':rpc_form_handler',
     ':rpc_reflect_handler',
     ':rpc_statistics_handler',
     ':static_resource_http_handler',
-  ],
+]
+if not _is_darwin:
+    _builtin_deps += [':prof_cpu_handler']
+
+cc_library(
+  name = 'builtin',
+  hdrs = [],
+  deps = _builtin_deps,
   visibility = ['//flare/rpc:*'],
 )
 
@@ -151,29 +156,30 @@ cc_test(
   ]
 )
 
-cc_library(
-  name = 'prof_cpu_handler',
-  hdrs = 'prof_cpu_handler.h',
-  srcs = 'prof_cpu_handler.cc',
-  deps = [
-    '//flare/base:logging',
-    '//flare/base:string',
-    '//flare/base/internal:test_prod',
-    '//flare/rpc:http',
-    '//flare/rpc/builtin/detail:prof_utility',
-    '//thirdparty/gperftools:profiler',
-    '//thirdparty/jsoncpp:jsoncpp',
-  ],
-  link_all_symbols = True
-)
+if not _is_darwin:
+    cc_library(
+      name = 'prof_cpu_handler',
+      hdrs = 'prof_cpu_handler.h',
+      srcs = 'prof_cpu_handler.cc',
+      deps = [
+        '//flare/base:logging',
+        '//flare/base:string',
+        '//flare/base/internal:test_prod',
+        '//flare/rpc:http',
+        '//flare/rpc/builtin/detail:prof_utility',
+        '//thirdparty/gperftools:profiler',
+        '//thirdparty/jsoncpp:jsoncpp',
+      ],
+      link_all_symbols = True
+    )
 
-cc_test(
-  name = 'prof_cpu_handler_test',
-  srcs = 'prof_cpu_handler_test.cc',
-  deps = [
-    ':prof_cpu_handler',
-  ],
-)
+    cc_test(
+      name = 'prof_cpu_handler_test',
+      srcs = 'prof_cpu_handler_test.cc',
+      deps = [
+        ':prof_cpu_handler',
+      ],
+    )
 
 cc_library(
   name = 'static_resource_http_handler',

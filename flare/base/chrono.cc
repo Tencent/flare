@@ -14,25 +14,12 @@
 
 #include "flare/base/chrono.h"
 
-#include <time.h>
-
 #include <chrono>
 #include <thread>
 
 using namespace std::literals;
 
 namespace flare {
-
-namespace {
-
-template <class T>
-inline T ReadClock(int type) {
-  timespec ts;
-  clock_gettime(type, &ts);
-  return T((ts.tv_sec * 1'000'000'000LL + ts.tv_nsec) * 1ns);
-}
-
-}  // namespace
 
 namespace detail::chrono {
 
@@ -65,13 +52,5 @@ CoarseClockInitializer::~CoarseClockInitializer() {
 }
 
 }  // namespace detail::chrono
-
-std::chrono::steady_clock::time_point ReadSteadyClock() {
-  return ReadClock<std::chrono::steady_clock::time_point>(CLOCK_MONOTONIC);
-}
-
-std::chrono::system_clock::time_point ReadSystemClock() {
-  return ReadClock<std::chrono::system_clock::time_point>(CLOCK_REALTIME);
-}
 
 }  // namespace flare

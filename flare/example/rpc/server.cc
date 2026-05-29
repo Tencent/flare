@@ -12,7 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include "flare/rpc/server.h"
+#include "gflags/gflags.h"
+
 #include "flare/base/exposed_var.h"
 #include "flare/base/random.h"
 #include "flare/example/rpc/echo_service.flare.pb.h"
@@ -20,6 +21,7 @@
 #include "flare/init.h"
 #include "flare/init/override_flag.h"
 #include "flare/rpc/rpc_server_controller.h"
+#include "flare/rpc/server.h"
 
 using namespace std::literals;
 

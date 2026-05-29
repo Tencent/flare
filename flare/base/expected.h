@@ -205,7 +205,7 @@ class Unexpected {
   constexpr void swap(Unexpected& other) noexcept(
       std::is_nothrow_swappable_v<E>) {
     using std::swap;
-    swap(unex_, other.unex);
+    swap(unex_, other.unex_);
   }
 
   template <class Err>

@@ -19,6 +19,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#if defined(__APPLE__)
+#include <sys/sysctl.h>
+#endif
+
 #include <fstream>
 
 #include "fmt/format.h"
@@ -30,8 +34,22 @@ namespace flare::io::util {
 
 namespace {
 
+#if defined(__APPLE__)
+constexpr auto kMaxBacklogSysctl = "kern.ipc.somaxconn";
+
 int MaximumBacklog() {
-  std::ifstream ifs("/proc/sys/net/core/somaxconn");
+  int val;
+  std::size_t len = sizeof(val);
+  if (sysctlbyname(kMaxBacklogSysctl, &val, &len, nullptr, 0) == 0) {
+    return val;
+  }
+  return -1;
+}
+#elif defined(__linux__)
+constexpr auto kMaxBacklogSysctl = "/proc/sys/net/core/somaxconn";
+
+int MaximumBacklog() {
+  std::ifstream ifs(kMaxBacklogSysctl);
   int rc;
   ifs >> rc;
   if (!ifs) {
@@ -39,6 +57,9 @@ int MaximumBacklog() {
   }
   return rc;
 }
+#else
+#error Unsupported platform.
+#endif
 
 Handle Socket(int af, int type, int protocol) {
   Handle fd(socket(af, type, protocol));
@@ -84,28 +105,25 @@ int SetFlags(int fd, int flags) {
 }  // namespace
 
 Handle CreateListener(const Endpoint& addr, int backlog) {
-  // For performance reasons, we don't expect this value to change (even if it
-  // can.)
   static const int kMaximumBacklog = [] {
     auto rc = MaximumBacklog();
     if (rc == -1) {
       FLARE_LOG_WARNING_ONCE(
-          "CreateListener: Failed to read from `/proc/sys/net/core/somaxconn`. "
+          "CreateListener: Failed to read {}. "
           "The program will keep functioning, but errors in `backlog` "
-          "specified in calling `CreateListener` won't be detected.");
+          "specified in calling `CreateListener` won't be detected.",
+          kMaxBacklogSysctl);
     }
     return rc;
   }();
 
-  // Check if the `backlog` is capped by `net.core.maxsoconn`.
   if (kMaximumBacklog != -1 && kMaximumBacklog < backlog) {
     FLARE_LOG_WARNING_ONCE(
-        "CreateListener: `backlog` you specified ({}) is larger than "
-        "`net.core.maxsoconn` ({}). The latter will be the effective one. This "
-        "may lead to unexpected connection failures. Consider changing "
-        "`/proc/sys/net/core/somaxconn` if you indeed want such a large "
-        "`backlog`.",
-        backlog, kMaximumBacklog);
+        "CreateListener: `backlog` you specified ({}) is larger than the "
+        "system's maximum ({}) as read from {}. The latter will be the "
+        "effective one. This may lead to unexpected connection failures. "
+        "Consider adjusting {} if you indeed want such a large `backlog`.",
+        backlog, kMaximumBacklog, kMaxBacklogSysctl, kMaxBacklogSysctl);
   }
 
   // Create the socket and listen on `addr`.

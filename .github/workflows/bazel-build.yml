@@ -2,6 +2,7 @@ name: Bazel Build
 
 on:
   push:
+    branches: [master]
   pull_request:
     branches: [master]
 
@@ -13,10 +14,9 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Setup bazel
-      # FIXME: Bazel 7.0+ support.
       run: |
         rm -rf /usr/local/bin/bazel
-        wget https://github.com/bazelbuild/bazel/releases/download/6.5.0/bazel-6.5.0-linux-x86_64 -O /usr/local/bin/bazel
+        wget https://github.com/bazelbuild/bazel/releases/download/7.5.0/bazel-7.5.0-linux-x86_64 -O /usr/local/bin/bazel
         chmod +x /usr/local/bin/bazel
 
     - name: Build
@@ -28,3 +28,19 @@ jobs:
       # Build and Execute tests
       working-directory: ${{github.workspace}}
       run: bazel test --test_output=errors ...
+
+  build_on_macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    # foreign_cc autotools deps (jemalloc/openssl/curl/nghttp2) run autogen.sh,
+    # which needs autoconf/automake/libtool (not preinstalled on the runner).
+    - name: Install dependencies
+      run: brew install autoconf automake libtool
+
+    # macOS runners ship bazelisk as `bazel`, which honors .bazelversion (7.5.0).
+    - name: Build
+      working-directory: ${{github.workspace}}
+      run: bazel build //flare/...

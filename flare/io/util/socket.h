@@ -22,7 +22,8 @@ namespace flare::io::util {
 
 // Returns a invalid handle (`(!rc == true)` holds.) on failure.
 
-// `backlog` is capped by `net.core.somaxconn`: https://serverfault.com/q/518862
+// `backlog` is capped by the system limit (`net.core.somaxconn` on Linux,
+// `kern.ipc.somaxconn` on macOS): https://serverfault.com/q/518862
 //
 // If you're not able to accept connections quick enough, you're likely to lose
 // them or have other troubles with accepting them.

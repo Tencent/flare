@@ -1,5 +1,7 @@
 # Blade BUILD file for Protobuf.
 
+_is_linux = blade.cc_toolchain.target_os == 'linux'
+
 ################################################################################
 # Protobuf Runtime Library
 ################################################################################
@@ -16,9 +18,8 @@ COPTS = [
     "-Wno-enum-compare",
     "-Wno-register",
     "-Wno-array-bounds",
-    "-Wno-stringop-overread",
     "-Ithirdparty/protobuf-3.4.1/src",
-]
+] + (["-Wno-stringop-overread"] if blade.cc_toolchain.cc_vendor == 'gcc' else [])
 
 cc_library(
     name = "protobuf_lite",
@@ -54,9 +55,8 @@ cc_library(
     export_incs = ['src'],
     deps = [
         '//thirdparty/glog:glog',
-        '#pthread',
         '#m',
-    ],
+    ] + (['#pthread'] if _is_linux else []),
 )
 
 cc_library(

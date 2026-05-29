@@ -15,19 +15,17 @@
 #ifndef FLARE_IO_EVENT_LOOP_H_
 #define FLARE_IO_EVENT_LOOP_H_
 
-#include <sys/epoll.h>
-
 #include <atomic>
 #include <chrono>
 #include <list>
+#include <memory>
 #include <mutex>
 
 #include "flare/base/function.h"
 #include "flare/base/handle.h"
 #include "flare/io/descriptor.h"
 #include "flare/io/detail/event_loop_notifier.h"
-
-struct epoll_event;
+#include "flare/io/detail/poller.h"
 
 namespace flare {
 
@@ -111,11 +109,12 @@ class EventLoop {
  private:
   void WaitAndRunEvents(std::chrono::milliseconds wait_for);
   void RunUserTasks();
-  void RunEventHandlers(epoll_event* begin, epoll_event* end);
+  void RunEventHandlers(io::detail::PollerEvent* begin,
+                        io::detail::PollerEvent* end);
 
  private:
   std::atomic<bool> exiting_{false};
-  Handle epfd_;
+  std::unique_ptr<io::detail::Poller> poller_;
 
   // `notifier_` is used for waking the worker. (e.g. in the case there's a new
   // task for running.)

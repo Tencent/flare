@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "gflags/gflags.h"
 #include "jsoncpp/json.h"
 
 #include "flare/base/chrono.h"

@@ -24,6 +24,12 @@ configure_make(
         "--without-librtmp",
         "--without-libpsl",
     ],
+    # macOS: use a real `ar`; rules_foreign_cc sets AR to Apple's libtool,
+    # whose CLI is incompatible with the `ar`-style invocation autotools uses.
+    env = select({
+        "@platforms//os:macos": {"AR": "/usr/bin/ar"},
+        "//conditions:default": {},
+    }),
     lib_source = ":all",
     # out_shared_libs = ["libcurl.so"],
     out_static_libs = ["libcurl.a"],

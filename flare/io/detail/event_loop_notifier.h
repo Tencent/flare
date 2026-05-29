@@ -15,18 +15,20 @@
 #ifndef FLARE_IO_DETAIL_EVENT_LOOP_NOTIFIER_H_
 #define FLARE_IO_DETAIL_EVENT_LOOP_NOTIFIER_H_
 
+#include "flare/base/handle.h"
 #include "flare/io/descriptor.h"
 
 namespace flare::io::detail {
 
 // This class is used to wake event loop thread up in certain cases.
 //
-// A notifier is implemented in terms of an eventfd. `Notify` would signal the
-// event, which in turn, wakes up event loop thread if it's sleeping now.
+// Implemented with `eventfd` on Linux and `pipe(2)` on other platforms.
+// `Notify` writes a byte to wake the event loop; `Reset` drains the channel.
 class EventLoopNotifier final {
  public:
   EventLoopNotifier();
 
+  // Returns the fd of the read end. This fd is added to the poller.
   int fd() const noexcept;
 
   // Wake up the event loop.
@@ -37,7 +39,12 @@ class EventLoopNotifier final {
   void Reset() noexcept;
 
  private:
+#ifdef __linux__
   Handle fd_;
+#else
+  Handle read_fd_;
+  Handle write_fd_;
+#endif
 };
 
 }  // namespace flare::io::detail

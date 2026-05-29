@@ -16,24 +16,40 @@
 
 #include <stdio.h>
 
+#if defined(__linux__)
+#include <unistd.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
+
 #include "flare/base/logging.h"
 
 namespace flare::rpc::builtin {
 
 std::string ReadProcPath() {
   static constexpr int kLength = 512;
-  char cmdline[kLength];
-  ssize_t nr = readlink("/proc/self/exe", cmdline, kLength - 1);
+  char path[kLength];
+#if defined(__linux__)
+  ssize_t nr = readlink("/proc/self/exe", path, kLength - 1);
   if (nr <= 0) {
     FLARE_LOG_ERROR("Fail to read /proc/self/exe");
     return "";
   }
-
   if (static_cast<size_t>(nr) == kLength - 1) {
     FLARE_LOG_ERROR("Buf is not big enough");
     return "";
   }
-  return std::string(cmdline, nr);
+  return std::string(path, nr);
+#elif defined(__APPLE__)
+  uint32_t size = kLength;
+  if (_NSGetExecutablePath(path, &size) != 0) {
+    FLARE_LOG_ERROR("Fail to get executable path");
+    return "";
+  }
+  return std::string(path);
+#else
+  return "";
+#endif
 }
 
 bool PopenNoShellCompat(const std::string& command, std::string* result,

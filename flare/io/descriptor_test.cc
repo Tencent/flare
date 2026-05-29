@@ -52,8 +52,18 @@ class PipeDesc : public Descriptor {
 };
 
 RefPtr<PipeDesc> CreatePipe() {
+  // `pipe2` is Linux-only. Use `pipe` + `fcntl` for cross-platform
+  // compatibility.
   int fds[2];
-  PCHECK(pipe2(fds, O_NONBLOCK | O_CLOEXEC) == 0);
+  PCHECK(pipe(fds) == 0);
+  for (int i = 0; i < 2; ++i) {
+    auto flags = fcntl(fds[i], F_GETFL);
+    PCHECK(flags != -1);
+    PCHECK(fcntl(fds[i], F_SETFL, flags | O_NONBLOCK) == 0);
+    auto fdflags = fcntl(fds[i], F_GETFD);
+    PCHECK(fdflags != -1);
+    PCHECK(fcntl(fds[i], F_SETFD, fdflags | FD_CLOEXEC) == 0);
+  }
   PCHECK(write(fds[1], "asdf", 4) == 4);
   close(fds[1]);
   return MakeRefCounted<PipeDesc>(Handle(fds[0]));

@@ -14,6 +14,7 @@
 
 #include <chrono>
 
+#include "gflags/gflags.h"
 #include "gtest/gtest.h"
 
 #include "flare/base/down_cast.h"

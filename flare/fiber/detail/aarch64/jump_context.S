@@ -65,9 +65,14 @@
 .file "jump_context.S"
 .text
 .align  2
+#ifdef __APPLE__
+.global _jump_context
+_jump_context:
+#else
 .global jump_context
 .type   jump_context, %function
 jump_context:
+#endif
     # prepare stack for GP + FPU
     sub  sp, sp, #0xb0
 
@@ -121,6 +126,8 @@ jump_context:
     mov  x0, x2
 
     ret x4
+#ifdef __linux__
 .size   jump_context,.-jump_context
 # Mark that we don't need executable stack.
 .section .note.GNU-stack,"",%progbits
+#endif

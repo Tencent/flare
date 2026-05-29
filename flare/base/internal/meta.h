@@ -24,7 +24,7 @@ namespace flare::internal {
 
 template <class F>
 constexpr auto is_valid(F&& f) {
-  return [f = std::forward<F>(f)](auto&&... args) constexpr {
+  return [](auto&&... args) constexpr {
     // FIXME: Perfect forwarding.
     return std::is_invocable_v<F, decltype(args)...>;
   };

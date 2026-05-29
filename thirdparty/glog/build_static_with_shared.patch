@@ -1,0 +1,26 @@
+When BUILD_SHARED_LIBS=ON, also emit a static variant. glog 0.7's CMake builds
+shared OR static (BUILD_SHARED_LIBS is binary), but blade's foreign_cc_library
+expects both libglog.a and libglog.so/.dylib. Reuse the existing glog_internal
+OBJECT library so we don't recompile the sources.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -409,5 +409,18 @@ add_library (glog
+ target_compile_features (glog PUBLIC cxx_std_14)
+ 
+ add_library (glog::glog ALIAS glog)
++
++# Also emit libglog.a alongside the shared library, so downstream consumers
++# that expect both forms (e.g. blade's foreign_cc_library) can pick the right
++# one based on link mode and avoid having glog statically embedded in multiple
++# DSOs (which would duplicate gflags flag registrations at startup).
++if (BUILD_SHARED_LIBS)
++  add_library (glog_static STATIC
++    $<TARGET_OBJECTS:glog_internal>
++    ${_glog_EMPTY_SOURCE}
++  )
++  set_target_properties (glog_static PROPERTIES OUTPUT_NAME glog)
++  install (TARGETS glog_static ARCHIVE DESTINATION ${_glog_CMake_LIBDIR})
++endif ()
+ 
+ set (glog_libraries_options_for_static_linking)

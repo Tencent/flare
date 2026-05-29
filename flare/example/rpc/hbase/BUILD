@@ -25,6 +25,7 @@ cc_binary(
   deps = [
     ':echo_service_proto',
     '//flare:init',
+    '//flare/base:down_cast',
     '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/net/hbase:hbase',
