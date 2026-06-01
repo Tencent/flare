@@ -63,8 +63,4 @@ cc_library(
 cc_test(
   name = 'round_robin_test',
   srcs = [],
-  keep_deps = [
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
-  ],
 )

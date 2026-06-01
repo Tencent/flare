@@ -116,9 +116,6 @@ cc_library(
     '//flare/rpc/protocol:message',
     '//thirdparty/protobuf:protobuf',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_library(
@@ -143,9 +140,6 @@ cc_library(
     '//flare/net/hbase/proto:rpc_proto',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -175,9 +169,6 @@ cc_library(
     '//flare/base/net:endpoint',
     '//flare/net/hbase/proto:constants',
     '//flare/net/hbase/proto:rpc_proto',
-    '//thirdparty/protobuf:protobuf',
-  ],
-  keep_deps = [
     '//thirdparty/protobuf:protobuf',
   ],
 )

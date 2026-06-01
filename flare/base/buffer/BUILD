@@ -72,9 +72,6 @@ cc_library(
     '//thirdparty/protobuf:protobuf',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(

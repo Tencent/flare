@@ -213,13 +213,6 @@ cc_library(
     '//flare/rpc/protocol/protobuf:protobuf',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//flare/base:expected',
-    '//flare/base:future',
-    '//flare/base:maybe_owning',
-    '//flare/base:status',
-    '//flare/rpc/protocol/protobuf:protobuf',
-  ],
 )
 
 #  Not implemented yet.

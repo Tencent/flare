@@ -25,11 +25,6 @@ cc_flare_library(
   name = 'echo_proto_flare',
   srcs = 'echo.proto',
   deps = [':echo_proto'],
-  keep_deps = [
-    ':echo_proto',
-    ':flare_gen_echo_proto_flare',
-    '//flare/rpc:protobuf',
-  ],
 )
 
 cc_binary(

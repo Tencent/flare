@@ -29,7 +29,4 @@ cc_library(
     hdrs = 'yaml.h',
     deps = [':yaml-cpp'],
     visibility = 'PUBLIC',
-    keep_deps = [
-      ':yaml-cpp',
-    ],
 )

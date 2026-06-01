@@ -26,9 +26,6 @@ cc_library(
     '//flare/base:string',
     '//thirdparty/protobuf:protobuf',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_library(
@@ -41,9 +38,6 @@ cc_library(
     '//flare/base:logging',
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
-    '//thirdparty/protobuf:protoc',
-  ],
-  keep_deps = [
     '//thirdparty/protobuf:protoc',
   ],
 )
@@ -60,9 +54,6 @@ cc_library(
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protoc',
-  ],
 )
 
 cc_library(
@@ -76,9 +67,6 @@ cc_library(
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protoc',
-  ],
 )
 
 cc_library(
@@ -90,9 +78,6 @@ cc_library(
     ':names',
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
-    '//thirdparty/protobuf:protoc',
-  ],
-  keep_deps = [
     '//thirdparty/protobuf:protoc',
   ],
 )
@@ -115,7 +100,6 @@ cc_binary(
   ],
   keep_deps = [
     '//thirdparty/fmt:fmt',
-    '//thirdparty/protobuf:protoc',
   ],
 )
 
@@ -139,6 +123,5 @@ cc_binary(
   visibility = 'PUBLIC',
   keep_deps = [
     '//thirdparty/fmt:fmt',
-    '//thirdparty/protobuf:protoc',
   ],
 )

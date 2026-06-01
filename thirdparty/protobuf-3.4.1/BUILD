@@ -129,7 +129,6 @@ cc_library(
     ],
     warning = 'no',
     keep_deps = [
-      ':protobuf_lite',
       '//thirdparty/zlib:z',
     ],
 )
@@ -282,9 +281,6 @@ cc_library(
     ],
     extra_cppflags = COPTS,
     deps = [":protobuf"],
-    keep_deps = [
-      ':protobuf',
-    ],
 )
 
 cc_binary(

@@ -282,9 +282,6 @@ cc_library(
     '//thirdparty/protobuf:protobuf',
   ],
   visibility = ['//flare/rpc/...'],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(

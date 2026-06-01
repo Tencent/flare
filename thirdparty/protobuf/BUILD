@@ -1,17 +1,11 @@
 cc_library(
     name = 'protobuf',
     deps = ['//thirdparty/protobuf-3.4.1:protobuf'],
-    keep_deps = [
-      '//thirdparty/protobuf-3.4.1:protobuf',
-    ],
 )
 
 cc_library(
     name = 'protoc',
     deps = ['//thirdparty/protobuf-3.4.1:protoc_lib'],
-    keep_deps = [
-      '//thirdparty/protobuf-3.4.1:protoc_lib',
-    ],
 )
 
 proto_library(

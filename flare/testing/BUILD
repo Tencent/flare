@@ -86,9 +86,6 @@ cc_library(
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -147,11 +144,6 @@ cc_flare_library(
   srcs = 'echo_service.proto',
   deps = [':echo_service_proto'],
   visibility = 'PUBLIC',
-  keep_deps = [
-    ':echo_service_proto',
-    ':flare_gen_echo_service_proto_flare',
-    '//flare/rpc:protobuf',
-  ],
 )
 
 proto_library(
@@ -168,11 +160,6 @@ cc_flare_library(
   srcs = 'relay_service.proto',
   deps = [':relay_service_proto'],
   visibility = 'PUBLIC',
-  keep_deps = [
-    ':flare_gen_relay_service_proto_flare',
-    ':relay_service_proto',
-    '//flare/rpc:protobuf',
-  ],
 )
 
 cc_library(

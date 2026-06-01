@@ -32,16 +32,6 @@ cc_library(
   hdrs = [],
   deps = _builtin_deps,
   visibility = ['//flare/rpc:*'],
-  keep_deps = [
-    ':exposed_vars_handler',
-    ':gflags_handler',
-    ':misc_handler',
-    ':options_handler',
-    ':rpc_form_handler',
-    ':rpc_reflect_handler',
-    ':rpc_statistics_handler',
-    ':static_resource_http_handler',
-  ],
 )
 
 cc_library(
@@ -244,7 +234,6 @@ cc_library(
   link_all_symbols = True,
   keep_deps = [
     '//thirdparty/ctemplate:ctemplate',
-    '//thirdparty/protobuf:protobuf',
   ],
 )
 
@@ -261,9 +250,6 @@ cc_test(
     '//flare/testing:endpoint',
     '//flare/testing:main',
     '//thirdparty/jsoncpp:jsoncpp',
-    '//thirdparty/protobuf:protobuf',
-  ],
-  keep_deps = [
     '//thirdparty/protobuf:protobuf',
   ],
 )

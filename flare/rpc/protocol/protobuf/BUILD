@@ -112,9 +112,6 @@ cc_library(
   visibility = [
     '//flare/rpc/binlog/gdt:dumper_test',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -134,9 +131,6 @@ cc_library(
     '//flare/base:maybe_owning',
     '//flare/base:object_pool',
     '//flare/rpc/protocol:controller',
-    '//thirdparty/protobuf:protobuf',
-  ],
-  keep_deps = [
     '//thirdparty/protobuf:protobuf',
   ],
 )
@@ -170,9 +164,6 @@ cc_library(
     '//flare/rpc/protocol/http/builtin:rpc_reflect_handler',
     '//flare/rpc/protocol/http/builtin:rpc_reflect_handler_test',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -197,9 +188,6 @@ cc_library(
   visibility = [
     '//flare/rpc/protocol/http/builtin:rpc_reflect_handler',
   ],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -210,9 +198,6 @@ cc_test(
     '//flare/testing:message_proto',
     '//thirdparty/googletest:gmock',
     '//thirdparty/jsoncpp:jsoncpp',
-    '//thirdparty/protobuf:protobuf',
-  ],
-  keep_deps = [
     '//thirdparty/protobuf:protobuf',
   ],
 )
@@ -241,9 +226,6 @@ cc_library(
     '//flare/base:enum',
   ],
   link_all_symbols = True,
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -295,9 +277,6 @@ cc_library(
     '//thirdparty/protobuf:protobuf',
   ],
   link_all_symbols = True,
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -349,9 +328,6 @@ cc_library(
     '//flare/base:likely',
   ],
   link_all_symbols = True,
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -449,9 +425,6 @@ cc_library(
     '//flare/base:logging',
   ],
   visibility = ['//flare/testing:rpc_controller'],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
-  ],
 )
 
 cc_test(
@@ -507,9 +480,6 @@ cc_library(
   ],
   visibility = [
     '//flare/testing:rpc_mock',
-  ],
-  keep_deps = [
-    '//thirdparty/protobuf:protobuf',
   ],
 )
 
@@ -615,14 +585,8 @@ for block_size in ['4K', '64K', '1M']:
       '//flare/testing:endpoint',
       '//flare/testing:main',
     ],
-    keep_deps = [
-      # `:protobuf` is the umbrella that bundles per-protocol libs (std/
-      # baidu_std/poppy/...). integration_test pulls them in via runtime
-      # registration, not via any direct header include, so blade flags
-      # it unused.
-      ':protobuf',
-    ],
-    defs = ['BUFFER_BLOCK_SIZE=\\"%s\\"' % block_size]
+    defs = ['BUFFER_BLOCK_SIZE=\\"%s\\"' % block_size],
+    keep_deps = [':protobuf'],
   )
 
 cc_library(
@@ -664,7 +628,6 @@ cc_library(
   ],
   link_all_symbols = True,
   keep_deps = [
-    '//thirdparty/protobuf:protobuf',
     ':std_protocol',
   ],
 )
@@ -710,7 +673,6 @@ cc_library(
   ],
   link_all_symbols = True,
   keep_deps = [
-    '//thirdparty/protobuf:protobuf',
     ':std_protocol',
   ],
 )
