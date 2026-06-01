@@ -49,12 +49,15 @@ cc_library(
 
 cc_library(
   name = 'http',
-  hdrs = [
-    'http11_protocol.h',
-    'service.h',
-  ],
+  # Pure self-registration: HTTP/1.x protocol + service implementations
+  # register themselves with the protocol / service registries via static
+  # initializers; consumers reach them only through the registries at
+  # link time, so the .h files belong in srcs (private to this target).
+  hdrs = [],
   srcs = [
+    'http11_protocol.h',
     'http11_protocol.cc',
+    'service.h',
     'service.cc',
   ],
   deps = [
@@ -62,24 +65,18 @@ cc_library(
     ':buffer_io',
     ':http_filter',
     ':http_handler',
-    ':http_server_context',
     ':message',
-    '//flare/base:buffer',
     '//flare/base:compression',
     '//flare/base:maybe_owning',
     '//flare/base:string',
     '//flare/base/buffer:compression_output_stream',
     '//flare/base/compression:util',
-    '//flare/base/internal:lazy_init',
-    '//flare/base/net:endpoint',
-    '//flare/init:on_init',
     '//flare/net/http:packet_desc',
     '//flare/rpc/internal:session_context',
-    '//flare/rpc/internal:stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/protocol:stream_service',
+    '//flare/base:deferred',
+    '//flare/base:logging',
   ],
   visibility = [
     '//flare/rpc:http',
@@ -111,14 +108,13 @@ cc_test(
   name = 'http_test',
   srcs = 'http_test.cc',
   deps = [
-    ':http',
     '//flare/base:string',
     '//flare/net/http:http_client',
     '//flare/rpc:rpc',
     '//flare/testing:endpoint',
     '//flare/testing:main',
     '//thirdparty/jsoncpp:jsoncpp',
-  ]
+  ],
 )
 
 cc_library(
@@ -149,6 +145,7 @@ cc_test(
     '//flare/net/http:http_request',
     '//flare/net/http:http_response',
     '//thirdparty/googletest:gmock',
+    '//flare/base:buffer',
   ]
 )
 
@@ -160,7 +157,8 @@ cc_benchmark(
     '//flare/net/http:http_headers',
     '//flare/net/http:http_request',
     '//thirdparty/gflags:gflags',
-  ]
+    '//flare/base:logging',
+  ],
 )
 
 cc_test(
@@ -178,7 +176,6 @@ cc_test(
   srcs = 'http_handler_test.cc',
   deps = [
     ':http_handler',
-    ':http',
     '//flare/base:down_cast',
     '//flare/testing:main',
     '//thirdparty/googletest:gmock',
@@ -208,6 +205,7 @@ cc_test(
     '//flare/rpc/binlog/util:proto_dumper',
     '//flare/testing:endpoint',
     '//flare/testing:main',
+    '//flare/rpc/binlog:packet_desc',
   ]
 )
 
@@ -231,10 +229,10 @@ cc_test(
     '//flare/rpc/binlog:tags',
     '//flare/rpc/binlog/util:proto_binlog_proto',
     '//flare/rpc/binlog/util:proto_dry_runner',
-    '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/testing:main',
     '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
-  ]
+    '//flare/rpc/binlog:packet_desc',
+  ],
 )

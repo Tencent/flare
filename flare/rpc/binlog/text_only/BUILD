@@ -28,8 +28,6 @@ cc_library(
     ':binlog_proto',
     '//flare/base:string',
     '//flare/base:logging',
-    '//flare/base:buffer',
-    '//flare/base:casting',
     '//flare/base:chrono',
     '//flare/net/http:http_request',
     '//flare/net/http:http_response',
@@ -59,5 +57,6 @@ cc_test(
     '//flare/rpc/binlog:tags',
     '//flare/rpc/binlog:testing',
     '//thirdparty/jsoncpp:jsoncpp',
+    '//flare/rpc/protocol:message',
   ]
 )

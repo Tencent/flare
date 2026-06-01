@@ -53,6 +53,7 @@ cc_test(
   deps = [
     ':exposed_vars_handler',
     '//thirdparty/jsoncpp:jsoncpp',
+    '//flare/base:exposed_var',
   ]
 )
 
@@ -135,6 +136,7 @@ cc_library(
     '//flare/rpc:http',
     '//flare/rpc/internal:rpc_metrics',
     '//thirdparty/jsoncpp:jsoncpp',
+    '//flare/base:string',
   ],
   link_all_symbols = True
 )
@@ -147,8 +149,6 @@ cc_test(
     '//flare/base:down_cast',
     '//flare/net/http:http_client',
     '//flare/rpc:rpc',
-    '//flare/rpc/load_balancer:round_robin',
-    '//flare/rpc/name_resolver:list',
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/testing:main',
@@ -231,7 +231,7 @@ cc_library(
     '//thirdparty/ctemplate:ctemplate',
     '//thirdparty/protobuf:protobuf',
   ],
-  link_all_symbols = True
+  link_all_symbols = True,
 )
 
 cc_test(

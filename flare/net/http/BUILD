@@ -31,6 +31,15 @@ cc_library(
     ':query_string',
     ':types',
     '//flare/base:string',  # Due to BUG in blade.
+    ':http_message',
+    '//flare/base/internal:case_insensitive_hash_map',
+    '//flare/base/internal:lazy_init',
+    '//flare/base:buffer',
+    '//flare/base:expected',
+    '//flare/base:function',
+    '//flare/base:future',
+    '//flare/base:logging',
+    '//thirdparty/gflags:gflags',
   ],
   visibility = 'PUBLIC',
 )
@@ -59,8 +68,6 @@ cc_library(
     '//flare/base:expected',
     '//flare/base:function',
     '//flare/base:future',
-    '//flare/base:object_pool',
-    '//flare/base:string',
     '//flare/base/internal:lazy_init',
     '//flare/fiber:fiber',
     '//flare/net/internal:http_engine',
@@ -77,7 +84,6 @@ cc_test(
   name = 'http_client_test',
   srcs = 'http_client_test.cc',
   deps = [
-    ':dry_run_channel',
     ':http_client',
     '//flare/base:compression',
     '//flare/base:string',
@@ -89,13 +95,19 @@ cc_test(
     '//flare/testing:endpoint',
     '//flare/testing:main',
     '//thirdparty/curl:curl',
+    '//flare/base:expected',
   ]
 )
 
 cc_library(
   name = 'dry_run_channel',
-  hdrs = 'dry_run_channel.h',
-  srcs = 'dry_run_channel.cc',
+  # Pure self-registration: registers a dry-run HTTP channel scheme via
+  # a static initializer; consumers reach it through the registry.
+  hdrs = [],
+  srcs = [
+    'dry_run_channel.h',
+    'dry_run_channel.cc',
+  ],
   deps = [
     ':http_client',
     ':packet_desc',
@@ -140,8 +152,8 @@ cc_library(
     ':types',
     '//flare/base:buffer',
     '//flare/base:enum',
-    '//flare/base:string',
     '//flare/base/internal:early_init',
+    '//flare/base:logging',
   ],
   visibility = 'PUBLIC',
 )
@@ -162,6 +174,7 @@ cc_library(
     '//flare/base:enum',
     '//flare/base:string',
     '//flare/base/internal:early_init',
+    ':http_headers',
   ],
   visibility = 'PUBLIC',
 )
@@ -185,6 +198,7 @@ cc_library(
     '//flare/base:buffer',
     '//flare/base:enum',
     '//flare/base/internal:early_init',
+    '//flare/base:likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -218,6 +232,7 @@ cc_test(
     ':http_request',
     ':query_string',
     '//thirdparty/googletest:gmock',
+    '//flare/base:string',
   ]
 )
 
@@ -271,11 +286,9 @@ cc_test(
     '//flare/net/http:packet_desc',
     '//flare/rpc:rpc',
     '//flare/rpc/binlog:binlog',
-    '//flare/rpc/binlog/util:proto_binlog_proto',
     '//flare/rpc/binlog/util:proto_dry_runner',
     '//flare/rpc/protocol/http:binlog_proto',
     '//flare/rpc/protocol/protobuf:rpc_meta_proto',
-    '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/testing:main',
     '//thirdparty/gflags:gflags',
@@ -290,6 +303,7 @@ cc_library(
   deps = [
     ':http_request',
     '//flare/base/net:endpoint',
+    '//flare/base:string',
   ],
   visibility = 'PUBLIC',
 )

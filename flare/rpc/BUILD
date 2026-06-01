@@ -35,6 +35,18 @@ cc_library(
     # Frequently used protocols.
     '//flare/rpc/protocol/http:http',
     '//flare/rpc/protocol/protobuf:protobuf',
+    '//flare/base/internal:test_prod',
+    '//flare/base/net:endpoint',
+    '//flare/base:down_cast',
+    '//flare/base:exposed_var',
+    '//flare/base:handle',
+    '//flare/base:maybe_owning',
+    '//flare/base:ref_ptr',
+    '//flare/base:type_index',
+    '//flare/fiber:logging',
+    '//flare/fiber:timer',
+    '//flare/io/util:rate_limiter',
+    '//thirdparty/gflags:gflags',
   ],
   visibility = 'PUBLIC',
 )
@@ -112,12 +124,14 @@ cc_library(
     '//flare/rpc/protocol:stream_service',
     '//flare/rpc/protocol/http:http',
     '//flare/rpc/protocol/http/builtin:builtin',
-    '//flare/rpc/protocol/protobuf:protobuf',
     '//flare/rpc/protocol/protobuf:service',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
     '//thirdparty/opentracing-cpp:opentracing',
+    '//flare/base:logging',
+    '//flare/base:ref_ptr',
+    '//flare/base:tsc',
   ],
 )
 
@@ -168,8 +182,6 @@ cc_test(
     '//flare/base:string',
     '//flare/rpc/name_resolver:name_resolver',
     '//flare/rpc/load_balancer:load_balancer',
-    '//flare/rpc/message_dispatcher:message_dispatcher',
-    '//flare/rpc/message_dispatcher:composited',
   ]
 )
 

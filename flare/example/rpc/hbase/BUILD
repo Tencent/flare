@@ -44,7 +44,6 @@ cc_binary(
     '//flare:init',
     '//flare/init:override_flag',
     '//flare/net/hbase:hbase',
-    '//flare/rpc:rpc',
     '//thirdparty/gflags:gflags',
   ]
 )

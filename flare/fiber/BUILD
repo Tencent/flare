@@ -41,6 +41,20 @@ cc_library(
     ':logging',
     ':timer',
     ':work_queue',
+    '//flare/base/internal:annotation',
+    '//flare/base/internal:index_alloc',
+    '//flare/base/internal:time_view',
+    '//flare/base/object_pool:ref_counted',
+    '//flare/base/thread:semaphore',
+    '//flare/base:chrono',
+    '//flare/base:deferred',
+    '//flare/base:delayed_init',
+    '//flare/base:function',
+    '//flare/base:future',
+    '//flare/base:likely',
+    '//flare/base:ref_ptr',
+    '//flare/base:string',
+    '//flare/fiber/detail:fiber_impl',
   ],
   visibility = 'PUBLIC',
 )
@@ -71,7 +85,6 @@ cc_library(
   name = 'future',
   hdrs = 'future.h',
   deps = [
-    ':fiber_basic',
     '//flare/base:delayed_init',
     '//flare/base:future',
     '//flare/base/internal:time_view',
@@ -135,7 +148,6 @@ cc_library(
     '//flare/base:deferred',
     '//flare/base:function',
     '//flare/base:likely',
-    '//flare/base:logging',
     '//flare/base:random',
     '//flare/base:ref_ptr',
     '//flare/base:string',
@@ -251,6 +263,7 @@ cc_test(
   deps = [
     ':fiber',
     '//flare/fiber/detail:testing',
+    '//flare/base:future',
   ]
 )
 
@@ -261,6 +274,7 @@ cc_library(
   deps = [
     ':fiber_basic',
     '//flare/base:function',
+    '//flare/base:logging',
   ],
   visibility = [
     ':fiber',
@@ -328,6 +342,7 @@ cc_test(
     ':fiber_basic',
     '//flare/base:random',
     '//flare/fiber/detail:testing',
+    '//flare/base:chrono',
   ],
 )
 

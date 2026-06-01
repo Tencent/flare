@@ -22,7 +22,7 @@ proto_library(
 cc_flare_library(
   name = 'echo_service_proto_flare',
   srcs = 'echo_service.proto',
-  deps = ':echo_service_proto'
+  deps = [':echo_service_proto'],
 )
 
 cc_binary(

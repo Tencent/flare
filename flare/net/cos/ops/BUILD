@@ -17,6 +17,7 @@ cc_library(
   hdrs = 'operation.h',
   deps = [
     ':task',
+    '//flare/base:erased_ptr',
   ],
   visibility = '//flare/net/cos/...'
 )
@@ -32,6 +33,8 @@ cc_library(
     '//flare/net/cos:signature',
     '//flare/net/http:http_headers',
     '//flare/net/internal:http_task',
+    '//flare/base:buffer',
+    '//flare/base:string',
   ],
   visibility = '//flare/net/cos/...'
 )

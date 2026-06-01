@@ -25,7 +25,7 @@ cc_library(
     ':code_writer',
     '//flare/base:string',
     '//thirdparty/protobuf:protobuf',
-  ]
+  ],
 )
 
 cc_library(
@@ -39,7 +39,7 @@ cc_library(
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
-  ]
+  ],
 )
 
 cc_library(
@@ -53,7 +53,7 @@ cc_library(
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
-  ]
+  ],
 )
 
 cc_library(
@@ -66,7 +66,7 @@ cc_library(
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
-  ]
+  ],
 )
 
 cc_library(
@@ -79,7 +79,7 @@ cc_library(
     '//flare/base:string',
     '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/protobuf:protoc',
-  ]
+  ],
 )
 
 cc_binary(
@@ -95,10 +95,9 @@ cc_binary(
     ':sync_decl_generator',
     '//flare/base:logging',
     '//flare/base:string',
-    '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/fmt:fmt',
     '//thirdparty/protobuf:protoc',
-  ]
+  ],
 )
 
 cc_binary(
@@ -114,7 +113,6 @@ cc_binary(
     '//flare/base:logging',
     '//flare/base:string',
     '//flare/base/encoding:hex',
-    '//flare/rpc/protocol/protobuf:rpc_options',
     '//thirdparty/fmt:fmt',
     '//thirdparty/glog:glog',
     '//thirdparty/protobuf:protoc',

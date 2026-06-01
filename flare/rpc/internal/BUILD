@@ -185,7 +185,6 @@ cc_library(
   hdrs = 'fast_latch.h',
   srcs = 'fast_latch.cc',
   deps = [
-    '//flare/base:callback',
     '//flare/fiber:fiber',
   ],
   visibility = [
@@ -233,7 +232,6 @@ cc_library(
   deps = [
     ':correlation_id',
     ':correlation_map',
-    ':sharded_call_map',
     ':stream',
     ':stream_io_adaptor',
     '//flare/base:align',
@@ -251,6 +249,8 @@ cc_library(
     '//flare/rpc/binlog:binlog',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/gflags:gflags',
+    '//flare/base:logging',
+    '//flare/base:ref_ptr',
   ],
   visibility = [
     '//flare/net/...',
@@ -289,6 +289,7 @@ cc_test(
     '//flare/fiber:fiber',
     '//flare/testing:main',
     '//thirdparty/googletest:gmock',
+    '//flare/base:chrono',
   ]
 )
 

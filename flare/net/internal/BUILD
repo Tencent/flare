@@ -35,7 +35,6 @@ cc_test(
   srcs = 'http_task_test.cc',
   deps = [
     ':http_task',
-    '//flare/base:object_pool',
     '//flare/testing:main',
   ]
 )
@@ -55,7 +54,6 @@ cc_library(
     '//flare/base/thread:attribute',
     '//flare/fiber:fiber',
     '//flare/fiber/detail:fiber_impl',  # !!!
-    '//flare/net/http:http_response',
     '//thirdparty/curl:curl',
     '//thirdparty/gflags:gflags',
   ],
@@ -71,7 +69,6 @@ cc_test(
   deps = [
     ':http_engine',
     '//flare/base:string',
-    '//flare/base/thread:latch',
     '//flare/fiber:fiber',
     '//flare/rpc:rpc',
     '//flare/testing:endpoint',

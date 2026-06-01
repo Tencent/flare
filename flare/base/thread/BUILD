@@ -22,6 +22,8 @@ cc_library(
     '//flare/base:never_destroyed',
     '//flare/base/thread:thread_local',
     '//flare/base/internal:biased_mutex',
+    '//flare/base:align',
+    '//flare/base:likely',
   ],
   visibility = 'PUBLIC',
 )

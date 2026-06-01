@@ -40,11 +40,9 @@ cc_library(
   srcs = 'run_queue.cc',
   deps = [
     ':assembly',
-    ':runnable_entity',
     '//flare/base:align',
     '//flare/base:likely',
     '//flare/base:logging',
-    '//flare/base/thread:spinlock',
   ]
 )
 
@@ -119,6 +117,7 @@ cc_library(
     '//flare/base/thread:out_of_duty_callback',
     '//flare/base/thread:spinlock',
     '//thirdparty/gflags:gflags',
+    '//flare/base:likely',
   ],
   visibility = [
     '//flare/fiber/...',
@@ -163,6 +162,7 @@ cc_test(
     ':fiber_impl',
     '//flare/base:chrono',
     '//flare/base:random',
+    '//flare/base/thread:latch',
   ],
 )
 
@@ -185,6 +185,8 @@ cc_test(
     ':fiber_impl',
     '//flare/base:random',
     '//flare/fiber/detail:testing',
+    '//flare/base:chrono',
+    '//flare/base:tsc',
   ]
 )
 
@@ -197,6 +199,8 @@ cc_library(
     '//flare/base:object_pool',
     '//flare/base/internal:annotation',
     '//thirdparty/gflags:gflags',
+    '//flare/base:align',
+    '//flare/base:never_destroyed',
   ]
 )
 
@@ -207,6 +211,7 @@ cc_test(
     ':stack_allocator',
     '//flare/base:logging',
     '//thirdparty/gflags:gflags',
+    '//flare/base/internal:annotation',
   ],
   # Death test in this UT does not get along well with heap checker.
   heap_check = ''

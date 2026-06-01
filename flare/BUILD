@@ -19,7 +19,6 @@ cc_library(
   deps = [
     '//flare/base:buffer',
     '//flare/base:function',
-    '//flare/base:monitoring',
     '//flare/base:option',
     '//flare/base:random',
     '//flare/base/internal:background_task_host',
@@ -38,6 +37,7 @@ cc_library(
     '//flare/rpc/internal:stream_call_gate_pool',
     '//thirdparty/gflags:gflags',
     '//thirdparty/glog:glog',
+    '//flare/base:logging',
   ],
   visibility = 'PUBLIC',
 )

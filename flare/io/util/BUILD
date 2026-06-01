@@ -17,11 +17,11 @@ cc_library(
   hdrs = 'socket.h',
   srcs = 'socket.cc',
   deps = [
-    '//flare/base:buffer',
     '//flare/base:handle',
     '//flare/base/net:endpoint',
     '//flare/fiber:alternatives',
     '//thirdparty/fmt:fmt',
+    '//flare/base:logging',
   ],
   visibility = ['//flare/...'],
 )
@@ -33,7 +33,6 @@ cc_test(
     ':socket',
     '//flare/testing:main',
     '//flare/testing:endpoint',
-    '//flare/base:string',
   ]
 )
 
@@ -68,8 +67,6 @@ cc_test(
     '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/rpc:rpc',
-    '//flare/rpc/load_balancer:round_robin',
-    '//flare/rpc/name_resolver:list',
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/testing:main',
@@ -93,8 +90,6 @@ cc_library(
     ':http_proxy_stream_io',
     ':stream_io',
     '//flare/base:logging',
-    '//flare/fiber:alternatives',
-    '//flare/io/detail:eintr_safe',
     '//thirdparty/openssl:ssl',
   ],
 )
@@ -118,9 +113,7 @@ cc_library(
   srcs = 'http_proxy_stream_io.cc',
   deps = [
     ':stream_io',
-    '//flare/base:down_cast',
     '//flare/base:string',
     '//flare/base:logging',
-    '//flare/fiber:alternatives',
   ]
 )

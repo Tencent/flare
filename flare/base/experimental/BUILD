@@ -67,7 +67,6 @@ cc_test(
   srcs = 'bloom_filter_test.cc',
   deps = [
     ':bloom_filter',
-    '//flare/base:logging',
   ]
 )
 

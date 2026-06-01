@@ -16,7 +16,6 @@ cc_library(
   name = 'atomic_ptr',
   hdrs = 'atomic_ptr.h',
   deps = [
-    '//flare/base:align',
     '//flare/base:ref_ptr',
     '//flare/base/internal:copyable_atomic',
   ],

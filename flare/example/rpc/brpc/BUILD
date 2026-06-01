@@ -24,7 +24,7 @@ proto_library(
 cc_flare_library(
   name = 'echo_proto_flare',
   srcs = 'echo.proto',
-  deps = ':echo_proto'
+  deps = [':echo_proto'],
 )
 
 cc_binary(

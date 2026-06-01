@@ -89,7 +89,6 @@ cc_library(
   srcs = 'compression_output_stream.cc',
   deps = [
     '//flare/base/compression:compression',
-    '//flare/base:buffer',
   ],
   visibility = 'PUBLIC',
 )
@@ -108,7 +107,6 @@ cc_library(
   srcs = 'view.cc',
   deps = [
     '//flare/base:buffer',
-    '//flare/base:logging',
     '//flare/base/internal:early_init',
   ],
   visibility = 'PUBLIC',

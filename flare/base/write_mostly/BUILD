@@ -17,7 +17,6 @@ cc_library(
   hdrs = 'write_mostly.h',
   deps = [
     '//flare/base:align',
-    '//flare/base:chrono',
     '//flare/base/thread:thread_local',
   ],
   visibility = ['//flare/base:write_mostly'],
@@ -36,8 +35,6 @@ cc_test(
   name = 'basic_ops_test',
   srcs = 'basic_ops_test.cc',
   deps = [
-    ':basic_ops',
-    ':write_mostly',
     '//flare/base:write_mostly',
   ]
 )
@@ -47,7 +44,6 @@ cc_benchmark(
   srcs = 'write_mostly_benchmark.cc',
   deps = [
     ':basic_ops',
-    ':write_mostly',
     # (tcmalloc unavailable on macOS — false-sharing workaround is Linux-only.)
   ] + ([] if blade.cc_toolchain.target_os == 'darwin' else [
     '//thirdparty/gperftools:tcmalloc_minimal',
@@ -81,7 +77,6 @@ cc_test(
   name = 'metrics_test',
   srcs = 'metrics_test.cc',
   deps = [
-    ':metrics',
     '//flare/base:write_mostly',
     '//flare/testing:main',
   ]

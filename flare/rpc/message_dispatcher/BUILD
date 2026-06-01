@@ -40,5 +40,4 @@ cc_library(
 cc_test(
   name = 'composited_test',
   srcs = [],
-  deps = []
 )

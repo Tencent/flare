@@ -27,6 +27,6 @@ foreign_cc_library(
 cc_library(
     name = 'yaml_cpp',
     hdrs = 'yaml.h',
-    deps = ':yaml-cpp',
+    deps = [':yaml-cpp'],
     visibility = 'PUBLIC',
 )

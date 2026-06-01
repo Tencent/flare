@@ -45,8 +45,10 @@ cc_test(
 
 cc_library(
   name = 'gzip',
-  hdrs = 'gzip.h',
-  srcs = 'gzip.cc',
+  # Pure self-registration with the compressor registry; no consumer ever
+  # `#include`s gzip.h directly.
+  hdrs = [],
+  srcs = ['gzip.h', 'gzip.cc'],
   deps = [
     ':compression',
     ':util',
@@ -58,8 +60,9 @@ cc_library(
 
 cc_library(
   name = 'lz4',
-  hdrs = 'lz4.h',
-  srcs = 'lz4.cc',
+  # Pure self-registration; see `:gzip`.
+  hdrs = [],
+  srcs = ['lz4.h', 'lz4.cc'],
   deps = [
     ':compression',
     ':util',
@@ -75,15 +78,15 @@ cc_test(
   deps = [
     '//flare/base:compression',
     '//flare/base/buffer:compression_output_stream',
-    '//flare:init',
     '//flare/testing:main',
   ],
 )
 
 cc_library(
   name = 'snappy',
-  hdrs = 'snappy.h',
-  srcs = 'snappy.cc',
+  # Pure self-registration; see `:gzip`.
+  hdrs = [],
+  srcs = ['snappy.h', 'snappy.cc'],
   deps = [
     ':compression',
     ':util',
@@ -95,8 +98,9 @@ cc_library(
 
 cc_library(
   name = 'zstd',
-  hdrs = 'zstd.h',
-  srcs = 'zstd.cc',
+  # Pure self-registration; see `:gzip`.
+  hdrs = [],
+  srcs = ['zstd.h', 'zstd.cc'],
   deps = [
     ':compression',
     '//thirdparty/zstd:zstd',

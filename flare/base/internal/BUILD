@@ -82,6 +82,7 @@ cc_library(
     '//flare/base:function',
     '//flare/base:object_pool',
     '//flare/base/thread/thread_local:ref_counted',
+    '//flare/base:align',
   ],
   visibility = ['//flare/...'],
 )
@@ -213,13 +214,11 @@ cc_library(
   hdrs = 'curl.h',
   srcs = 'curl.cc',
   deps = [
-    ':logging',
     '//flare/base:deferred',
     '//flare/base:expected',
     '//flare/base:function',
     '//flare/base:logging',
     '//flare/base:never_destroyed',
-    '//flare/base/thread:attribute',
     '//thirdparty/curl:curl',
     '//thirdparty/gflags:gflags',
     '#dl',
@@ -270,6 +269,7 @@ cc_library(
     '//flare/base:function',
     '//flare/base:never_destroyed',
     '//flare/base:ref_ptr',
+    '//flare/base:likely',
   ] + (['#pthread'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = ['//flare/...'],
 )
@@ -313,6 +313,7 @@ cc_library(
   deps = [
     ':annotation',
     ':memory_barrier',
+    '//flare/base:likely',
   ],
   visibility = ['//flare/...'],
 )
@@ -383,7 +384,7 @@ cc_library(
   deps = [
     ':logging',
     ':meta',
-    '//flare/base:logging',
+    '//flare/base:likely',
   ],
   visibility = ['//flare/...'],
 )

@@ -125,7 +125,6 @@ cc_binary(
   deps = [
     ':echo_service_proto_flare',
     '//flare:init',
-    '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/rpc:rpc',
     '//thirdparty/gflags:gflags',
