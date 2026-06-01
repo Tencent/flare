@@ -195,7 +195,9 @@ cc_library(
     '//flare/base:string',
     '//flare/init:on_init',
     '//flare/rpc:message_dispatcher_factory',
+    '//flare/rpc/load_balancer:round_robin',  # link-time NSLB used by `rr://...`
     '//flare/rpc/message_dispatcher:message_dispatcher',
+    '//flare/rpc/name_resolver:list',         # link-time resolver used by `list://...`
   ],
   link_all_symbols = True,
 )

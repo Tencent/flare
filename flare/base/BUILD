@@ -681,6 +681,13 @@ cc_library(
   deps = [
     '//flare/base/buffer:compression_output_stream',
     '//flare/base/compression:compression',
+    # The four implementations below self-register with the compressor
+    # registry; they have no public header so blade's unused-deps check
+    # already exempts them (each is header-less).
+    '//flare/base/compression:gzip',
+    '//flare/base/compression:lz4',
+    '//flare/base/compression:snappy',
+    '//flare/base/compression:zstd',
   ],
   visibility = 'PUBLIC',
 )
