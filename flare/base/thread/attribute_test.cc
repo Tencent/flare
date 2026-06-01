@@ -31,6 +31,14 @@ using namespace std::literals;
 namespace flare {
 
 TEST(Thread, SetCurrentAffinity) {
+#ifdef __APPLE__
+  // Darwin does not expose a `pthread_setaffinity_np` equivalent. The legacy
+  // `thread_policy_set` with THREAD_AFFINITY_POLICY is a hint at best and
+  // not enforced by the scheduler. `SetCurrentThreadAffinity` therefore
+  // can't actually pin a thread to a CPU on Darwin, and the
+  // `GetCurrentProcessorId == i` assertion below cannot hold.
+  GTEST_SKIP() << "Thread CPU affinity is not supported on Darwin.";
+#else
   auto nprocs = internal::GetNumberOfProcessorsConfigured();
   for (int j = 0; j != 1000; ++j) {
     for (int i = 0; i != nprocs; ++i) {
@@ -43,6 +51,7 @@ TEST(Thread, SetCurrentAffinity) {
       }
     }
   }
+#endif
 }
 
 TEST(Thread, SetCurrentName) {
