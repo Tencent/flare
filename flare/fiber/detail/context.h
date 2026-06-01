@@ -32,6 +32,6 @@ extern "C" {
 // See https://man7.org/linux/man-pages/man3/makecontext.3.html
 void* make_context(void* sp, std::size_t size, void (*start_proc)(void*));
 
-} // extern "C"
+}  // extern "C"
 
 #endif  // FLARE_FIBER_DETAIL_FIBER_CONTEXT_H_

@@ -86,16 +86,15 @@ void KqueuePoller::Modify(int fd, int events, void* user_data) {
   // the readiness. (EV_DELETE + later EV_ADD on a socket that is already
   // readable produces no edge with EV_CLEAR -- the reader would stall.)
   bool et = events & kPollerET;
-  unsigned short flags = EV_ADD | EV_ENABLE;
-  if (et) flags |= EV_CLEAR;
+  unsigned short enable_flags = EV_ADD | EV_ENABLE;
+  if (et) enable_flags |= EV_CLEAR;
+  unsigned short disable_flags = EV_DISABLE;
 
   struct kevent changes[2];
-  unsigned short read_flags  = (events & kPollerRead)
-                                   ? flags
-                                   : static_cast<unsigned short>(EV_DISABLE);
-  unsigned short write_flags = (events & kPollerWrite)
-                                   ? flags
-                                   : static_cast<unsigned short>(EV_DISABLE);
+  unsigned short read_flags =
+      (events & kPollerRead) ? enable_flags : disable_flags;
+  unsigned short write_flags =
+      (events & kPollerWrite) ? enable_flags : disable_flags;
   EV_SET(&changes[0], fd, EVFILT_READ, read_flags, 0, 0, user_data);
   EV_SET(&changes[1], fd, EVFILT_WRITE, write_flags, 0, 0, user_data);
   // EV_DISABLE on a never-registered filter returns ENOENT -- harmless.
