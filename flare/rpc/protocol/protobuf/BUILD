@@ -28,10 +28,7 @@ cc_library(
     ':qzone_protocol',
     ':rpc_channel',
     ':rpc_client_controller',
-    ':rpc_meta_proto',
     ':rpc_server_controller',
-    ':service_method_locator',
-    ':service',
     ':std_protocol',
     ':call_context',
     ':rpc_controller_common',
@@ -42,17 +39,6 @@ cc_library(
     '//flare/base:string',
     '//flare/rpc/internal:stream_call_gate_pool',
     '//thirdparty/gflags:gflags',
-  ],
-  keep_deps = [
-    # `:service` and `:service_method_locator` are link-time plumbing that
-    # this umbrella's own srcs/hdrs do not directly `#include`. The
-    # `*_protocol` sub-targets are header-less (their .h files live in
-    # their `srcs`), so blade auto-exempts them via the header-less rule.
-    # The proto_library `:rpc_meta_proto` is also still listed because its
-    # generated header is not yet wired into the re-export auto-exemption.
-    ':service',
-    ':service_method_locator',
-    ':rpc_meta_proto',
   ],
   visibility = [
     '//flare/rpc:rpc',

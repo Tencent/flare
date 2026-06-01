@@ -39,18 +39,14 @@ cc_library(
     'hbase_client_controller.h',
   ],
   deps = [
+    # `:hbase_client_protocol` flows in transitively via `:hbase_channel`,
+    # which directly depends on it (hbase_channel.cc instantiates
+    # HbaseClientProtocol).
     ':hbase_channel',
     ':hbase_client_controller',
-    ':hbase_client_protocol',
     ':call_context',
     ':hbase_controller_common',
     '//flare/base/net:endpoint',
-  ],
-  keep_deps = [
-    # `:hbase_client_protocol` static-registers the HBase wire protocol
-    # with the RPC protocol registry; it has no public header for the
-    # client umbrella to `#include`.
-    ':hbase_client_protocol',
   ],
   visibility = 'PUBLIC',
 )
@@ -62,17 +58,14 @@ cc_library(
     'hbase_service.h',
   ],
   deps = [
+    # `:hbase_server_protocol` flows in transitively via `:hbase_service`,
+    # which directly depends on it (hbase_service.cc uses
+    # HbaseServerProtocol::RegisterService).
     ':hbase_service',
     ':hbase_server_controller',
-    ':hbase_server_protocol',
     ':hbase_controller_common',
     '//flare/base/internal:test_prod',
     '//flare/rpc/protocol:stream_service',
-  ],
-  keep_deps = [
-    # Same pattern as `:hbase_client`: `:hbase_server_protocol`
-    # static-registers the HBase wire protocol on the server side.
-    ':hbase_server_protocol',
   ],
   visibility = 'PUBLIC',
 )
