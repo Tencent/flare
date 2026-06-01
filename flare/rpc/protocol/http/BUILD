@@ -49,12 +49,15 @@ cc_library(
 
 cc_library(
   name = 'http',
-  hdrs = [
-    'http11_protocol.h',
-    'service.h',
-  ],
+  # Pure self-registration: HTTP/1.x protocol + service implementations
+  # register themselves with the protocol / service registries via static
+  # initializers; consumers reach them only through the registries at
+  # link time, so the .h files belong in srcs (private to this target).
+  hdrs = [],
   srcs = [
+    'http11_protocol.h',
     'http11_protocol.cc',
+    'service.h',
     'service.cc',
   ],
   deps = [

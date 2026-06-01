@@ -48,15 +48,6 @@ cc_library(
     '//flare/io/util:rate_limiter',
     '//thirdparty/gflags:gflags',
   ],
-  keep_deps = [
-    # Pre-register the most commonly used factories so that a one-line
-    # `deps = [':rpc']` is enough to stand up an HTTP- or protobuf-speaking
-    # RPC server. Each entry hooks into a global registry via a static
-    # initializer with no public header for consumers to `#include`.
-    '//flare/rpc/load_balancer:round_robin',    # NSLB: round-robin
-    '//flare/rpc/name_resolver:list',           # name-resolver: comma-separated list
-    '//flare/rpc/protocol/http:http',           # protocol: HTTP/1.x
-  ],
   visibility = 'PUBLIC',
 )
 
@@ -86,11 +77,6 @@ cc_library(
   deps = [
     '//flare/rpc/protocol/http:http_filter',
     '//flare/rpc/protocol/http:http_handler',
-    '//flare/rpc/protocol/http:http',
-  ],
-  keep_deps = [
-    # Umbrella re-export: this facade exposes the HTTP filter / handler types
-    # AND link-registers the HTTP protocol with the RPC server.
     '//flare/rpc/protocol/http:http',
   ],
   visibility = 'PUBLIC',

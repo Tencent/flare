@@ -25,8 +25,14 @@ cc_library(
 
 cc_library(
   name = 'list',
-  hdrs = 'list.h',
-  srcs = 'list.cc',
+  # Pure self-registration: the list-based name resolver registers itself
+  # under a scheme name and consumers reach it only through the registry
+  # at link time.
+  hdrs = [],
+  srcs = [
+    'list.h',
+    'list.cc',
+  ],
   deps = [
     ':name_resolver',
     ':name_resolver_impl',

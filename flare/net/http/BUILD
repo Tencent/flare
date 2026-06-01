@@ -41,11 +41,6 @@ cc_library(
     '//flare/base:logging',
     '//thirdparty/gflags:gflags',
   ],
-  keep_deps = [
-    # `:dry_run_channel` self-registers a dry-run HTTP channel scheme via a
-    # static initializer; consumers never `#include` anything from it.
-    ':dry_run_channel',
-  ],
   visibility = 'PUBLIC',
 )
 
@@ -106,8 +101,13 @@ cc_test(
 
 cc_library(
   name = 'dry_run_channel',
-  hdrs = 'dry_run_channel.h',
-  srcs = 'dry_run_channel.cc',
+  # Pure self-registration: registers a dry-run HTTP channel scheme via
+  # a static initializer; consumers reach it through the registry.
+  hdrs = [],
+  srcs = [
+    'dry_run_channel.h',
+    'dry_run_channel.cc',
+  ],
   deps = [
     ':http_client',
     ':packet_desc',

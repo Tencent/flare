@@ -49,8 +49,15 @@ cc_test(
 
 cc_library(
   name = 'round_robin',
-  hdrs = 'round_robin.h',
-  srcs = 'round_robin.cc',
+  # No public header: `RoundRobinLoadBalancer` self-registers under the
+  # "rr" scheme via a static initializer; consumers depend on this target
+  # purely for the link-time registration and never `#include` anything
+  # from it.
+  hdrs = [],
+  srcs = [
+    'round_robin.h',
+    'round_robin.cc',
+  ],
   deps = [
     ':load_balancer',
     '//flare/base:hazptr',

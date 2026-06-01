@@ -44,20 +44,15 @@ cc_library(
     '//thirdparty/gflags:gflags',
   ],
   keep_deps = [
-    # Link-time protocol / service registration: each `*_protocol` and
-    # `service*` target self-registers with ServiceMethodLocator / the
-    # protocol registry via static initializers, with no public header
-    # the umbrella's own sources could `#include` to express the dependency.
-    ':baidu_std_protocol',             # registers the baidu-std protocol
-    ':poppy_protocol',                 # registers the poppy protocol
-    ':proto_over_http_protocol',       # registers the proto-over-HTTP protocol
-    ':qzone_protocol',                 # registers the QZone protocol
-    ':std_protocol',                   # registers the std protocol (base for the four above)
-    ':service',                        # link-time service plumbing
-    ':service_method_locator',         # registers ServiceMethodLocator
-    ':rpc_meta_proto',                 # owns generated rpc_meta.pb.h (re-export
-                                       # auto-rule doesn't yet cover proto_library
-                                       # generated hdrs)
+    # `:service` and `:service_method_locator` are link-time plumbing that
+    # this umbrella's own srcs/hdrs do not directly `#include`. The
+    # `*_protocol` sub-targets are header-less (their .h files live in
+    # their `srcs`), so blade auto-exempts them via the header-less rule.
+    # The proto_library `:rpc_meta_proto` is also still listed because its
+    # generated header is not yet wired into the re-export auto-exemption.
+    ':service',
+    ':service_method_locator',
+    ':rpc_meta_proto',
   ],
   visibility = [
     '//flare/rpc:rpc',
@@ -207,8 +202,12 @@ cc_test(
 
 cc_library(
   name = 'proto_over_http_protocol',
-  hdrs = 'proto_over_http_protocol.h',
-  srcs = 'proto_over_http_protocol.cc',
+  # Pure self-registration; see `:std_protocol` for the rationale.
+  hdrs = [],
+  srcs = [
+    'proto_over_http_protocol.h',
+    'proto_over_http_protocol.cc',
+  ],
   deps = [
     # We rely on `std_protocol` to register methods to `ServiceMethodLocator`.
     ':call_context_factory',
@@ -264,8 +263,14 @@ cc_test(
 
 cc_library(
   name = 'std_protocol',
-  hdrs = 'std_protocol.h',
-  srcs = 'std_protocol.cc',
+  # Pure self-registration: only the matching `*_test.cc` reaches the
+  # type by name; downstream consumers reach the protocol via the
+  # registry that the static initializer wires up at link time.
+  hdrs = [],
+  srcs = [
+    'std_protocol.h',
+    'std_protocol.cc',
+  ],
   deps = [
     ':call_context_factory',
     ':call_context',
@@ -310,8 +315,10 @@ cc_test(
 
 cc_library(
   name = 'qzone_protocol',
-  hdrs = 'qzone_protocol.h',
+  # Pure self-registration; see `:std_protocol` for the rationale.
+  hdrs = [],
   srcs = [
+    'qzone_protocol.h',
     'qzone_protocol.cc',
   ],
   deps = [
@@ -602,8 +609,14 @@ proto_library(
 
 cc_library(
   name = 'baidu_std_protocol',
-  hdrs = 'baidu_std_protocol.h',
-  srcs = 'baidu_std_protocol.cc',
+  # Pure self-registration: nothing outside this target's tests needs to
+  # `#include` baidu_std_protocol.h -- consumers reach the protocol via
+  # the registry that the static initializer wires up at link time.
+  hdrs = [],
+  srcs = [
+    'baidu_std_protocol.h',
+    'baidu_std_protocol.cc',
+  ],
   deps = [
     ':baidu_std_rpc_meta_proto',
     ':call_context_factory',
@@ -612,20 +625,12 @@ cc_library(
     ':message',
     ':rpc_meta_proto',
     ':service_method_locator',
-    ':std_protocol',  # For the same reason as of `proto_over_http`.
+    ':std_protocol',  # piggybacks on std_protocol's ServiceMethodLocator registration
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base/buffer:zero_copy_stream',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
-  ],
-  keep_deps = [
-    # baidu_std_protocol piggybacks on `std_protocol`'s static-initializer
-    # registration of methods with `ServiceMethodLocator` -- there is no
-    # public header from `std_protocol` that baidu_std_protocol.cc needs to
-    # `#include`, so blade can't see the dep, but dropping it would lose the
-    # registration at link time.
-    ':std_protocol',
   ],
   link_all_symbols = True,
 )
@@ -651,8 +656,12 @@ proto_library(
 
 cc_library(
   name = 'poppy_protocol',
-  hdrs = 'poppy_protocol.h',
-  srcs = 'poppy_protocol.cc',
+  # Pure self-registration; see `:std_protocol` for the rationale.
+  hdrs = [],
+  srcs = [
+    'poppy_protocol.h',
+    'poppy_protocol.cc',
+  ],
   deps = [
     ':call_context_factory',
     ':call_context',
@@ -661,19 +670,13 @@ cc_library(
     ':poppy_rpc_meta_proto',
     ':rpc_meta_proto',
     ':service_method_locator',
-    ':std_protocol',  # For the same reason as of `proto_over_http`.
+    ':std_protocol',  # piggybacks on std_protocol's ServiceMethodLocator registration
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base:string',
     '//flare/base/buffer:zero_copy_stream',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
-  ],
-  keep_deps = [
-    # Same pattern as `baidu_std_protocol`: poppy_protocol piggybacks on
-    # `std_protocol`'s ServiceMethodLocator registration via static
-    # initializers and has no public header to `#include`.
-    ':std_protocol',
   ],
   link_all_symbols = True,
 )
