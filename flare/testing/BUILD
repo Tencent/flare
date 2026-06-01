@@ -58,10 +58,6 @@ cc_test(
   name = 'hooking_mock_test',
   srcs = 'hooking_mock_test.cc',
   deps = [':hooking_mock'],
-  keep_deps = [
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
-  ],
 )
 
 cc_library(
@@ -96,10 +92,6 @@ cc_test(
     ':main',
     ':rpc_mock',
     '//flare/rpc:rpc',
-  ],
-  keep_deps = [
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
   ],
 )
 
@@ -187,10 +179,6 @@ cc_test(
     '//flare/fiber:fiber',
     '//flare/net/http:http_client',
   ],
-  keep_deps = [
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
-  ],
 )
 
 cc_library(
@@ -221,11 +209,6 @@ cc_test(
     ':redis_mock',
     '//flare/net/redis:redis',
     '//thirdparty/googletest:gmock',
-  ],
-  keep_deps = [
-    '//thirdparty/googletest:gmock',
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
   ],
 )
 
@@ -288,10 +271,5 @@ cc_test(
     '//flare/net/cos:cos_client',
     '//flare/net/cos/ops/object:get_object',
     '//thirdparty/googletest:gmock',
-  ],
-  keep_deps = [
-    '//thirdparty/googletest:gmock',
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
   ],
 )

@@ -112,9 +112,6 @@ cc_test(
     '//flare/testing:main',
     '//thirdparty/jsoncpp:jsoncpp',
   ],
-  keep_deps = [
-    '//thirdparty/jsoncpp:jsoncpp',
-  ],
 )
 
 cc_library(
@@ -158,9 +155,6 @@ cc_benchmark(
     '//flare/net/http:http_request',
     '//thirdparty/gflags:gflags',
     '//flare/base:logging',
-  ],
-  keep_deps = [
-    '//thirdparty/gflags:gflags',
   ],
 )
 
@@ -237,8 +231,5 @@ cc_test(
     '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
     '//flare/rpc/binlog:packet_desc',
-  ],
-  keep_deps = [
-    '//thirdparty/gflags:gflags',
   ],
 )

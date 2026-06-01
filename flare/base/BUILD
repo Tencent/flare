@@ -666,9 +666,6 @@ cc_test(
     '//flare/testing:main',
     '//thirdparty/gflags:gflags',
   ],
-  keep_deps = [
-    '//thirdparty/gflags:gflags',
-  ],
 )
 
 cc_benchmark(

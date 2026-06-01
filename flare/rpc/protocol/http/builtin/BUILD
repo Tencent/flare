@@ -232,9 +232,6 @@ cc_library(
     '//thirdparty/protobuf:protobuf',
   ],
   link_all_symbols = True,
-  keep_deps = [
-    '//thirdparty/ctemplate:ctemplate',
-  ],
 )
 
 cc_test(

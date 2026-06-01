@@ -57,9 +57,6 @@ cc_library(
         '//thirdparty/glog:glog',
         '#m',
     ] + ([',#pthread'] if _is_linux else []),
-    keep_deps = [
-      '//thirdparty/glog:glog',
-    ],
 )
 
 cc_library(
@@ -128,9 +125,6 @@ cc_library(
         '//thirdparty/zlib:z',
     ],
     warning = 'no',
-    keep_deps = [
-      '//thirdparty/zlib:z',
-    ],
 )
 
 # This provides just the header files for use in projects that need to build

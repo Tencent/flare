@@ -98,9 +98,6 @@ cc_binary(
     '//thirdparty/fmt:fmt',
     '//thirdparty/protobuf:protoc',
   ],
-  keep_deps = [
-    '//thirdparty/fmt:fmt',
-  ],
 )
 
 cc_binary(
@@ -121,7 +118,4 @@ cc_binary(
     '//thirdparty/protobuf:protoc',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//thirdparty/fmt:fmt',
-  ],
 )
