@@ -44,21 +44,10 @@ cc_library(
     '//thirdparty/gflags:gflags',
   ],
   keep_deps = [
-    # Umbrella facade for the protobuf-RPC stack. Two patterns at play:
-    #
-    # 1) Header re-exports: rpc_channel.h, rpc_client_controller.h,
-    #    rpc_meta.pb.h, rpc_server_controller.h are listed both here and on
-    #    the sub-target that "owns" them, so blade attributes every direct
-    #    #include to the more specific owner and the umbrella looks unused.
-    ':rpc_channel',                    # owns rpc_channel.h
-    ':rpc_client_controller',          # owns rpc_client_controller.h
-    ':rpc_meta_proto',                 # owns rpc_meta.pb.h
-    ':rpc_server_controller',          # owns rpc_server_controller.h
-    # 2) Link-time protocol / service registration: each `*_protocol` and
-    #    `service*` target self-registers with ServiceMethodLocator / the
-    #    protocol registry via static initializers, with no public header
-    #    the umbrella's own sources could `#include` to express the
-    #    dependency.
+    # Link-time protocol / service registration: each `*_protocol` and
+    # `service*` target self-registers with ServiceMethodLocator / the
+    # protocol registry via static initializers, with no public header
+    # the umbrella's own sources could `#include` to express the dependency.
     ':baidu_std_protocol',             # registers the baidu-std protocol
     ':poppy_protocol',                 # registers the poppy protocol
     ':proto_over_http_protocol',       # registers the proto-over-HTTP protocol
@@ -66,6 +55,9 @@ cc_library(
     ':std_protocol',                   # registers the std protocol (base for the four above)
     ':service',                        # link-time service plumbing
     ':service_method_locator',         # registers ServiceMethodLocator
+    ':rpc_meta_proto',                 # owns generated rpc_meta.pb.h (re-export
+                                       # auto-rule doesn't yet cover proto_library
+                                       # generated hdrs)
   ],
   visibility = [
     '//flare/rpc:rpc',

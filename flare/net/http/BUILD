@@ -42,15 +42,9 @@ cc_library(
     '//thirdparty/gflags:gflags',
   ],
   keep_deps = [
-    # Umbrella facade for the HTTP module. The headers re-exported here are
-    # ALSO declared as hdrs of the sub-targets below, so blade attributes
-    # any direct #include to the sub-target -- the umbrella itself never gets
-    # credited as "used", and every consumer who depends on the umbrella
-    # would otherwise see these sub-deps flagged.
-    ':dry_run_channel',  # link-time registration of the dry-run HTTP channel
-    ':http_client',      # re-export: HttpClient
-    ':http_headers',     # re-export: HttpHeaders
-    ':query_string',     # re-export: query-string parsing
+    # `:dry_run_channel` self-registers a dry-run HTTP channel scheme via a
+    # static initializer; consumers never `#include` anything from it.
+    ':dry_run_channel',
   ],
   visibility = 'PUBLIC',
 )
