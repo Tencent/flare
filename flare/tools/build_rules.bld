@@ -32,7 +32,7 @@ def _make_protoc_cmd(srcs, deps):
     return cmd
 
 
-def cc_flare_library(name, srcs, deps, visibility=None):
+def cc_flare_library(name, srcs, deps, visibility=None, keep_deps=None):
     """This target generates `xxx.flare.pb.*`.
 
     In order to access Protocol Buffers messages (`xxx.pb.*`), you should
@@ -70,4 +70,6 @@ def cc_flare_library(name, srcs, deps, visibility=None):
                       srcs=src_prefix + '.flare.pb.cc',
                       deps=[':flare_gen_' + name, '//flare/rpc:protobuf'] +
                       deps,
-                      visibility=visibility)
+                      visibility=visibility,
+        keep_deps=(keep_deps or []),
+    )
