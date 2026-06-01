@@ -56,7 +56,7 @@ cc_library(
     deps = [
         '//thirdparty/glog:glog',
         '#m',
-    ] + ([',#pthread'] if _is_linux else []),
+    ] + (['#pthread'] if _is_linux else []),
 )
 
 cc_library(
