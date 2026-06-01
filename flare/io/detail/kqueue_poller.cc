@@ -71,8 +71,38 @@ void KqueuePoller::Add(int fd, int events, void* user_data) {
 }
 
 void KqueuePoller::Modify(int fd, int events, void* user_data) {
-  // In kqueue, re-adding with EV_ADD updates existing entries.
-  ApplyKeventChanges(kq_.Get(), fd, events, user_data, EV_ADD | EV_ENABLE);
+  // Unlike Linux epoll (EPOLL_CTL_MOD replaces the whole event bitmask in
+  // one shot), kqueue is per-filter: EVFILT_READ and EVFILT_WRITE are two
+  // independent registrations. A bare EV_ADD on one does NOT affect the
+  // other -- so Modify must explicitly disable filters that are no longer
+  // in the new mask, or else (under level-triggered) the kernel keeps
+  // firing them, OnWritable() runs on an empty writing buffer, and the
+  // connection layer mistakes the resulting NothingWritten for a peer
+  // close and kills the connection.
+  //
+  // EV_DISABLE (not EV_DELETE) is what we want here: it pauses delivery
+  // while preserving the filter's internal readiness state, mirroring
+  // epoll's behaviour where EPOLL_CTL_MOD removing a flag doesn't drop
+  // the readiness. (EV_DELETE + later EV_ADD on a socket that is already
+  // readable produces no edge with EV_CLEAR -- the reader would stall.)
+  bool et = events & kPollerET;
+  unsigned short flags = EV_ADD | EV_ENABLE;
+  if (et) flags |= EV_CLEAR;
+
+  struct kevent changes[2];
+  unsigned short read_flags  = (events & kPollerRead)
+                                   ? flags
+                                   : static_cast<unsigned short>(EV_DISABLE);
+  unsigned short write_flags = (events & kPollerWrite)
+                                   ? flags
+                                   : static_cast<unsigned short>(EV_DISABLE);
+  EV_SET(&changes[0], fd, EVFILT_READ, read_flags, 0, 0, user_data);
+  EV_SET(&changes[1], fd, EVFILT_WRITE, write_flags, 0, 0, user_data);
+  // EV_DISABLE on a never-registered filter returns ENOENT -- harmless.
+  int rc = kevent(kq_.Get(), changes, 2, nullptr, 0, nullptr);
+  if (rc == -1 && fiber::GetLastError() != ENOENT) {
+    FLARE_PLOG_ERROR("Failed to modify fd #{} in kqueue.", fd);
+  }
 }
 
 void KqueuePoller::Remove(int fd) {
@@ -111,16 +141,19 @@ int KqueuePoller::Wait(PollerEvent* events, int max_events, int timeout_ms) {
     if (kevents_[i].flags & EV_ERROR) {
       flags |= kPollerError;
     } else {
+      // Only set the event direction that the firing filter actually
+      // represents. In particular, EV_EOF on EVFILT_READ just means the
+      // peer half-closed for reading -- our write direction is still
+      // usable. The upper layer detects EOF via read()/write() returning
+      // 0 or EPIPE naturally; manufacturing a kPollerWrite event here
+      // would cause Descriptor::FireWriteEvent to run OnWritable() with
+      // an empty writing buffer, which the connection layer then mistakes
+      // for "remote closed" and kills the connection.
       if (kevents_[i].filter == EVFILT_READ) {
         flags |= kPollerRead;
       }
       if (kevents_[i].filter == EVFILT_WRITE) {
         flags |= kPollerWrite;
-      }
-      // EV_EOF: treat as both readable and writable (the caller will get
-      // read()==0 indicating EOF).
-      if (kevents_[i].flags & EV_EOF) {
-        flags |= kPollerRead | kPollerWrite;
       }
     }
     events[i].events = flags;
