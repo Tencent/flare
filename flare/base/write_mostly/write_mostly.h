@@ -94,9 +94,17 @@ class WriteMostly {
     WriteBuffer buffer_;
   };
 
+  // Declaration order matters: `tls_buffer_` must be the LAST member so it
+  // is destroyed FIRST (members are destroyed in reverse declaration order).
+  // `~WriteBufferWrapper` (invoked when `tls_buffer_` releases its per-thread
+  // slot) locks `mutex` and merges into `exited_thread_combined_`, so both
+  // those must still be alive at that point. libstdc++ on Linux tolerates
+  // locking an already-destroyed mutex silently; libc++ on Darwin throws
+  // `system_error("mutex lock failed: Invalid argument")` and aborts via
+  // terminate.
   mutable WriteBuffer exited_thread_combined_;
-  ThreadLocal<WriteBufferWrapper> tls_buffer_;
   mutable std::mutex mutex;
+  ThreadLocal<WriteBufferWrapper> tls_buffer_;
 };
 
 }  // namespace flare
