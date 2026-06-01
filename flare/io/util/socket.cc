@@ -90,15 +90,21 @@ bool GetSockOpt(int fd, int level, int opt, T* value) {
   return true;
 }
 
-// fd_flags |= flags
+// OR-in `bits` into the **file status flags** of `fd` via F_GETFL / F_SETFL.
+// Returns the previous flag value.
 //
-// Old flags is returned.
-int SetFlags(int fd, int flags) {
+// `bits` MUST be a subset of the file-status-flag space (O_NONBLOCK,
+// O_APPEND, O_ASYNC, ...). It is NOT for file-descriptor flags such as
+// FD_CLOEXEC -- those live in a separate namespace and must go through
+// F_GETFD / F_SETFD. Mixing the two corrupts state silently on Linux and
+// observably on Darwin (FD_CLOEXEC = 0x01 collides with the ACCMODE bit
+// in the F_SETFL flag space and wipes O_NONBLOCK on the listening socket).
+int SetStatusFlags(int fd, int bits) {
   int old = fcntl(fd, F_GETFL, 0);
-  FLARE_PCHECK(old != -1, "Cannot get fd #{}'s flags.", fd);
-  int newf = old | flags;
+  FLARE_PCHECK(old != -1, "Cannot get fd #{}'s status flags.", fd);
+  int newf = old | bits;
   FLARE_PCHECK(fcntl(fd, F_SETFL, newf) == 0,
-               "Cannot set fd #{}'s flags to {}.", fd, newf);
+               "Cannot set fd #{}'s status flags to {}.", fd, newf);
   return old;
 }
 
@@ -168,9 +174,21 @@ bool StartConnect(int fd, const Endpoint& addr) {
   return true;
 }
 
-void SetNonBlocking(int fd) { SetFlags(fd, O_NONBLOCK); }
+void SetNonBlocking(int fd) { SetStatusFlags(fd, O_NONBLOCK); }
 
-void SetCloseOnExec(int fd) { SetFlags(fd, FD_CLOEXEC); }
+void SetCloseOnExec(int fd) {
+  // CAUTION: FD_CLOEXEC is a file-descriptor flag (F_GETFD / F_SETFD), NOT a
+  // file-status flag (F_GETFL / F_SETFL). The historical `SetStatusFlags(fd,
+  // FD_CLOEXEC)` here folded the wrong constant into F_SETFL: on Darwin the
+  // kernel reinterpreted the FD_CLOEXEC bit (= 0x01) inside its F_SETFL
+  // path and wiped O_NONBLOCK off the listening socket. This was harmless
+  // on Linux only because Linux's F_SETFL silently discards bits that
+  // aren't settable, so the corruption was invisible there.
+  int old = fcntl(fd, F_GETFD, 0);
+  FLARE_PCHECK(old != -1, "Cannot get fd #{}'s descriptor flags.", fd);
+  FLARE_PCHECK(fcntl(fd, F_SETFD, old | FD_CLOEXEC) == 0,
+               "Cannot set FD_CLOEXEC on fd #{}.", fd);
+}
 
 void SetTcpNoDelay(int fd) {
   FLARE_PCHECK(SetSockOpt(fd, IPPROTO_TCP, TCP_NODELAY, 1),
