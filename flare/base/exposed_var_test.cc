@@ -17,7 +17,6 @@
 #include "gtest/gtest.h"
 #include "jsoncpp/json.h"
 
-#include "flare/base/write_mostly/metrics.h"
 #include "flare/testing/main.h"
 
 namespace flare {

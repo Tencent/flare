@@ -28,7 +28,11 @@ cc_library(
     '//flare/net/http:http_request',
     '//flare/net/http:http_response',
   ],
-  visibility = '//flare/rpc:http',
+  # Treated like a C++ `friend` declaration: only the two umbrella facades
+  # may BUILD-depend on this lib directly. `//flare/rpc:http` (inner) is the
+  # canonical re-exporter, and `//flare/rpc:rpc` (outer) re-includes through
+  # its own `http_filter.h`. Anyone else must go through one of those.
+  visibility = ['//flare/rpc:http', '//flare/rpc:rpc'],
 )
 
 cc_library(
@@ -44,7 +48,8 @@ cc_library(
     '//flare/net/http:http_request',
     '//flare/net/http:http_response',
   ],
-  visibility = '//flare/rpc:http',
+  # See `:http_filter` above -- same `friend`-list scoping.
+  visibility = ['//flare/rpc:http', '//flare/rpc:rpc'],
 )
 
 cc_library(
