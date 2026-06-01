@@ -357,7 +357,14 @@ NativeStreamConnection::FlushStatus NativeStreamConnection::FlushWritingBuffer(
     }
     if (FLARE_UNLIKELY(written < 0)) {
       auto err = fiber::GetLastError();
-      if (err == EAGAIN || err == EWOULDBLOCK) {
+      // EAGAIN/EWOULDBLOCK: kernel says "would block, try later."
+      // ENOTCONN: macOS-specific. write(2) on a non-blocking socket whose
+      // TCP connect is still in progress returns ENOTCONN. Linux folds the
+      // same case into EAGAIN, but Darwin distinguishes "would block on a
+      // connected socket" (EAGAIN) from "not yet connected" (ENOTCONN).
+      // Both are transient -- the kernel will signal writability when the
+      // connect completes, and the retry will succeed.
+      if (err == EAGAIN || err == EWOULDBLOCK || err == ENOTCONN) {
         return FlushStatus::SystemBufferSaturated;
       } else {
         FLARE_VLOG(10, "Cannot write to fd [{}].", fd());
