@@ -36,12 +36,6 @@
 
 DECLARE_int32(flare_fiber_stack_size);
 
-// Defined in `flare/fiber/detail/{arch}/*.S`
-extern "C" {
-
-void* make_context(void* sp, std::size_t size, void (*start_proc)(void*));
-}
-
 namespace flare::fiber::detail {
 
 // Define thread-local variables declared in `fiber_entity.h`.
@@ -269,13 +263,23 @@ void SetUpMasterFiberEntity() noexcept {
   SetCurrentFiberEntity(master_fiber);
 }
 
-// `noinline` keeps the compiler from CSE-ing the underlying TLS load across an
-// opaque call (most importantly `jump_context`, which may switch the executing
-// OS thread under us and so invalidates any cached `current_fiber` slot from
-// the previous worker). The `returns_twice` annotation on `jump_context`
-// itself is the more precise signal, but in practice Clang on AArch64 still
-// CSEs TLS reads across `returns_twice` calls when these getters are inlined
-// — so we belt-and-suspenders by also forcing them out-of-line here.
+// `noinline` forces each accessor to be an out-of-line function call, which
+// is what the caller's optimizer has to assume re-resolves the TLV on each
+// invocation. Apple Clang on macOS otherwise caches the resolved TLV address
+// across `jump_context` (a context switch may resume on a different OS
+// thread, but the optimizer has no language attribute that says so).
+// Notes from experimentation:
+//   - `[[gnu::returns_twice]]` on `jump_context` alone (in context.h) is
+//     not enough -- Apple Clang still CSEs the TLV resolution across
+//     the call when the getters are inlined.
+//   - Declaring `master_fiber` / `current_fiber` as `volatile thread_local`
+//     is not enough either: it forces the slot load to re-issue but the
+//     resolved TLV address still gets cached, so we end up reading the
+//     slot of the previous worker.
+//   - Linux (pre-macOS port) had these inlined without `noinline` and
+//     passed -- it's a macOS / Apple Clang specific limitation.
+// Confirmed regression mode if removed: `this_fiber_test` aborts with
+// `self == GetCurrentFiberEntity()` check failures.
 [[gnu::noinline]] FiberEntity* GetMasterFiberEntity() noexcept {
   return master_fiber;
 }

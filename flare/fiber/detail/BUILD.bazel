@@ -14,6 +14,7 @@
 
 cc_library(
     name = "context",
+    hdrs = ["context.h"],
     srcs = select({
         "@platforms//cpu:x86_64": glob(["x86_64/*.S"]),
         "@platforms//cpu:aarch64": glob(["aarch64/*.S"]),
@@ -89,6 +90,7 @@ cc_library(
         "waitable.cc",
     ],
     hdrs = [
+        "context.h",
         "fiber_desc.h",
         "fiber_entity.h",
         "fiber_worker.h",

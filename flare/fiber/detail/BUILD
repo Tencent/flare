@@ -14,7 +14,7 @@
 
 cc_library(
   name = 'context',
-  hdrs = [],
+  hdrs = ['context.h'],
   srcs = glob(build_target.arch + '/*.S')
 )
 

@@ -30,6 +30,7 @@
 #include "flare/base/object_pool.h"
 #include "flare/base/ref_ptr.h"
 #include "flare/base/thread/spinlock.h"
+#include "flare/fiber/detail/context.h"
 #include "flare/fiber/detail/fiber_desc.h"
 #include "flare/fiber/detail/runnable_entity.h"
 
@@ -270,19 +271,6 @@ void FreeFiberEntity(FiberEntity* fiber) noexcept;
 //////////////////////////////////////////
 // Implementation goes below.           //
 //////////////////////////////////////////
-
-// Defined in `flare/fiber/detail/{arch}/*.S`.
-//
-// `returns_twice` is the same attribute setjmp/vfork carry: it tells the
-// compiler that on return from this call, *all* register/memory state may
-// have changed (we may even be running on a different OS thread now). Without
-// it, on weakly-typed-TLS targets (aarch64 / ppc64le / TSan) the compiler is
-// free to CSE thread_local reads across the context switch and observe the
-// previous worker's `current_fiber`, which used to manifest as a flurry of
-// `FLARE_CHECK_EQ(caller, GetCurrentFiberEntity())` failures and abort the
-// whole fiber test suite.
-extern "C" [[gnu::returns_twice]] void jump_context(void** self, void* to,
-                                                   void* context);
 
 template <class F>
 inline void DestructiveRunCallback(F* cb) {
