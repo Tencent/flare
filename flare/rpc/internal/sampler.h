@@ -20,6 +20,7 @@
 
 #include "flare/base/chrono.h"
 #include "flare/base/likely.h"
+#include "flare/base/logging.h"
 #include "flare/base/thread/thread_local.h"
 
 namespace flare::rpc::detail {

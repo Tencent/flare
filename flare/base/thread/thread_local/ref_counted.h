@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "flare/base/function.h"
 #include "flare/base/ref_ptr.h"
 #include "flare/base/thread/thread_local/always_initialized.h"
 #include "flare/base/thread/thread_local/detail/atomic_ptr.h"
