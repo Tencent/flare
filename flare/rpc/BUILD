@@ -35,6 +35,12 @@ cc_library(
     # Frequently used protocols.
     '//flare/rpc/protocol/http:http',
     '//flare/rpc/protocol/protobuf:protobuf',
+    # `http_filter.h` / `http_handler.h` (this target's own hdrs) re-export
+    # these protocol-layer types; depend on the owning libs directly so
+    # blade's Missing-dep check is satisfied. Both libs treat us as a
+    # `friend` via their visibility list.
+    '//flare/rpc/protocol/http:http_filter',
+    '//flare/rpc/protocol/http:http_handler',
     '//flare/base/internal:test_prod',
     '//flare/base/net:endpoint',
     '//flare/base:down_cast',
