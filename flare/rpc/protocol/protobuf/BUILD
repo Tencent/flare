@@ -43,25 +43,36 @@ cc_library(
     '//flare/rpc/internal:stream_call_gate_pool',
     '//thirdparty/gflags:gflags',
   ],
+  keep_deps = [
+    # Umbrella facade for the protobuf-RPC stack. Two patterns at play:
+    #
+    # 1) Header re-exports: rpc_channel.h, rpc_client_controller.h,
+    #    rpc_meta.pb.h, rpc_server_controller.h are listed both here and on
+    #    the sub-target that "owns" them, so blade attributes every direct
+    #    #include to the more specific owner and the umbrella looks unused.
+    ':rpc_channel',                    # owns rpc_channel.h
+    ':rpc_client_controller',          # owns rpc_client_controller.h
+    ':rpc_meta_proto',                 # owns rpc_meta.pb.h
+    ':rpc_server_controller',          # owns rpc_server_controller.h
+    # 2) Link-time protocol / service registration: each `*_protocol` and
+    #    `service*` target self-registers with ServiceMethodLocator / the
+    #    protocol registry via static initializers, with no public header
+    #    the umbrella's own sources could `#include` to express the
+    #    dependency.
+    ':baidu_std_protocol',             # registers the baidu-std protocol
+    ':poppy_protocol',                 # registers the poppy protocol
+    ':proto_over_http_protocol',       # registers the proto-over-HTTP protocol
+    ':qzone_protocol',                 # registers the QZone protocol
+    ':std_protocol',                   # registers the std protocol (base for the four above)
+    ':service',                        # link-time service plumbing
+    ':service_method_locator',         # registers ServiceMethodLocator
+  ],
   visibility = [
     '//flare/rpc:rpc',
     '//flare/rpc:server',
     '//flare/rpc:for_internal_use_only_protobuf_plugin_deps',
     '//flare/rpc:protobuf',
     '//flare/testing:rpc_mock',
-  ],
-  keep_deps = [
-    ':baidu_std_protocol',
-    ':poppy_protocol',
-    ':proto_over_http_protocol',
-    ':qzone_protocol',
-    ':rpc_channel',
-    ':rpc_client_controller',
-    ':rpc_meta_proto',
-    ':rpc_server_controller',
-    ':service',
-    ':service_method_locator',
-    ':std_protocol',
   ],
 )
 
@@ -616,10 +627,15 @@ cc_library(
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
   ],
-  link_all_symbols = True,
   keep_deps = [
+    # baidu_std_protocol piggybacks on `std_protocol`'s static-initializer
+    # registration of methods with `ServiceMethodLocator` -- there is no
+    # public header from `std_protocol` that baidu_std_protocol.cc needs to
+    # `#include`, so blade can't see the dep, but dropping it would lose the
+    # registration at link time.
     ':std_protocol',
   ],
+  link_all_symbols = True,
 )
 
 cc_test(
@@ -661,10 +677,13 @@ cc_library(
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
   ],
-  link_all_symbols = True,
   keep_deps = [
+    # Same pattern as `baidu_std_protocol`: poppy_protocol piggybacks on
+    # `std_protocol`'s ServiceMethodLocator registration via static
+    # initializers and has no public header to `#include`.
     ':std_protocol',
   ],
+  link_all_symbols = True,
 )
 
 cc_test(

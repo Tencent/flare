@@ -48,15 +48,19 @@ cc_library(
     '//flare/io/util:rate_limiter',
     '//thirdparty/gflags:gflags',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
-    ':http',
-    ':server',
-    ':server_group',
-    '//flare/rpc/load_balancer:round_robin',
-    '//flare/rpc/name_resolver:list',
-    '//flare/rpc/protocol/http:http',
+    # The `:rpc` facade is a one-stop dep for typical RPC users; it bundles
+    # the basic types and pre-registers commonly used NSLBs / name resolvers
+    # / protocols so that ":depend on `:rpc`" is sufficient to ship an HTTP-
+    # or protobuf-speaking server out-of-the-box.
+    ':http',                                    # umbrella re-export
+    ':server',                                  # umbrella re-export
+    ':server_group',                            # umbrella re-export
+    '//flare/rpc/load_balancer:round_robin',    # link-time NSLB registration
+    '//flare/rpc/name_resolver:list',           # link-time name-resolver registration
+    '//flare/rpc/protocol/http:http',           # link-time HTTP protocol registration
   ],
+  visibility = 'PUBLIC',
 )
 
 proto_library(
@@ -87,12 +91,12 @@ cc_library(
     '//flare/rpc/protocol/http:http_handler',
     '//flare/rpc/protocol/http:http',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
     # Umbrella re-export: this facade exposes the HTTP filter / handler types
     # AND link-registers the HTTP protocol with the RPC server.
     '//flare/rpc/protocol/http:http',
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(

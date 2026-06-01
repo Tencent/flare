@@ -41,13 +41,18 @@ cc_library(
     '//flare/base:logging',
     '//thirdparty/gflags:gflags',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
-    ':dry_run_channel',
-    ':http_client',
-    ':http_headers',
-    ':query_string',
+    # Umbrella facade for the HTTP module. The headers re-exported here are
+    # ALSO declared as hdrs of the sub-targets below, so blade attributes
+    # any direct #include to the sub-target -- the umbrella itself never gets
+    # credited as "used", and every consumer who depends on the umbrella
+    # would otherwise see these sub-deps flagged.
+    ':dry_run_channel',  # link-time registration of the dry-run HTTP channel
+    ':http_client',      # re-export: HttpClient
+    ':http_headers',     # re-export: HttpHeaders
+    ':query_string',     # re-export: query-string parsing
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(

@@ -35,10 +35,13 @@ cc_library(
     '//flare/base:string',
     '//thirdparty/gflags:gflags',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
+    # Umbrella facade: redis.h is a curated public-API entry-point that does
+    # NOT re-include redis_client.h, but consumers expect `RedisClient` to be
+    # linkable when they depend on `:redis`.
     ':redis_client',
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(

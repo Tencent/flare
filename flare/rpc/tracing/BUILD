@@ -34,11 +34,15 @@ cc_library(
     '//flare/rpc/internal:sampler',
     '//thirdparty/opentracing-cpp:opentracing',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
+    # Umbrella facade for the tracing module. `framework_tags.h` and
+    # `tracing_ops.h` are ALSO declared as hdrs of the sub-targets below, so
+    # any direct #include is attributed to the sub-target and the umbrella
+    # itself ends up looking like it never uses them.
     ':framework_tags',
     ':tracing_ops',
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(

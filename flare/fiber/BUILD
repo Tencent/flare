@@ -56,15 +56,20 @@ cc_library(
     '//flare/base:string',
     '//flare/fiber/detail:fiber_impl',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
-    ':alternatives',
-    ':async',
-    ':future',
-    ':logging',
-    ':timer',
-    ':work_queue',
+    # `:fiber` is the umbrella facade -- consumers depend on it instead of
+    # cherry-picking sub-targets. Each header listed in `hdrs` is ALSO a
+    # public header of one of the sub-libs below, so blade attributes any
+    # direct #include to the more specific owner and never credits the
+    # umbrella itself for "using" them.
+    ':alternatives',   # re-export: fiber alternatives (e.g. AlternativeT<>)
+    ':async',          # re-export: Async() launcher
+    ':future',         # re-export: Future / BlockingGet adapters
+    ':logging',        # re-export: fiber-aware logging macros
+    ':timer',          # re-export: SetTimer / KillTimer
+    ':work_queue',     # re-export: WorkQueue
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(

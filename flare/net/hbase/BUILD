@@ -29,11 +29,15 @@ cc_library(
     '//flare/base/net:endpoint',
     '//flare/rpc/protocol:stream_service',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
+    # Umbrella facade bundling the HBase client + server stacks. Each sub-dep
+    # registers its own protocol/handler at link time (via
+    # `:hbase_client_protocol` / `:hbase_server_protocol`), so users who
+    # depend on `:hbase` expect to get a fully wired HBase stack.
     ':hbase_client',
     ':hbase_server',
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(
@@ -50,12 +54,15 @@ cc_library(
     ':hbase_controller_common',
     '//flare/base/net:endpoint',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
-    ':hbase_channel',
-    ':hbase_client_controller',
-    ':hbase_client_protocol',
+    # The umbrella's hdrs are ALSO declared by these sub-targets, so blade
+    # attributes every direct #include to the more specific sub-target,
+    # leaving the umbrella itself looking "unused" to its own consumers.
+    ':hbase_channel',             # re-export: HbaseChannel
+    ':hbase_client_controller',   # re-export: HbaseClientController
+    ':hbase_client_protocol',     # link-time HBase wire-protocol registration
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(
@@ -72,12 +79,15 @@ cc_library(
     '//flare/base/internal:test_prod',
     '//flare/rpc/protocol:stream_service',
   ],
-  visibility = 'PUBLIC',
   keep_deps = [
+    # Mirrors `:hbase_client`: umbrella for the server side. The headers are
+    # owned by the sub-targets, plus `:hbase_server_protocol` static-registers
+    # the wire protocol with the RPC server.
     ':hbase_server_controller',
     ':hbase_server_protocol',
     ':hbase_service',
   ],
+  visibility = 'PUBLIC',
 )
 
 cc_library(
