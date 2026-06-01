@@ -13,7 +13,11 @@ mkdir -p $BLADE_BOOST_DIR/bin
 is_git_lfs_pulled() {
   local zipfile="$BLADE_DIR/blade.zip"
   local filesize
-  filesize=$(stat --format=%s $zipfile)
+  if [[ "$(uname)" = "Darwin" ]]; then
+    filesize=$(stat -f%z $zipfile)
+  else
+    filesize=$(stat --format=%s $zipfile)
+  fi
   if [[ $filesize -gt 1024 ]]; then  # Unpulled LFS file is a small txt file
     return 0
   fi
@@ -24,21 +28,37 @@ if ! is_git_lfs_pulled; then
   _error_exit "This repository need GIT LFS, see README.md"
 fi
 
-# Copy ninja
-if [[ ! -f $BLADE_BOOST_DIR/bin/ninja ]]; then
-  cp $BLADE_DIR/ninja $BLADE_BOOST_DIR/bin
+# On macOS, use system ninja/cmake instead of bundled Linux binaries. ninja is
+# now always taken from PATH (the previously bundled binary was too old: < 1.10
+# doesn't support multiple-output edges with the depslog).
+if [[ "$(uname)" != "Darwin" ]]; then
+  # Copy cmake (from thirdparty/blade/cmake-*.tar.gz).
+  if [[ ! -L $BLADE_BOOST_DIR/bin/cmake ]]; then
+    tar zxf $BLADE_DIR/cmake-3.31.6-linux-x86_64.tar.gz -C $BLADE_BOOST_DIR/
+    ln -s $BLADE_BOOST_DIR/cmake-3.31.6-linux-x86_64/bin/cmake $BLADE_BOOST_DIR/bin/cmake
+  fi
+
+  # Copy nasm
+  if [[ ! -f $BLADE_BOOST_DIR/bin/nasm ]]; then
+    cp $BLADE_DIR/nasm $BLADE_BOOST_DIR/bin
+    cp $BLADE_DIR/ndisasm $BLADE_BOOST_DIR/bin
+  fi
 fi
 
-# Copy cmake
-if [[ ! -L $BLADE_BOOST_DIR/bin/cmake ]]; then
-  tar zxf $BLADE_DIR/cmake-3.17.2-Linux-x86_64.tar.gz -C $BLADE_BOOST_DIR/
-  ln -s $BLADE_BOOST_DIR/cmake-3.17.2-Linux-x86_64/bin/cmake $BLADE_BOOST_DIR/bin/cmake
+# Drop any stale ninja from a previous blade_init revision so we resolve ninja
+# from the system PATH (apt install ninja-build / brew install ninja). Need
+# >= 1.10 — older ninja errors out with "multiple outputs aren't (yet?)
+# supported by depslog" on rules blade generates.
+rm -f $BLADE_BOOST_DIR/bin/ninja
+if ! command -v ninja >/dev/null 2>&1; then
+  _error_exit "ninja not found; install via your package manager (e.g. \`apt install ninja-build\` or \`brew install ninja\`). Need >= 1.10."
 fi
-
-# Copy nsam
-if [[ ! -f $BLADE_BOOST_DIR/bin/nasm ]]; then
-  cp $BLADE_DIR/nasm $BLADE_BOOST_DIR/bin
-  cp $BLADE_DIR/ndisasm $BLADE_BOOST_DIR/bin
+ninja_ver=$(ninja --version 2>/dev/null)
+if [[ ! "$ninja_ver" =~ ^([0-9]+)\.([0-9]+) ]]; then
+  _error_exit "Cannot parse ninja version: $ninja_ver"
+fi
+if (( ${BASH_REMATCH[1]} < 1 || (${BASH_REMATCH[1]} == 1 && ${BASH_REMATCH[2]} < 10) )); then
+  _error_exit "ninja $ninja_ver is too old; need >= 1.10 for multiple-output edges with the depslog."
 fi
 
 PrepareDistBuild() {
@@ -64,7 +84,9 @@ PrepareDistBuild() {
 # PrepareDistBuild
 
 export PATH=$BLADE_BOOST_DIR/bin:$PATH
-export CMAKE_ROOT=$BLADE_BOOST_DIR/cmake-3.17.2-Linux-x86_64/
+if [[ "$(uname)" != "Darwin" ]]; then
+  export CMAKE_ROOT=$BLADE_BOOST_DIR/cmake-3.31.6-linux-x86_64/
+fi
 
 export GO111MODULE=on
 export go_module_relpath=go/src/tencent.com

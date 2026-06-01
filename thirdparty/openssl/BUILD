@@ -1,8 +1,10 @@
 include('//thirdparty/foreign_build.bld')
 
+_is_linux = blade.cc_toolchain.target_os == 'linux'
+
 autotools_build(
     name = 'openssl_build',
-    source_package = 'openssl-1.0.2u.tar.gz',
+    source_package = 'openssl-1.1.1w.tar.gz',
     package_name = 'openssl',
     lib_names = ['crypto', 'ssl'],
     configure_options = '-fPIC -g -shared ' +
@@ -17,10 +19,9 @@ autotools_build(
 foreign_cc_library(
     name = 'crypto',
     deps = [
-      '#pthread',
       '#dl',
       ':openssl_build',
-    ],
+    ] + (['#pthread'] if _is_linux else []),
     visibility = 'PUBLIC',
     has_dynamic=True,
 )

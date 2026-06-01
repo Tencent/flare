@@ -16,7 +16,9 @@
 
 #include <arpa/inet.h>
 #include <ifaddrs.h>
+#ifdef __linux__
 #include <linux/if_packet.h>
+#endif
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -271,9 +273,11 @@ std::vector<Endpoint> GetInterfaceAddresses() {
       TEST_AF_AND_COPY(AF_INET, sockaddr_in)
       TEST_AF_AND_COPY(AF_INET6, sockaddr_in6)
       TEST_AF_AND_COPY(AF_UNIX, sockaddr_un)
+#ifdef AF_PACKET
       case AF_PACKET: {
         continue;  // Ignored.
       }
+#endif
       default: {
         FLARE_LOG_WARNING_ONCE("Unrecognized address family #{} is ignored.",
                                af);

@@ -48,8 +48,7 @@ cc_library(
   srcs = 'attribute.cc',
   deps = [
     '//flare/base:logging',
-    '#pthread',
-  ],
+  ] + (['#pthread'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = 'PUBLIC',
 )
 
@@ -154,9 +153,10 @@ cc_benchmark(
   srcs = 'thread_local_benchmark.cc',
   deps = [
     ':thread_local',
-    # Tests workaround for gperftools's false-sharing issue.
+    # (tcmalloc unavailable on macOS — false-sharing workaround is Linux-only.)
+  ] + ([] if blade.cc_toolchain.target_os == 'darwin' else [
     '//thirdparty/gperftools:tcmalloc_minimal',
-  ]
+  ])
 )
 
 cc_library(

@@ -51,8 +51,17 @@ TEST(NativeDatagramTransceiver, SendRecv) {
   NoncontiguousBuffer buffers[2];
 
   buffers[0] = CreateBufferSlow("123");
-  // buffers[1] is a highly fragmented one (more than `IOV_MAX` blocks).
-  for (int i = 0; i != 60'000; ++i) {
+  // buffers[1] is a highly fragmented one (more than `IOV_MAX` blocks),
+  // exercising the "flatten on overflow" path inside FlushTo. On macOS the
+  // flattened datagram also has to fit under `net.inet.udp.maxdgram`
+  // (default 9216 bytes) or sendmsg() returns EMSGSIZE. IOV_MAX is 1024 on
+  // both glibc Linux and Darwin, so 8192 still comfortably exceeds it.
+#ifdef __APPLE__
+  constexpr int kFragmentCount = 8192;
+#else
+  constexpr int kFragmentCount = 60'000;
+#endif
+  for (int i = 0; i != kFragmentCount; ++i) {
     buffers[1].Append(MakeForeignBuffer(std::string(1, i % 26 + 'a')));
   }
 

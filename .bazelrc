@@ -1,5 +1,10 @@
 # This file tries to group and simplify build options for flare
 
+# Bzlmod is disabled on this branch (still using WORKSPACE).
+# Migration deferred to a follow-up PR — Bazel 8/9 bundled rules require
+# protobuf 24+ which breaks flare source (descriptor name() returns string_view).
+common --enable_bzlmod=false
+
 build --cxxopt=-std=c++2a --host_cxxopt=-std=c++2a
 
 build:llvm --action_env=CXX=clang++ --action_env=CC=clang
@@ -9,6 +14,11 @@ build:dbg --compilation_mode=dbg
 build:opt --compilation_mode=opt
 
 build --copt=-Wno-sign-compare
+
+# Silence warnings from third-party code while keeping flare's own warnings.
+# Covers both fetched deps (external/) and in-repo vendored libs (thirdparty/,
+# e.g. blake3, xxhash, rapidxml). `-w` is appended last so it wins.
+build --per_file_copt=(external|thirdparty)/.*@-w
 
 build:san-common --config=dbg --strip=never --copt=-O0 --copt=-fno-omit-frame-pointer
 

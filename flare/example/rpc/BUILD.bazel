@@ -66,8 +66,11 @@ cc_binary(
         "//flare/init:override_flag",
         "//flare/rpc",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
-    ],
+    ] + select({
+        # gperftools / tcmalloc is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@com_github_gperftools_gperftools//:tcmalloc_and_profiler"],
+    }),
 )
 
 cc_binary(
@@ -83,8 +86,11 @@ cc_binary(
         "//flare/init:override_flag",
         "//flare/rpc",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
-    ],
+    ] + select({
+        # gperftools / tcmalloc is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@com_github_gperftools_gperftools//:tcmalloc_and_profiler"],
+    }),
 )
 
 cc_binary(
@@ -144,6 +150,9 @@ cc_binary(
         "//flare/fiber",
         "//flare/init:override_flag",
         "//flare/rpc",
-        "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
-    ],
+    ] + select({
+        # gperftools / tcmalloc is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@com_github_gperftools_gperftools//:tcmalloc_and_profiler"],
+    }),
 )

@@ -23,6 +23,8 @@
 #include <string_view>
 #include <utility>
 
+#include "gflags/gflags.h"
+
 #include "flare/base/chrono.h"
 #include "flare/base/internal/time_keeper.h"
 #include "flare/base/monitoring/monitoring_system.h"

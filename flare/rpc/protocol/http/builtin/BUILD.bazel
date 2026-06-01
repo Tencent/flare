@@ -23,12 +23,15 @@ cc_library(
         ":gflags_handler",
         ":misc_handler",
         ":options_handler",
-        ":prof_cpu_handler",
         ":rpc_form_handler",
         ":rpc_reflect_handler",
         ":rpc_statistics_handler",
         ":static_resource_http_handler",
-    ],
+    ] + select({
+        # `prof_cpu_handler` needs gperftools, which is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": [":prof_cpu_handler"],
+    }),
 )
 
 cc_library(
@@ -162,6 +165,11 @@ cc_library(
     name = "prof_cpu_handler",
     srcs = ["prof_cpu_handler.cc"],
     hdrs = ["prof_cpu_handler.h"],
+    # gperftools is Linux-only; not available on macOS.
+    target_compatible_with = select({
+        "@platforms//os:macos": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         "//flare/base/internal:test_prod",
         "//flare/rpc:http",

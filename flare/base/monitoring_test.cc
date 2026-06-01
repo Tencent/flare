@@ -112,14 +112,14 @@ class FancyMonitoringSystem : public MonitoringSystem {
       const std::string& key,
       const std::vector<std::pair<std::string, std::string>>& tags = {}) const {
     std::scoped_lock _(lock_);
-    const std::map<std::chrono::nanoseconds, std::size_t>* ptimers;
+    const std::map<std::chrono::nanoseconds, std::uint64_t>* ptimers;
     if (tags.empty()) {
       ptimers = &timers_.at(key);
     } else {
       ptimers = &timers_tagged_.at(key).at(NormalizeTags(tags));
     }
     std::chrono::nanoseconds sum = 0ns;
-    std::size_t times = 0;
+    std::uint64_t times = 0;
     for (auto&& [k, v] : *ptimers) {
       sum += k * v;
       times += v;

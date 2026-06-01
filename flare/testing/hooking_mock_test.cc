@@ -44,7 +44,21 @@ TEST(HookingMock, NotEnabled) {
   }
 }
 
+// All tests that exercise `FLARE_EXPECT_HOOKED_CALL` rely on `DirtyHook`,
+// which patches the function prologue via `mprotect`. macOS arm64 rejects
+// this with EPERM (W^X enforcement on signed code pages). See
+// `dirty_hook_test.cc` for the full explanation.
+#ifdef __APPLE__
+#define FLARE_HOOKING_MOCK_SKIP_ON_DARWIN()                       \
+  GTEST_SKIP() << "Hooking mocks need mprotect() of the text "    \
+                  "segment, which Darwin rejects on signed code " \
+                  "pages."
+#else
+#define FLARE_HOOKING_MOCK_SKIP_ON_DARWIN() ((void)0)
+#endif
+
 TEST(HookingMock, NormalAndMultipleExpect) {
+  FLARE_HOOKING_MOCK_SKIP_ON_DARWIN();
   std::vector<std::string> v;
 
   FLARE_EXPECT_HOOKED_CALL(FancyNonVirtualMethod, "a")
@@ -65,6 +79,7 @@ TEST(HookingMock, NormalAndMultipleExpect) {
 }
 
 TEST(HookingMock, Member) {
+  FLARE_HOOKING_MOCK_SKIP_ON_DARWIN();
   FirstStructure fs;
   std::vector<std::string> v;
   FLARE_EXPECT_HOOKED_CALL(&FirstStructure::AnotherFancyNonVirtualMethod, &fs,
@@ -78,6 +93,7 @@ TEST(HookingMock, Member) {
 }
 
 TEST(HookingMock, ConstMember) {
+  FLARE_HOOKING_MOCK_SKIP_ON_DARWIN();
   SecondStructure ss;
   std::vector<std::string> v;
   FLARE_EXPECT_HOOKED_CALL(&SecondStructure::YetAnotherFancyNonVirtualMethod,

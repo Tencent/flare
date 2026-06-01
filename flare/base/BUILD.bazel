@@ -129,8 +129,10 @@ cc_library(
     hdrs = ["chrono.h"],
     linkopts = [
         "-lpthread",
-        "-lrt",
-    ],
+    ] + select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["-lrt"],
+    }),
     visibility = ["//visibility:public"],
     deps = [":align"],
 )

@@ -47,7 +47,10 @@ TEST(Deferred, All) {
   defer3.Fire();
   ASSERT_TRUE(f3);
 
-  bool f4;
+  // Must be initialised: reading an uninitialised `bool` is UB, and macOS
+  // Clang traps on the indeterminate value (SIGTRAP). Linux happened to
+  // observe a zero on the stack and limped through.
+  bool f4 = false;
   Deferred defer5;
   {
     Deferred defer4([&] { f4 = true; });

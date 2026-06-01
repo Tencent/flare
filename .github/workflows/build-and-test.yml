@@ -2,16 +2,20 @@ name: Build and Test
 
 on:
   push:
+    branches: [master]
   pull_request:
     branches: [master]
 
 jobs:
-  build_on_ubuntu_20_04:
-    runs-on: ubuntu-20.04
+  # Oldest supported compiler (gcc 10, first with usable C++20). Pinned to
+  # ubuntu-22.04 because GitHub's ubuntu-20.04 runners are deprecated and the
+  # queue can stall for tens of minutes. gcc-10 is still in 22.04's main archive.
+  build_on_ubuntu_22_04:
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
-        python-version: [3.9]
-        cc: [8, 9, 10]
+        python-version: ['3.10']
+        cc: [10]
 
     steps:
     - uses: actions/checkout@v2
@@ -29,32 +33,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }}
-    - name: Build
-      run: |
-        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
-    - name: Run tests
-      run: |
-        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
-  build_on_ubuntu_22_04:
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        python-version: [3.9]
-        cc: [11, 12]
-
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        lfs: true
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }}
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build
     - name: Build
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
@@ -62,11 +41,12 @@ jobs:
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
 
+  # Latest compiler (gcc 13).
   build_on_ubuntu_24_04:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: [3.9]
+        python-version: ['3.10']
         cc: [13]
 
     steps:
@@ -80,10 +60,25 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }}
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build
     - name: Build
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
     - name: Run tests
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
+
+  build_on_macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+    # blade uses the system cmake/ninja on macOS (cmake is preinstalled on the
+    # runner; ninja is not). autoconf/automake/libtool are needed by autotools-
+    # based thirdparty packages (e.g. jemalloc's autogen.sh).
+    - name: Install dependencies
+      run: brew install ninja autoconf automake libtool
+    - name: Build
+      run: ./blade build flare/... -k

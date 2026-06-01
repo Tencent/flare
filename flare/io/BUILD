@@ -73,6 +73,7 @@ cc_library(
     '//flare/base/thread:latch',
     '//flare/fiber:fiber',
     '//flare/io/detail:eintr_safe',
+    '//flare/io/detail:poller',
     '//flare/io/detail:timed_call',
     '//flare/io/util:rate_limiter',
     '//flare/io/util:socket',

@@ -3,6 +3,12 @@ load("//bazel:deps.bzl", "flare_dependencies")
 
 flare_dependencies()
 
+# Prefer the host's preinstalled `make` over rules_foreign_cc's bundled one:
+# the bundled make segfaults building jemalloc on macOS. Registered before
+# `rules_foreign_cc_dependencies()` so it wins toolchain resolution. blade
+# likewise drives every foreign build with the system make.
+register_toolchains("@rules_foreign_cc//toolchains:preinstalled_make_toolchain")
+
 load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_dependencies")
 
 # This sets up some common toolchains for building targets. For more details, please see

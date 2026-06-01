@@ -13,6 +13,27 @@
 # the License.
 
 cc_library(
+  name = 'poller',
+  hdrs = [
+    'poller.h',
+    'epoll_poller.h',
+    'kqueue_poller.h',
+  ],
+  srcs = [
+    'poller.cc',
+    'epoll_poller.cc',
+    'kqueue_poller.cc',
+  ],
+  deps = [
+    ':eintr_safe',
+    '//flare/base:handle',
+    '//flare/base:logging',
+    '//flare/fiber:alternatives',
+  ],
+  visibility = ['//flare/...'],
+)
+
+cc_library(
   name = 'eintr_safe',
   hdrs = 'eintr_safe.h',
   srcs = 'eintr_safe.cc',

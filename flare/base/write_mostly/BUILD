@@ -48,9 +48,10 @@ cc_benchmark(
   deps = [
     ':basic_ops',
     ':write_mostly',
-    # Tests workaround for gperftools's false-sharing issue.
+    # (tcmalloc unavailable on macOS — false-sharing workaround is Linux-only.)
+  ] + ([] if blade.cc_toolchain.target_os == 'darwin' else [
     '//thirdparty/gperftools:tcmalloc_minimal',
-  ]
+  ])
 )
 
 cc_library(

@@ -26,6 +26,11 @@ cc_library(
     ],
     hdrs = [],
     visibility = ["//visibility:public"],
+    # gperftools / tcmalloc is Linux-only; not available on macOS.
+    target_compatible_with = select({
+        "@platforms//os:macos": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
     deps = [
         "//flare/rpc:http",
         "//flare/rpc/builtin/detail:prof_utility",

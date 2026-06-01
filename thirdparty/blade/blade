@@ -16,8 +16,7 @@
 #        BY  :    Michaelpeng
 #        MODIFICATION: Created
 
-function _info()
-{
+function _info() {
     if [ -t 1 ]; then
         echo -e "\033[1;36mBlade(info): $@\033[m" >&2
     else
@@ -25,8 +24,7 @@ function _info()
     fi
 }
 
-function _warning()
-{
+function _warning() {
     if [ -t 2 ]; then
         echo -e "\033[1;33mBlade(warning): $@\033[m" >&2
     else
@@ -34,18 +32,16 @@ function _warning()
     fi
 }
 
-function _error_exit()
-{
+function _fatal() {
     if [ -t 2 ]; then
-        echo -e "\033[1;31mBlade(error): $@\nBlade(error): Blade will exit...\033[m" >&2
+        echo -e "\033[1;31mBlade(fatal): $@\nBlade(fatal): Blade will exit...\033[m" >&2
     else
-        echo -e "Blade(error): $@\nBlade(error): Blade will exit..." >&2
+        echo -e "Blade(fatal): $@\nBlade(fatal): Blade will exit..." >&2
     fi
     exit 1
 }
 
-function _full_real_path()
-{
+function _full_real_path() {
     local o
     local f
     f="$1"
@@ -69,45 +65,103 @@ function _full_real_path()
     return 0
 }
 
+# Return 0 and echo the interpreter if "$1" is a single executable on PATH
+# whose `-V` reports Python >= 3.10. Return 1 otherwise (silently).
+# Multi-word values (e.g. "python -m coverage run ...") are intentionally
+# rejected so that the full-command form stays routed through the final
+# ${BLADE_PYTHON_INTERPRETER:-$python} fallback at the bottom of this
+# script rather than being executed with a bare `-V`.
+function _probe_python() {
+    local candidate="$1"
+    [ -n "$candidate" ] || return 1
+    # Single-word check: reject if the value contains whitespace.
+    case "$candidate" in
+        *[[:space:]]*) return 1 ;;
+    esac
+    command -v "$candidate" &> /dev/null || return 1
+
+    local ver major rest minor
+    ver=$("$candidate" -V 2>&1 | sed 's/Python //g')
+    major=${ver%%.*}
+    rest=${ver#*.}
+    minor=${rest%%.*}
+    [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ ]] || return 1
+    if (( major > 3 )) || (( major == 3 && minor >= 10 )); then
+        echo "$candidate"
+        return 0
+    fi
+    return 1
+}
+
+# Check the python version at first, exit blade when python
+# version is under 3.10.
+function _check_python() {
+    # Honor BLADE_PYTHON_INTERPRETER when it names a single executable that
+    # already satisfies the version requirement. This lets users point blade
+    # at e.g. /opt/homebrew/bin/python3.12 without having to shadow the
+    # system python3 on PATH. Multi-word values (coverage wrappers etc.)
+    # silently fall through to auto-detection and are re-applied at the
+    # final `${BLADE_PYTHON_INTERPRETER:-$python}` invocation below.
+    local override
+    if override=$(_probe_python "${BLADE_PYTHON_INTERPRETER:-}"); then
+        echo "$override"
+        return 0
+    fi
+
+    local python=""
+    if command -v python3 &> /dev/null; then
+        python="python3"
+    elif command -v python &> /dev/null; then
+        python="python"
+    else
+        _fatal "Please install python 3.10+ in your system"
+    fi
+
+    local python_ver
+    python_ver=$("$python" -V 2>&1 | sed 's/Python //g')
+    local major=${python_ver%%.*}
+    local rest=${python_ver#*.}
+    local minor=${rest%%.*}
+
+    if ! [[ "$major" =~ ^[0-9]+$ && "$minor" =~ ^[0-9]+$ ]]; then
+        _info "Python version in your machine: $python_ver"
+        _fatal "Cannot parse python version, please install python 3.10+"
+    fi
+
+    if (( major < 3 )) || (( major == 3 && minor < 10 )); then
+        _info "Python version in your machine: $python_ver"
+        _fatal "Please upgrade your python version to 3.10+"
+    fi
+    echo "$python"
+}
+
+
 blade_path=`_full_real_path $0`
 blade_dir=$(cd $(dirname $blade_path) && pwd)
 
-# if [[ -d "$blade_dir/src/blade" ]]; then
-#     blade_file="$blade_dir/src"
-# else
-blade_file="$blade_dir/blade.zip"
-# fi
+if [[ -d "$blade_dir/src/blade" ]]; then
+    blade_file="$blade_dir/src"
+else
+    blade_file="$blade_dir/blade.zip"
+fi
 
 if [[ -e $blade_dir/blade_init ]]; then
     source $blade_dir/blade_init
 fi
 
-# Check the python version at first, exit blade when python
-# version is under 2.7
-no_python=$(which python 2>&1 | grep 'which: no')
-if [[ -n "$no_python" ]]; then
-    _error_exit "Please install python 2.7 or above in your system"
-fi
-
-python_ver=$(python -V 2>&1 | sed 's/Python //g')
-if [[ "$python_ver" < "2.7" ]]; then
-    _info "Python version in your machine: $python_ver"
-    _error_exit "Please upgrade your python version to 2.7 or above"
-fi
+# Note: _fatal inside _check_python runs in a command-substitution
+# sub-shell, so its `exit 1` only terminates the sub-shell. Propagate
+# the failure explicitly here.
+python=$(_check_python) || exit 1
 
 # Check ninja
-no_ninja=$(which ninja 2>&1 | grep 'which: no ninja in')
-if [[ -n "$no_ninja" ]]; then
-    _error_exit "Please install ninja v1.8 or above on your machine"
+if ! command -v ninja &> /dev/null; then
+    _fatal "Please install ninja v1.8+ (https://ninja-build.org)"
 fi
 
 # Check blade file
 if [[ ! -e "$blade_file" ]]; then
-    _error_exit "Cannot find the core file $blade_file"
+    _fatal "Cannot find the core file $blade_file"
 fi
 
-if [[ $@ == *'--cloud'* ]]; then
-    python $blade_dir/../yadcc/blade-yadcc "$@"
-else
-    python $blade_file "$@"
-fi
+${BLADE_PYTHON_INTERPRETER:-$python} $blade_file "$@"

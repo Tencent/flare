@@ -3,14 +3,24 @@ include('../foreign_build.bld')
 _GFLAGS_PATH = get_install_dir('gflags')
 _ZLIB_PATH = get_install_dir('zlib')
 
+_is_darwin = blade.cc_toolchain.target_os == 'darwin'
+
+# tcmalloc assembly has Mach-O section flag issues on macOS; gperftools is
+# Linux-only for both the allocator and the profiler.
+_shared_lib_names = [
+    'tcmalloc', 'tcmalloc_debug', 'tcmalloc_minimal',
+    'tcmalloc_minimal_debug',
+]
+if not _is_darwin:
+    _shared_lib_names.extend([
+        'profiler', 'tcmalloc_and_profiler',
+    ])
+
 autotools_build(
     name='gperftools_build',
     source_package='gperftools-2.8.tar.gz',
     package_name='gperftools',
-    lib_names=[
-        'profiler', 'tcmalloc', 'tcmalloc_and_profiler', 'tcmalloc_debug',
-        'tcmalloc_minimal', 'tcmalloc_minimal_debug'
-    ],
+    lib_names=_shared_lib_names,
     configure_options=' '.join([
         '--with-gflags=' + _GFLAGS_PATH, '--with-zlib=' + _ZLIB_PATH,
         '--enable-shared', '--enable-static', '--with-pic',
@@ -28,33 +38,7 @@ autotools_build(
 )
 
 foreign_cc_library(
-    name='profiler',
-    deps=[
-        ':gperftools_build',
-        '//thirdparty/zlib:z',
-        '#pthread',
-        '#rt',
-    ],
-    export_incs='//' + blade.path.join(blade.current_target_dir(), 'include'),
-    has_dynamic=True,
-    visibility='PUBLIC',
-)
-
-foreign_cc_library(
     name='tcmalloc',
-    deps=[
-        ':gperftools_build',
-        '//thirdparty/zlib:z',
-        '#pthread',
-        '#rt',
-    ],
-    export_incs='//' + blade.path.join(blade.current_target_dir(), 'include'),
-    has_dynamic=True,
-    visibility='PUBLIC',
-)
-
-foreign_cc_library(
-    name='tcmalloc_and_profiler',
     deps=[
         ':gperftools_build',
         '//thirdparty/zlib:z',
@@ -104,3 +88,30 @@ foreign_cc_library(
     has_dynamic=True,
     visibility='PUBLIC',
 )
+
+if not _is_darwin:
+    foreign_cc_library(
+        name='profiler',
+        deps=[
+            ':gperftools_build',
+            '//thirdparty/zlib:z',
+            '#pthread',
+            '#rt',
+        ],
+        export_incs='//' + blade.path.join(blade.current_target_dir(), 'include'),
+        has_dynamic=True,
+        visibility='PUBLIC',
+    )
+
+    foreign_cc_library(
+        name='tcmalloc_and_profiler',
+        deps=[
+            ':gperftools_build',
+            '//thirdparty/zlib:z',
+            '#pthread',
+            '#rt',
+        ],
+        export_incs='//' + blade.path.join(blade.current_target_dir(), 'include'),
+        has_dynamic=True,
+        visibility='PUBLIC',
+    )

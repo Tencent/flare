@@ -13,6 +13,7 @@
 // the License.
 
 #include "benchmark/benchmark.h"
+#include "flare/fiber/detail/context.h"
 
 // Note: We do two context switches each round in `Benchmark_JumpContext`, the
 // actual cost of `jump_context` is half of the timings shown below.
@@ -55,13 +56,6 @@
 // ----------------------------------------------------------------
 // Benchmark_MakeContext       8.71 ns         8.71 ns     80484985
 // Benchmark_JumpContext       74.5 ns         74.5 ns      9446046
-
-// Defined in `flare/fiber/detail/{arch}/*.S`
-extern "C" {
-
-void jump_context(void** self, void* to, void* context);
-void* make_context(void* sp, std::size_t size, void (*start_proc)(void*));
-}
 
 namespace flare::fiber::detail {
 

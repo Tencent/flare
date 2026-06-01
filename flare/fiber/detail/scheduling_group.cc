@@ -14,9 +14,7 @@
 
 #include "flare/fiber/detail/scheduling_group.h"
 
-#include <linux/futex.h>
 #include <sys/mman.h>
-#include <sys/syscall.h>
 #include <sys/wait.h>
 
 #include <climits>
@@ -94,42 +92,26 @@ class alignas(hardware_destructive_interference_size)
       wakeup_sleeping_worker_latency->Report(TscElapsed(start, ReadTsc()));
     });
 
-    if (wakeup_count_.fetch_add(1, std::memory_order_relaxed) == 0) {
-      FLARE_PCHECK(syscall(SYS_futex, &wakeup_count_, FUTEX_WAKE_PRIVATE, 1, 0,
-                           0, 0) >= 0);
-    }
+    wakeup_count_.fetch_add(1, std::memory_order_release);
+    wakeup_count_.notify_one();
     // If `Wait()` is called before this check fires, `wakeup_count_` can be 0.
     FLARE_CHECK_GE(wakeup_count_.load(std::memory_order_relaxed), 0);
   }
 
   void Wait() noexcept {
-    if (wakeup_count_.fetch_sub(1, std::memory_order_relaxed) == 1) {
-      do {
-        // TODO(luobogao): I saw spurious wake up. But how can it happen? If
-        // `wakeup_count_` is not zero by the time `futex` checks it, the only
-        // values it can become is a positive one, which in this case is a
-        // "real" wake up.
-        //
-        // We need further investigation here.
-        auto rc =
-            syscall(SYS_futex, &wakeup_count_, FUTEX_WAIT_PRIVATE, 0, 0, 0, 0);
-        FLARE_PCHECK(rc == 0 || errno == EAGAIN);
-      } while (wakeup_count_.load(std::memory_order_relaxed) == 0);
+    if (wakeup_count_.fetch_sub(1, std::memory_order_acquire) == 1) {
+      wakeup_count_.wait(0, std::memory_order_acquire);
     }
     FLARE_CHECK_GT(wakeup_count_.load(std::memory_order_relaxed), 0);
   }
 
   void PersistentWake() noexcept {
     // Hopefully this is large enough.
-    wakeup_count_.store(0x4000'0000, std::memory_order_relaxed);
-    FLARE_PCHECK(syscall(SYS_futex, &wakeup_count_, FUTEX_WAKE_PRIVATE, INT_MAX,
-                         0, 0, 0) >= 0);
+    wakeup_count_.store(0x4000'0000, std::memory_order_release);
+    wakeup_count_.notify_all();
   }
 
  private:
-  // `futex` requires this.
-  static_assert(sizeof(std::atomic<int>) == sizeof(int));
-
   std::atomic<int> wakeup_count_{1};
 };
 
@@ -208,9 +190,24 @@ FiberEntity* SchedulingGroup::SpinningAcquireFiber() noexcept {
   }
 
   if (need_spin) {
-    static constexpr auto kMaximumCyclesToSpin = 10'000;
-    // Wait for some time between touching `run_queue_` to reduce contention.
-    static constexpr auto kCyclesBetweenRetry = 1000;
+    // These must be time-based, not TSC-tick-based, because TSC frequency
+    // varies wildly across platforms (from ~24 MHz on Apple Silicon to 2+ GHz
+    // on x86_64).
+    //
+    // ticks = time_ns * kUnit / (kNanosecondsPerUnit / 1ns)
+    // which simplifies to: time_ns * freq / 1e9
+    // These must be time-based, not TSC-tick-based, because TSC frequency
+    // varies across platforms (from ~24 MHz on Apple Silicon to 2+ GHz on
+    // x86_64).
+    //
+    // ticks = time_ns * kUnit / ns_per_unit
+    static const std::uint64_t kMaximumCyclesToSpin = [] {
+      constexpr auto kTargetUs = 5ULL;  // 5us
+      auto ns_per_unit = static_cast<std::uint64_t>(
+          tsc::detail::kNanosecondsPerUnit / std::chrono::nanoseconds(1));
+      return kTargetUs * 1000 * tsc::detail::kUnit / ns_per_unit;
+    }();
+    static const auto kCyclesBetweenRetry = kMaximumCyclesToSpin / 10;
     auto start = ReadTsc(), end = start + kMaximumCyclesToSpin;
 
     ScopedDeferred _([&] {

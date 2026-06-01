@@ -20,11 +20,13 @@ int EIntrSafeAccept(int sockfd, sockaddr* addr, socklen_t* addrlen) {
   return EIntrSafeCall([&] { return accept(sockfd, addr, addrlen); });
 }
 
+#ifdef __linux__
 int EIntrSafeEpollWait(int epfd, epoll_event* events, int maxevents,
                        int timeout) {
   return EIntrSafeCall(
       [&] { return epoll_wait(epfd, events, maxevents, timeout); });
 }
+#endif
 
 ssize_t EIntrSafeRecvFrom(int sockfd, void* buf, size_t len, int flags,
                           sockaddr* src_addr, socklen_t* addrlen) {

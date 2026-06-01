@@ -15,8 +15,6 @@
 #ifndef FLARE_IO_DESCRIPTOR_H_
 #define FLARE_IO_DESCRIPTOR_H_
 
-#include <sys/epoll.h>
-
 #include <chrono>
 #include <memory>
 #include <string>
@@ -27,6 +25,7 @@
 #include "flare/base/internal/test_prod.h"
 #include "flare/base/ref_ptr.h"
 #include "flare/fiber/mutex.h"
+#include "flare/io/detail/poller.h"
 
 namespace flare {
 
@@ -36,9 +35,12 @@ class EventLoop;
 class alignas(hardware_destructive_interference_size) Descriptor
     : public RefCounted<Descriptor> {
  public:
-  // Internally we use `Event::kXxx` and `EPOLLXXX` interchangeably, so don't
-  // use customized value for the enumerators.
-  enum class Event { Read = EPOLLIN, Write = EPOLLOUT };
+  // Event mask values. These intentionally match EPOLLIN/EPOLLOUT so that
+  // existing code using them as bitmask values continues to work.
+  enum class Event {
+    Read = io::detail::kPollerRead,
+    Write = io::detail::kPollerWrite
+  };
 
   // `name` is used by `EventLoop` for writing logs.
   explicit Descriptor(Handle fd, Event events, const std::string& name = "");

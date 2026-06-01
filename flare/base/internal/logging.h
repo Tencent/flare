@@ -446,21 +446,23 @@ std::string FormatLog([[maybe_unused]] const char* file,
 //
 // See comments on `FLARE_INTERNAL_DETAIL_LOGGING_CHECK_OP` provided for GCC /
 // clang 10+ (see below) for discussion how can dangling reference occur.
-#define FLARE_INTERNAL_DETAIL_LOGGING_CHECK_OP(name, op, val1, val2, ...)      \
-  do {                                                                         \
-    /* Copied to avoid dangling reference. SLOW. */                            \
-    auto flare_anonymous_x = (val1);                                           \
-    auto flare_anonymous_y = (val2);                                           \
-    if (FLARE_UNLIKELY(!(flare_anonymous_x op flare_anonymous_y))) {           \
-      ::google::LogMessageFatal(                                               \
-          __FILE__, __LINE__,                                                  \
-          ::google::CheckOpString(::google::MakeCheckOpString(                 \
-              flare_anonymous_x, flare_anonymous_y, #val1 " " #op " " #val2))) \
-              .stream()                                                        \
-          << ::flare::internal::logging::FormatLog(__FILE__, __LINE__,         \
-                                                   ##__VA_ARGS__);             \
-      FLARE_UNREACHABLE();                                                     \
-    }                                                                          \
+#define FLARE_INTERNAL_DETAIL_LOGGING_CHECK_OP(name, op, val1, val2, ...) \
+  do {                                                                    \
+    /* Copied to avoid dangling reference. SLOW. */                       \
+    auto flare_anonymous_x = (val1);                                      \
+    auto flare_anonymous_y = (val2);                                      \
+    if (FLARE_UNLIKELY(!(flare_anonymous_x op flare_anonymous_y))) {      \
+      ::google::LogMessageFatal(                                          \
+          __FILE__, __LINE__,                                             \
+          ::google::logging::internal::CheckOpString(                     \
+              ::google::logging::internal::MakeCheckOpString(             \
+                  flare_anonymous_x, flare_anonymous_y,                   \
+                  #val1 " " #op " " #val2)))                              \
+              .stream()                                                   \
+          << ::flare::internal::logging::FormatLog(__FILE__, __LINE__,    \
+                                                   ##__VA_ARGS__);        \
+      FLARE_UNREACHABLE();                                                \
+    }                                                                     \
   } while (0)
 
 #define FLARE_INTERNAL_DETAIL_LOGGING_PCHECK(expr, ...)                      \
@@ -533,9 +535,10 @@ std::string FormatLog([[maybe_unused]] const char* file,
       [&]() FLARE_INTERNAL_DETAIL_LOGGING_ATTRIBUTE_NORETURN_NOINLINE_COLD { \
         ::google::LogMessageFatal(                                           \
             __FILE__, __LINE__,                                              \
-            ::google::CheckOpString(::google::MakeCheckOpString(             \
-                flare_anonymous_x, flare_anonymous_y,                        \
-                #val1 " " #op " " #val2)))                                   \
+            ::google::logging::internal::CheckOpString(                      \
+                ::google::logging::internal::MakeCheckOpString(              \
+                    flare_anonymous_x, flare_anonymous_y,                    \
+                    #val1 " " #op " " #val2)))                               \
                 .stream()                                                    \
             << ::flare::internal::logging::FormatLog(__FILE__, __LINE__,     \
                                                      ##__VA_ARGS__);         \

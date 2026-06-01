@@ -251,7 +251,7 @@ void FlushDpcs() noexcept {
         }
         dpcs += cbs.size();
       }
-      FLARE_VLOG(100, "Run {} DPCs.", cbs.size());
+      FLARE_VLOG(100, "Run {} DPCs.", dpcs);
     };
     BackgroundTaskHost::Instance()->Queue(queue->GetNode(), flush_cb);
   });

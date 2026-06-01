@@ -1,5 +1,6 @@
 include('//thirdparty/foreign_build.bld')
 
+_is_linux = blade.cc_toolchain.target_os == 'linux'
 
 cmake_build(
     name='jsoncpp_build',
@@ -21,8 +22,7 @@ foreign_cc_library(
     name='jsoncpp',
     deps=[
         ':jsoncpp_build',
-        '#pthread',
-    ],
+    ] + (['#pthread'] if _is_linux else []),
     visibility = 'PUBLIC',
     has_dynamic=True,
 )

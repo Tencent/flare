@@ -12,6 +12,8 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
+#include "gflags/gflags.h"
+
 #include "flare/base/exposed_var.h"
 #include "flare/example/rpc/brpc/echo.flare.pb.h"
 #include "flare/fiber/this_fiber.h"

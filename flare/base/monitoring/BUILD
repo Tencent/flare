@@ -40,6 +40,7 @@ cc_library(
   hdrs = 'dispatcher.h',
   srcs = 'dispatcher.cc',
   deps = [
+    ':event',
     ':monitoring_system',
     '//flare/base:chrono',
     '//flare/base:logging',

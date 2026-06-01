@@ -104,11 +104,19 @@ TEST(ReadAtMost, LargeChunk) {
   // > Note that because of the way the pages of the pipe buffer are employed
   // > when data is written to the pipe, the number of bytes that can be written
   // > may be less than the nominal size, depending on the size of the writes.
+#ifdef F_SETPIPE_SZ
   constexpr auto kMaxBytes = 1048576;  // @sa: `/proc/sys/fs/pipe-max-size`
+#else
+  // macOS doesn't support F_SETPIPE_SZ; use the default pipe size (~64KB on
+  // BSD).
+  constexpr auto kMaxBytes = 65536;
+#endif
 
   int fd[2];  // read fd, write fd.
   FLARE_PCHECK(pipe(fd) == 0);
+#ifdef F_SETPIPE_SZ
   FLARE_PCHECK(fcntl(fd[0], F_SETPIPE_SZ, kMaxBytes) == kMaxBytes);
+#endif
   util::SetNonBlocking(fd[0]);
   util::SetNonBlocking(fd[1]);
   auto io = std::make_unique<SystemStreamIo>(fd[0]);

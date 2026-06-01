@@ -23,10 +23,15 @@ cc_binary(
         "//flare/fiber",
         "//flare/init:override_flag",
         "//flare/rpc",
-        "//flare/rpc/builtin:tcmalloc_profiler_http_handler",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
-    ],
+    ] + select({
+        # gperftools / tcmalloc is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": [
+            "//flare/rpc/builtin:tcmalloc_profiler_http_handler",
+            "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
+        ],
+    }),
 )
 
 cc_binary(
@@ -42,8 +47,11 @@ cc_binary(
         "//flare/rpc",
         "//flare/rpc/builtin:jemalloc_profiler_http_handler",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_gperftools_gperftools//:profiler",
-    ],
+    ] + select({
+        # gperftools is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@com_github_gperftools_gperftools//:profiler"],
+    }),
 )
 
 cc_binary(
@@ -57,8 +65,11 @@ cc_binary(
         "//flare/base/thread:latch",
         "//flare/net/http:http_client",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
-    ],
+    ] + select({
+        # gperftools / tcmalloc is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@com_github_gperftools_gperftools//:tcmalloc_and_profiler"],
+    }),
 )
 
 cc_binary(
@@ -73,8 +84,13 @@ cc_binary(
         "//flare/init:override_flag",
         "//flare/net/http:http_client",
         "//flare/rpc",
-        "//flare/rpc/builtin:tcmalloc_profiler_http_handler",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
-    ],
+    ] + select({
+        # gperftools / tcmalloc is Linux-only.
+        "@platforms//os:macos": [],
+        "//conditions:default": [
+            "//flare/rpc/builtin:tcmalloc_profiler_http_handler",
+            "@com_github_gperftools_gperftools//:tcmalloc_and_profiler",
+        ],
+    }),
 )

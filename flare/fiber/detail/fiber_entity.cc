@@ -36,13 +36,13 @@
 
 DECLARE_int32(flare_fiber_stack_size);
 
-// Defined in `flare/fiber/detail/{arch}/*.S`
-extern "C" {
-
-void* make_context(void* sp, std::size_t size, void (*start_proc)(void*));
-}
-
 namespace flare::fiber::detail {
+
+// Define thread-local variables declared in `fiber_entity.h`.
+// Defined here (not as `inline` in the header) so that Apple Clang on macOS
+// correctly treats them as thread-local.
+FLARE_INTERNAL_TLS_MODEL thread_local FiberEntity* master_fiber;
+FLARE_INTERNAL_TLS_MODEL thread_local FiberEntity* current_fiber;
 
 namespace {
 
@@ -166,6 +166,46 @@ static void FiberProc(void* context) {
 
 FiberEntity::FiberEntity() { SetRuntimeTypeTo<FiberEntity>(); }
 
+void FiberEntity::Resume() noexcept {
+  auto caller = GetCurrentFiberEntity();
+  FLARE_DCHECK_NE(caller, this, "Calling `Resume()` on self is undefined.");
+
+#ifdef FLARE_INTERNAL_USE_ASAN
+  void* shadow_stack;
+  flare::internal::asan::StartSwitchFiber(
+      caller->asan_terminating ? nullptr : &shadow_stack, asan_stack_bottom,
+      asan_stack_size);
+#endif
+
+#ifdef FLARE_INTERNAL_USE_TSAN
+  flare::internal::tsan::SwitchToFiber(tsan_fiber);
+#endif
+
+  auto caller_before = caller;
+  jump_context(&caller->state_save_area, state_save_area, this);
+
+  FLARE_CHECK_EQ(caller_before, caller, "`caller` changed after jump_context.");
+
+#ifdef FLARE_INTERNAL_USE_ASAN
+  FLARE_CHECK(!caller->asan_terminating);
+  flare::internal::asan::CompleteSwitchFiber(shadow_stack);
+#endif
+
+  SetCurrentFiberEntity(caller);
+  FLARE_CHECK_EQ(caller, GetCurrentFiberEntity(),
+                 "SetCurrentFiberEntity did not stick.");
+
+  // Expand DestructiveRunCallbackOpt inline so we can pinpoint the issue.
+  if (caller->resume_proc) {
+    FLARE_CHECK_EQ(caller, GetCurrentFiberEntity(),
+                   "Before resume_proc callback.");
+    caller->resume_proc();
+    FLARE_CHECK_EQ(caller, GetCurrentFiberEntity(),
+                   "resume_proc callback changed current fiber.");
+    caller->resume_proc = nullptr;
+  }
+}
+
 void FiberEntity::ResumeOn(Function<void()>&& cb) noexcept {
   auto caller = GetCurrentFiberEntity();
   FLARE_CHECK(!resume_proc,
@@ -223,16 +263,34 @@ void SetUpMasterFiberEntity() noexcept {
   SetCurrentFiberEntity(master_fiber);
 }
 
-#if defined(FLARE_INTERNAL_USE_TSAN) || defined(__powerpc64__) || \
-    defined(__aarch64__)
+// `noinline` forces each accessor to be an out-of-line function call, which
+// is what the caller's optimizer has to assume re-resolves the TLV on each
+// invocation. Apple Clang on macOS otherwise caches the resolved TLV address
+// across `jump_context` (a context switch may resume on a different OS
+// thread, but the optimizer has no language attribute that says so).
+// Notes from experimentation:
+//   - `[[gnu::returns_twice]]` on `jump_context` alone (in context.h) is
+//     not enough -- Apple Clang still CSEs the TLV resolution across
+//     the call when the getters are inlined.
+//   - Declaring `master_fiber` / `current_fiber` as `volatile thread_local`
+//     is not enough either: it forces the slot load to re-issue but the
+//     resolved TLV address still gets cached, so we end up reading the
+//     slot of the previous worker.
+//   - Linux (pre-macOS port) had these inlined without `noinline` and
+//     passed -- it's a macOS / Apple Clang specific limitation.
+// Confirmed regression mode if removed: `this_fiber_test` aborts with
+// `self == GetCurrentFiberEntity()` check failures.
+[[gnu::noinline]] FiberEntity* GetMasterFiberEntity() noexcept {
+  return master_fiber;
+}
 
-FiberEntity* GetMasterFiberEntity() noexcept { return master_fiber; }
+[[gnu::noinline]] FiberEntity* GetCurrentFiberEntity() noexcept {
+  return current_fiber;
+}
 
-FiberEntity* GetCurrentFiberEntity() noexcept { return current_fiber; }
-
-void SetCurrentFiberEntity(FiberEntity* current) { current_fiber = current; }
-
-#endif
+[[gnu::noinline]] void SetCurrentFiberEntity(FiberEntity* current) {
+  current_fiber = current;
+}
 
 FiberEntity* InstantiateFiberEntity(SchedulingGroup* scheduling_group,
                                     FiberDesc* desc) noexcept {

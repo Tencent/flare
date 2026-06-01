@@ -15,9 +15,12 @@
 #include "flare/base/internal/cpu.h"
 
 #include <dlfcn.h>
+#include <unistd.h>
+
+#ifdef __linux__
 #include <sys/sysinfo.h>
 #include <syscall.h>
-#include <unistd.h>
+#endif
 
 #include <atomic>
 #include <memory>
@@ -48,6 +51,7 @@ std::vector<int> node_of_cpus;
 std::vector<std::size_t> node_index;
 std::vector<int> nodes_present;
 
+#ifdef __linux__
 bool IsValgrindPresent() {
   // You need to export this var yourself in bash.
   char* rov = getenv("RUNNING_ON_VALGRIND");
@@ -66,52 +70,69 @@ int SyscallGetCpu(unsigned* cpu, unsigned* node, void* cache) {
   return syscall(SYS_getcpu, cpu, node, cache);
 #endif
 }
+#endif  // __linux__
 
 // @sa: https://gist.github.com/chergert/eb6149916b10d3bf094c
-int (*GetCpu)(unsigned* cpu, unsigned* node, void* cache) = [] {
-  if (IsValgrindPresent()) {
-    return SyscallGetCpu;
-  } else {
+int (*GetCpu)(unsigned* cpu, unsigned* node, void* cache) =
+#ifdef __linux__
+    [] {
+      if (IsValgrindPresent()) {
+        return SyscallGetCpu;
+      } else {
 #if defined(__aarch64__)
-    // `getcpu` is not available on AArch64.
-    return SyscallGetCpu;
+        // `getcpu` is not available on AArch64.
+        return SyscallGetCpu;
 #endif
-    // Not all ISAs use the same name here. We'll try our best to locate
-    // `getcpu` via vDSO.
-    //
-    // @sa http://man7.org/linux/man-pages/man7/vdso.7.html for more details.
+        // Not all ISAs use the same name here. We'll try our best to locate
+        // `getcpu` via vDSO.
+        //
+        // @sa http://man7.org/linux/man-pages/man7/vdso.7.html for more
+        // details.
 
-    static const char* kvDSONames[] = {"linux-gate.so.1", "linux-vdso.so.1",
-                                       "linux-vdso32.so.1",
-                                       "linux-vdso64.so.1"};
-    static const char* kGetCpuNames[] = {"__vdso_getcpu", "__kernel_getcpu"};
-    for (auto&& e : kvDSONames) {
-      if (auto vdso = dlopen(e, RTLD_NOW)) {
-        for (auto&& e2 : kGetCpuNames) {
-          if (auto p = dlsym(vdso, e2)) {
-            // AFAICT, leaking `vdso` does nothing harmful to us. We use a
-            // managed pointer to hold it only to comfort Coverity. (But it
-            // still doesn't seem comforttable with this..)
-            [[maybe_unused]] static std::unique_ptr<void, int (*)(void*)>
-                suppress_vdso_leak{vdso, &dlclose};
+        static const char* kvDSONames[] = {"linux-gate.so.1", "linux-vdso.so.1",
+                                           "linux-vdso32.so.1",
+                                           "linux-vdso64.so.1"};
+        static const char* kGetCpuNames[] = {"__vdso_getcpu",
+                                             "__kernel_getcpu"};
+        for (auto&& e : kvDSONames) {
+          if (auto vdso = dlopen(e, RTLD_NOW)) {
+            for (auto&& e2 : kGetCpuNames) {
+              if (auto p = dlsym(vdso, e2)) {
+                // AFAICT, leaking `vdso` does nothing harmful to us. We use a
+                // managed pointer to hold it only to comfort Coverity. (But it
+                // still doesn't seem comforttable with this..)
+                [[maybe_unused]] static std::unique_ptr<void, int (*)(void*)>
+                    suppress_vdso_leak{vdso, &dlclose};
 
-            return reinterpret_cast<int (*)(unsigned*, unsigned*, void*)>(p);
+                return reinterpret_cast<int (*)(unsigned*, unsigned*, void*)>(
+                    p);
+              }
+            }
+            dlclose(vdso);
           }
         }
-        dlclose(vdso);
+        // Fall back to syscall. This can be slow.
+        //
+        // Using raw logging here as glog is unlikely to have been initialized
+        // now.
+        RAW_LOG(WARNING,
+                "Failed to locate `getcpu` in vDSO. Failing back to syscall. "
+                "Performance will degrade.");
+        return SyscallGetCpu;
       }
-    }
-    // Fall back to syscall. This can be slow.
-    //
-    // Using raw logging here as glog is unlikely to have been initialized now.
-    RAW_LOG(WARNING,
-            "Failed to locate `getcpu` in vDSO. Failing back to syscall. "
-            "Performance will degrade.");
-    return SyscallGetCpu;
-  }
-}();
+    }();
+#else
+    [](unsigned* cpu, unsigned* node, void*) {
+      if (cpu) *cpu = 0;
+      if (node) *node = 0;
+      return 0;
+    };
+#endif
 
 int GetNodeOfProcessorImpl(int proc_id) {
+#ifndef __linux__
+  return 0;  // Single NUMA node on non-Linux, no CPU affinity needed.
+#else
   // Slow, indeed. We don't expect this method be called much.
   std::atomic<int> rc;
   std::thread([&] {
@@ -126,6 +147,7 @@ int GetNodeOfProcessorImpl(int proc_id) {
     rc = node;
   }).join();
   return rc.load();
+#endif
 }
 
 // Initialize those global variables.
@@ -239,13 +261,23 @@ int GetCurrentProcessorId() {
 
 std::size_t GetNumberOfProcessorsAvailable() {
   // We do not support CPU hot-plugin, so we use `static` here.
-  static const auto rc = get_nprocs();
+  static const auto rc =
+#ifdef __linux__
+      get_nprocs();
+#else
+      sysconf(_SC_NPROCESSORS_ONLN);
+#endif
   return rc;
 }
 
 std::size_t GetNumberOfProcessorsConfigured() {
   // We do not support CPU hot-plugin, so we use `static` here.
-  static const auto rc = get_nprocs_conf();
+  static const auto rc =
+#ifdef __linux__
+      get_nprocs_conf();
+#else
+      sysconf(_SC_NPROCESSORS_CONF);
+#endif
   return rc;
 }
 

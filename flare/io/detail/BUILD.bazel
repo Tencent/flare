@@ -124,6 +124,27 @@ cc_test(
     ],
 )
 
+cc_library(
+    name = "poller",
+    srcs = [
+        "epoll_poller.cc",
+        "kqueue_poller.cc",
+        "poller.cc",
+    ],
+    hdrs = [
+        "epoll_poller.h",
+        "kqueue_poller.h",
+        "poller.h",
+    ],
+    visibility = ["//flare:__subpackages__"],
+    deps = [
+        ":eintr_safe",
+        "//flare/base:handle",
+        "//flare/base:logging",
+        "//flare/fiber:alternatives",
+    ],
+)
+
 # `watchdog` is compiled with `io/event_loop.cc`. No `cc_library` here.
 
 cc_test(

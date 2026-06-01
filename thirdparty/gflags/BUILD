@@ -1,5 +1,7 @@
 include('../foreign_build.bld')
 
+_is_linux = blade.cc_toolchain.target_os == 'linux'
+
 cmake_build(
     name='gflags_build',
     package_name='gflags',
@@ -24,9 +26,11 @@ foreign_cc_library(
     name='gflags',
     deps=[
         ':gflags_build',
-        '#pthread',
-        '#rt',
-    ],
+    ] + (['#pthread', '#rt'] if _is_linux else []),
+    # gflags must expose its .so (not just .a) so that downstream consumers all
+    # link a single instance — without this, libglog.{so,dylib} embeds gflags
+    # while exes also link libgflags.a directly, causing duplicate flag
+    # registration at startup.
     has_dynamic=True,
     visibility='PUBLIC',
 )

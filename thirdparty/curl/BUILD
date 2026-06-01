@@ -1,6 +1,7 @@
 include('//thirdparty/foreign_build.bld')
 
 _SSL_PATH = get_install_dir('openssl')
+_is_linux = blade.cc_toolchain.target_os == 'linux'
 _NGHTTP2_PATH = get_install_dir('nghttp2')
 _ZLIB_PATH = get_install_dir('zlib')
 
@@ -30,7 +31,7 @@ autotools_build(
         '//thirdparty/openssl:ssl',
         '//thirdparty/zlib:z',
     ],
-    ld_library_path=[_SSL_PATH + '/lib', _NGHTTP2_PATH + '/lib'],
+    ld_library_path=[_SSL_PATH + '/lib', _NGHTTP2_PATH + '/lib', _ZLIB_PATH + '/lib'],
     strip_include_prefix='curl',
     generate_dynamic=True,
 )
@@ -43,9 +44,7 @@ foreign_cc_library(
         '//thirdparty/openssl:crypto',
         '//thirdparty/openssl:ssl',
         '//thirdparty/zlib:z',
-        '#pthread',
-        '#rt',
-    ],
+    ] + (['#pthread', '#rt'] if _is_linux else []),
     visibility='PUBLIC',
     has_dynamic=True,
 )

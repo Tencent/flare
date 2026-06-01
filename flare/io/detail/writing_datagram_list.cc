@@ -70,7 +70,7 @@ ssize_t WritingDatagramList::FlushTo(int fd, std::uintptr_t* flushed_ctx,
       .msg_name = const_cast<void*>(reinterpret_cast<const void*>(to.Get())),
       .msg_namelen = to.Length(),
       .msg_iov = iov,
-      .msg_iovlen = nv,
+      .msg_iovlen = static_cast<decltype(msghdr::msg_iovlen)>(nv),
       .msg_control = nullptr,
       .msg_controllen = 0,
       .msg_flags = 0};

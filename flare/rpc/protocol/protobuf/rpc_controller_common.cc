@@ -16,6 +16,8 @@
 
 #include <chrono>
 
+#include "gflags/gflags.h"
+
 #include "flare/rpc/internal/stream_call_gate.h"
 #include "flare/rpc/protocol/protobuf/message.h"
 

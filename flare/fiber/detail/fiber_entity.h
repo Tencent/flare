@@ -30,6 +30,7 @@
 #include "flare/base/object_pool.h"
 #include "flare/base/ref_ptr.h"
 #include "flare/base/thread/spinlock.h"
+#include "flare/fiber/detail/context.h"
 #include "flare/fiber/detail/fiber_desc.h"
 #include "flare/fiber/detail/runnable_entity.h"
 
@@ -238,55 +239,19 @@ static_assert(sizeof(FiberEntity) < kFiberStackReservedSize);
 // We use pointer here to avoid call to `__tls_init()` each time it's accessed.
 // The "real" master fiber object is defined inside `SetUpMasterFiberEntity()`.
 //
-// By defining these TLS as `inline` here, compiler can be sure they need no
-// special initialization (as the compiler can see their definition, not just
-// declaration). Had we defined them in `fiber_entity.cc`, call to "TLS init
-// function for ..." might be needed by `GetXxxFiberEntity()` below.
-FLARE_INTERNAL_TLS_MODEL inline thread_local FiberEntity* master_fiber;
-FLARE_INTERNAL_TLS_MODEL inline thread_local FiberEntity* current_fiber;
+// For macOS with Apple Clang, `inline thread_local` variables defined in a
+// header may not be correctly treated as thread-local (the same variable may
+// be shared across threads). To avoid this, we declare them as `extern` here
+// and define them in `fiber_entity.cc`.
+extern thread_local FiberEntity* master_fiber;
+extern thread_local FiberEntity* current_fiber;
 
 // Set up & get master fiber (i.e., so called "main" fiber) of this thread.
 void SetUpMasterFiberEntity() noexcept;
 
-// To suppress a (technically correct but in practice) false positive, we can't
-// make them inlined. Un-inlining them prevents CSE in accessing TLS (which, in
-// TSan's case, is indeed leading to race). It's surprising that CSE only occurs
-// when TSan is enabled.
-//
-// CAUTION: To be pedantic, even in non-TSan environment, this still has to be
-// fixed. We actually observed errors caused by TLS accesses here in some
-// environment (GCC 10 on ppc64le / aarch64, for instance).
-//
-// FIXME: We still need a more "standardized" way to address this. I believe
-// that the compiler still has the freedom to do CSE even when TSan is not
-// enabled. In such case making access current fiber (just as we've done here )
-// a function call is too costly.
-//
-// @sa: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=26461 for more discussions.
-#if defined(FLARE_INTERNAL_USE_TSAN) || defined(__powerpc64__) || \
-    defined(__aarch64__)
-
 FiberEntity* GetMasterFiberEntity() noexcept;
 FiberEntity* GetCurrentFiberEntity() noexcept;
 void SetCurrentFiberEntity(FiberEntity* current);
-
-#else
-
-// For the moment we haven't seen any issue with this fast implementation when
-// using GCC8.2 on x86-64, so we keep them here for better perf.
-
-// Get & set fiber entity associated with current fiber.
-//
-// The set method is FOR INTERNAL USE ONLY.
-inline FiberEntity* GetCurrentFiberEntity() noexcept { return current_fiber; }
-
-inline void SetCurrentFiberEntity(FiberEntity* current) noexcept {
-  current_fiber = current;
-}
-
-inline FiberEntity* GetMasterFiberEntity() noexcept { return master_fiber; }
-
-#endif
 
 // Mostly used for debugging purpose.
 inline bool IsFiberContextPresent() noexcept {
@@ -307,9 +272,6 @@ void FreeFiberEntity(FiberEntity* fiber) noexcept;
 // Implementation goes below.           //
 //////////////////////////////////////////
 
-// Defined in `flare/fiber/detail/{arch}/*.S`
-extern "C" void jump_context(void** self, void* to, void* context);
-
 template <class F>
 inline void DestructiveRunCallback(F* cb) {
   (*cb)();
@@ -322,51 +284,6 @@ inline void DestructiveRunCallbackOpt(F* cb) {
     (*cb)();
     *cb = nullptr;
   }
-}
-
-// This method is used so often that it deserves to be inlined.
-inline void FiberEntity::Resume() noexcept {
-  // Note that there are some inconsistencies. The stack we're running on is not
-  // our stack. This should be easy to see, since we're actually running in
-  // caller's context (including its stack).
-  auto caller = GetCurrentFiberEntity();
-  FLARE_DCHECK_NE(caller, this, "Calling `Resume()` on self is undefined.");
-
-#ifdef FLARE_INTERNAL_USE_ASAN
-  // Here we're running on our caller's stack, not ours (the one associated with
-  // `*this`.).
-  void* shadow_stack;
-
-  // Special care must be taken if the caller is being terminated. In this case,
-  // the shadow stack associated with caller must be destroyed. We accomplish
-  // this by passing `nullptr` to the call (@sa: `asan::StartSwitchFiber`.).
-  flare::internal::asan::StartSwitchFiber(
-      caller->asan_terminating ? nullptr : &shadow_stack,  // Caller's shadow
-                                                           // stack.
-      asan_stack_bottom,  // The stack being swapped in.
-      asan_stack_size);   // The stack being swapped in.
-#endif
-
-#ifdef FLARE_INTERNAL_USE_TSAN
-  flare::internal::tsan::SwitchToFiber(tsan_fiber);
-#endif
-
-  // Argument `context` (i.e., `this`) is only used the first time the context
-  // is jumped to (in `FiberProc`).
-  jump_context(&caller->state_save_area, state_save_area, this);
-
-#ifdef FLARE_INTERNAL_USE_ASAN
-  FLARE_CHECK(!caller->asan_terminating);  // Otherwise the caller (as well as
-                                           // this runtime stack) has gone.
-
-  // We're back to the caller's runtime stack. Restore its shadow stack.
-  flare::internal::asan::CompleteSwitchFiber(shadow_stack);
-#endif
-
-  SetCurrentFiberEntity(caller);  // The caller has back.
-
-  // Check for pending `ResumeOn`.
-  DestructiveRunCallbackOpt(&caller->resume_proc);
 }
 
 }  // namespace flare::fiber::detail

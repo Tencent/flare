@@ -56,6 +56,7 @@ def _cmd_with_log(cmd, log_file):
 def _expand_libnames(install_dir, lib_dir, lib_names, generate_dynamic):
     """Expand library names to library filenames"""
     result = []
+    dyn_suffix = blade.cc_toolchain.dynamic_lib_suffix
     for lib_name in lib_names:
         if isinstance(lib_name, tuple):
             libprefix = blade.path.join(lib_name[0], 'lib' + lib_name[1])
@@ -64,7 +65,7 @@ def _expand_libnames(install_dir, lib_dir, lib_names, generate_dynamic):
         libprefix = blade.path.join(install_dir, lib_dir, libprefix)
         result.append(libprefix + '.a')
         if generate_dynamic:
-            result.append(libprefix + '.so')
+            result.append(libprefix + dyn_suffix)
     return result
 
 
@@ -74,9 +75,9 @@ def _unpack_source_package(name, source_package, source_dir, patches):
     stamp_file = blade.path.join(source_dir, _BLADE_UNPACK_STAMP)
     log_file = blade.path.join(blade.current_target_dir(), name + '.log')
     if source_package.endswith('.zip'):
-        unpack_cmd = 'unzip -o -d $OUT_DIR $SRCS'
+        unpack_cmd = 'unzip -o -d $OUT_DIR $FIRST_SRC'
     else:
-        unpack_cmd = 'tar xf $SRCS -C $OUT_DIR'
+        unpack_cmd = 'tar xf $FIRST_SRC -C $OUT_DIR'
     patch_files = [
         blade.path.join(blade.current_source_dir(), x) for x in patches
     ]
@@ -89,7 +90,7 @@ def _unpack_source_package(name, source_package, source_dir, patches):
         'touch $OUTS',
     ]
     gen_rule(name=name,
-             srcs=source_package,
+             srcs=[source_package] + patches,
              outs=stamp_file,
              cmd=' && '.join(cmds),
              cmd_name='UNPACK')
@@ -104,9 +105,25 @@ def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
     full_install_dir = blade.path.abspath(
         blade.path.join(blade.current_target_dir(), install_dir))
     lib_path_env = ':'.join(ld_library_path)
-    configure = 'cd $OUT_DIR/%s && LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH ./%s --prefix=%s %s' % (
-        source_dir, lib_path_env, configure_file_name, full_install_dir,
-        configure_options)
+    # Build rpath flags so that runtime library checks (e.g. curl's configure)
+    # can find the just-built shared libs without LD_LIBRARY_PATH.
+    rpath_flags = ' '.join('-Wl,-rpath,' + p for p in ld_library_path)
+    is_darwin = blade.cc_toolchain.target_os == 'darwin'
+    dyld_path = ('DYLD_LIBRARY_PATH=%s:$DYLD_LIBRARY_PATH '
+                 'DYLD_FALLBACK_LIBRARY_PATH=%s:$DYLD_FALLBACK_LIBRARY_PATH ' % (
+                     lib_path_env, lib_path_env)) if is_darwin else ''
+    configure = ('cd $OUT_DIR/%s && '
+                 'LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH '
+                 '%s'
+                 'LDFLAGS="$LDFLAGS %s" '
+                 './%s --prefix=%s %s' % (
+                     source_dir,
+                     lib_path_env,
+                     dyld_path,
+                     rpath_flags,
+                     configure_file_name,
+                     full_install_dir,
+                     configure_options))
     if with_packages:
         for pkg in with_packages:
             pkg = pkg[1:]  # remove prefix ':'
@@ -225,11 +242,21 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
     # Many cmake package forbid in source build, so we build all cmake package out of source.
     build_dir_name = package_name + '_build'
     build_dir = blade.path.join(blade.current_target_dir(), build_dir_name)
+    # install_dir relative to the cmake build dir (= $OUT_DIR/<build_dir_name>)
     install_dir = blade.path.join('..', install_dir)
+    # CMake needs an absolute prefix to generate an absolute install_name on
+    # macOS; a relative path produces just the filename.  install_dir is always
+    # ".." or "../foo": strip the leading "../" and join with the target dir.
+    full_install_dir = blade.path.abspath(
+        blade.path.join(blade.current_target_dir(), install_dir[3:]))
     log_file = '$OUT_DIR/%s.log' % name
     cmake_options = ' '.join([
-        '-DCMAKE_INSTALL_PREFIX=%s' % install_dir,
+        '-DCMAKE_INSTALL_PREFIX=%s' % full_install_dir,
         '-DCMAKE_INSTALL_LIBDIR=lib',
+        # Use absolute install names on macOS (matching autotools behavior)
+        # instead of @rpath, so consumers don't need per-target rpath setup.
+        '-DCMAKE_MACOSX_RPATH=OFF',
+        '-DCMAKE_INSTALL_NAME_DIR=%s' % blade.path.join(full_install_dir, 'lib'),
         # Do NOT use user's cmake package registry.
         '-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON',
         '-DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON',
@@ -237,13 +264,23 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
         '-DCMAKE_EXPORT_PACKAGE_REGISTRY=OFF',
         '-DCMAKE_FIND_USE_PACKAGE_REGISTRY=OFF',
         '-DCMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY=OFF',
+        # CMake 4.x dropped compatibility with `cmake_minimum_required(<3.5)`,
+        # which several old vendored packages still declare. Allow them to
+        # configure (a no-op on the 3.x toolchains used elsewhere).
+        '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
     ])
     if options:
         cmake_options += ' '
         cmake_options += ' '.join(options)
+    # On macOS, the host compiler defaults to the SDK minimum deployment target
+    # (e.g. 15.0), while cmake auto-detects the full OS version (e.g. 15.7).
+    # Align cmake to the compiler's default to avoid linker warnings.
     cmd = ' && '.join([
         'rm -fr {build_dir}', 'mkdir -p {build_dir}', 'cd {build_dir}',
-        'CXX=g++ CC=gcc cmake {options} ../{source_dir}'
+        'CXX=g++ CC=gcc cmake {options}'
+        ' $$(if [ "$$(uname)" = "Darwin" ]; then'
+        ' echo "-DCMAKE_OSX_DEPLOYMENT_TARGET=$$(sw_vers -productVersion | cut -d. -f1).0";'
+        ' fi) ../{source_dir}'
     ]).format(build_dir=build_dir, options=cmake_options, source_dir=source_dir)
     build_file = blade.path.join(build_dir_name, 'Makefile')
     gen_rule(name=name,

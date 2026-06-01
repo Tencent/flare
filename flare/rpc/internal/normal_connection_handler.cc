@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "gflags/gflags.h"
 #include "opentracing/ext/tags.h"
 
 #include "flare/base/deferred.h"

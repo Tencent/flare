@@ -21,7 +21,10 @@ namespace flare::detail {
 TEST(UriMatcher, All) {
   UriMatcher matcher0;
   UriMatcher matcher1("/some_prefix");
-  UriMatcher matcher2(std::regex("\\abc.*efg"));
+  // `\a` is not a valid ECMAScript regex escape; libstdc++ silently
+  // accepted it (treating it as literal `a`), libc++ on macOS rejects it
+  // with "invalid escaped character". The intended pattern was `abc.*efg`.
+  UriMatcher matcher2(std::regex("abc.*efg"));
   UriMatcher matcher3([](auto&& s) { return s == "1"; });
 
   EXPECT_TRUE(matcher0(""));

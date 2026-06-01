@@ -14,6 +14,8 @@
 
 load('//flare/tools/build_rules.bld', 'cc_flare_library')
 
+_is_darwin = blade.cc_toolchain.target_os == 'darwin'
+
 proto_library(
   name = 'echo_proto',
   srcs = 'echo.proto',
@@ -35,6 +37,6 @@ cc_binary(
     '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/rpc:rpc',
-    '//thirdparty/gperftools:tcmalloc_and_profiler',
-  ]
+    '//thirdparty/gflags:gflags',
+  ] + ([] if _is_darwin else ['//thirdparty/gperftools:tcmalloc_and_profiler'])
 )

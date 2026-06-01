@@ -36,7 +36,14 @@ void CallbackLockFunction(int32_t mode, int32_t type, const char* file,
 }
 
 unsigned long CallbackIdFunction() {
+#ifdef __APPLE__
+  uint64_t tid;
+  pthread_threadid_np(pthread_self(), &tid);
+  return static_cast<unsigned long>(tid);
+#else
+  // pthread_t is unsigned long on Linux/glibc.
   return static_cast<unsigned long>(pthread_self());
+#endif
 }
 
 void InitializeOpenSSL() {

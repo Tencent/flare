@@ -46,19 +46,17 @@ inline std::string MessageDigestWithCallbackImpl(F&& cb) {
 template <std::size_t kBufferSize, class F>
 inline std::string HmacWithCallbackImpl(const EVP_MD* evp_md,
                                         std::string_view key, F&& cb) {
-  HMAC_CTX ctx;
-  HMAC_CTX_init(&ctx);
-  FLARE_CHECK_EQ(HMAC_Init_ex(&ctx, key.data(), key.size(), evp_md, nullptr),
-                 1);
+  HMAC_CTX* ctx = HMAC_CTX_new();
+  FLARE_CHECK_EQ(HMAC_Init_ex(ctx, key.data(), key.size(), evp_md, nullptr), 1);
   cb([&](std::string_view buffer) {
     auto ptr =
         reinterpret_cast<const unsigned char*>(buffer.data());  // NOLINT.
-    FLARE_CHECK_EQ(HMAC_Update(&ctx, ptr, buffer.size()), 1);
+    FLARE_CHECK_EQ(HMAC_Update(ctx, ptr, buffer.size()), 1);
   });
 
   unsigned char buffer[kBufferSize];  // NOLINT.
-  FLARE_CHECK_EQ(HMAC_Final(&ctx, buffer, nullptr), 1);
-  HMAC_CTX_cleanup(&ctx);
+  FLARE_CHECK_EQ(HMAC_Final(ctx, buffer, nullptr), 1);
+  HMAC_CTX_free(ctx);
   return std::string(reinterpret_cast<char*>(buffer), kBufferSize);
 }
 

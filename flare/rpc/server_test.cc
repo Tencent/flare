@@ -18,6 +18,7 @@
 
 #include <thread>
 
+#include "gflags/gflags.h"
 #include "gtest/gtest.h"
 #include "jsoncpp/json.h"
 

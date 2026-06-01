@@ -72,6 +72,7 @@ cc_test(
     '//flare/testing:main',
     '//flare/testing:endpoint',
     '//flare/rpc:rpc',
+    '//thirdparty/gflags:gflags',
   ]
 )
 

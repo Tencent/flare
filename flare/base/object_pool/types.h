@@ -113,31 +113,20 @@ class FixedVector {
       deleter_(pop_back());
     }
 
-// @sa: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1152r4.html
-#if __GNUC__ >= 10
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wvolatile"
-#endif  // __GNUC__ >= 10
-
-#if __clang__ >= 10
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wvolatile"
-#endif  // __clang__ >= 10
-
     // We **hope** after destruction, calls to `full()` would return `true`.
     //
     // Frankly it's U.B.. Yet we  need this behavior when thread is leaving, so
     // as to deal with thread-local destruction order issues.
-    *const_cast<void** volatile*>(&current_) =
-        *const_cast<void** volatile*>(&end_) = nullptr;
-
-#if __GNUC__ >= 10
-#pragma GCC diagnostic pop
-#endif  // __GNUC__ >= 10
-
-#if __clang__ >= 10
-#pragma clang diagnostic pop
-#endif  // __clang__ >= 10
+    //
+    // @sa:
+    // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1152r4.html
+    //
+    // Written as two separate volatile stores rather than a chained assignment:
+    // C++20 deprecates using the *result* of a volatile assignment
+    // (-Wdeprecated-volatile on clang, -Wvolatile on GCC); a discarded single
+    // store is fine.
+    *const_cast<void** volatile*>(&end_) = nullptr;
+    *const_cast<void** volatile*>(&current_) = nullptr;
   }
 
   bool empty() const noexcept { return current_ == objects_.get(); }

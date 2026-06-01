@@ -14,6 +14,8 @@
 
 #include <atomic>
 
+#include "gflags/gflags.h"
+
 #include "flare/base/thread/latch.h"
 #include "flare/fiber/async.h"
 #include "flare/fiber/runtime.h"

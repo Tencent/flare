@@ -28,8 +28,13 @@ using namespace std::literals;
 namespace flare::io::detail {
 
 TEST(WritingDatagramList, FlushTo) {
-  static const auto ManyXs = std::string(16384, 'x');
-  static const auto ManyYs = std::string(16384, 'y');
+  // 4 KiB per datagram is well under every realistic per-datagram cap and
+  // still exercises the multi-iovec path FlushTo cares about. macOS in
+  // particular limits a single UDP send to `net.inet.udp.maxdgram` (default
+  // 9216 bytes) -- a 16 KiB datagram fails sendmsg() with EMSGSIZE there.
+  constexpr int kDatagramSize = 4096;
+  static const auto ManyXs = std::string(kDatagramSize, 'x');
+  static const auto ManyYs = std::string(kDatagramSize, 'y');
 
   auto port = testing::PickAvailablePort(SOCK_DGRAM);
   auto recv = util::CreateDatagramSocket(AF_INET);
@@ -44,21 +49,21 @@ TEST(WritingDatagramList, FlushTo) {
   bool emptied;
   std::uintptr_t ctx;
   auto rc = wbl.FlushTo(send.Get(), &ctx, &emptied);
-  ASSERT_EQ(16384, rc);
+  ASSERT_EQ(kDatagramSize, rc);
   ASSERT_FALSE(emptied);
   ASSERT_EQ(456, ctx);
   rc = wbl.FlushTo(send.Get(), &ctx, &emptied);
-  ASSERT_EQ(16384, rc);
+  ASSERT_EQ(kDatagramSize, rc);
   ASSERT_TRUE(emptied);
   ASSERT_EQ(567, ctx);
 
-  char buffer[16384];
-  ASSERT_EQ(16384,
+  char buffer[kDatagramSize];
+  ASSERT_EQ(kDatagramSize,
             recvfrom(recv.Get(), buffer, sizeof(buffer), 0, nullptr, nullptr));
-  ASSERT_EQ(0, memcmp(buffer, ManyXs.data(), 16384));
-  ASSERT_EQ(16384,
+  ASSERT_EQ(0, memcmp(buffer, ManyXs.data(), kDatagramSize));
+  ASSERT_EQ(kDatagramSize,
             recvfrom(recv.Get(), buffer, sizeof(buffer), 0, nullptr, nullptr));
-  ASSERT_EQ(0, memcmp(buffer, ManyYs.data(), 16384));
+  ASSERT_EQ(0, memcmp(buffer, ManyYs.data(), kDatagramSize));
 }
 
 // It's stated that `sendmsg` may returns `EAGAIN` in certain circumstances

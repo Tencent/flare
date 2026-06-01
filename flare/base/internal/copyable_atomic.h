@@ -16,6 +16,7 @@
 #define FLARE_BASE_INTERNAL_COPYABLE_ATOMIC_H_
 
 #include <atomic>
+#include <utility>
 
 namespace flare::internal {
 

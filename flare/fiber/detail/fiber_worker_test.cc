@@ -36,6 +36,10 @@ namespace flare::fiber::detail {
 class SystemFiberOrNot : public ::testing::TestWithParam<bool> {};
 
 TEST_P(SystemFiberOrNot, Affinity) {
+#ifndef __linux__
+  GTEST_SKIP() << "Hard CPU affinity is Linux-only; macOS' thread_policy_set "
+                  "is advisory so this test cannot observe pinning.";
+#else
   for (int k = 0; k != 1000; ++k) {
     auto sg = std::make_unique<SchedulingGroup>(std::vector<int>{1, 2, 3}, 16);
     TimerWorker dummy(sg.get());
@@ -54,6 +58,7 @@ TEST_P(SystemFiberOrNot, Affinity) {
       w.Join();
     }
   }
+#endif
 }
 
 TEST_P(SystemFiberOrNot, ExecuteFiber) {
@@ -68,7 +73,12 @@ TEST_P(SystemFiberOrNot, ExecuteFiber) {
   }
   testing::StartFiberEntityInGroup(sg.get(), GetParam(), [&] {
     auto cpu = flare::internal::GetCurrentProcessorId();
+#ifdef __linux__
+    // Hard CPU affinity is Linux-only — see Affinity test.
     ASSERT_TRUE(1 <= cpu && cpu <= 3);
+#else
+    (void)cpu;
+#endif
     ++executed;
   });
   sg->Stop();

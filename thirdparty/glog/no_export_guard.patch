@@ -1,0 +1,65 @@
+--- a/src/glog/logging.h
++++ b/src/glog/logging.h
+@@ -52,9 +52,7 @@
+ #include <utility>
+ #include <vector>
+
+-#if defined(GLOG_USE_GLOG_EXPORT)
+-#  include "glog/export.h"
+-#endif
++#include "glog/export.h"
+
+ #if !defined(GLOG_EXPORT) || !defined(GLOG_NO_EXPORT)
+ #  error <glog/logging.h> was not included correctly. See the documentation for how to consume the library.
+--- a/src/glog/flags.h
++++ b/src/glog/flags.h
+@@ -37,9 +37,7 @@
+ #  include <gflags/gflags.h>
+ #endif
+
+-#if defined(GLOG_USE_GLOG_EXPORT)
+-#  include "glog/export.h"
+-#endif
++#include "glog/export.h"
+
+ #if !defined(GLOG_EXPORT)
+ #  error <glog/flags.h> was not included correctly. See the documentation for how to consume the library.
+--- a/src/glog/raw_logging.h
++++ b/src/glog/raw_logging.h
+@@ -36,9 +36,7 @@
+ #ifndef GLOG_RAW_LOGGING_H
+ #define GLOG_RAW_LOGGING_H
+
+-#if defined(GLOG_USE_GLOG_EXPORT)
+-#  include "glog/export.h"
+-#endif
++#include "glog/export.h"
+
+ #if !defined(GLOG_EXPORT)
+ #  error <glog/raw_logging.h> was not included correctly. See the documentation for how to consume the library.
+--- a/src/glog/vlog_is_on.h
++++ b/src/glog/vlog_is_on.h
+@@ -63,9 +63,7 @@
+
+ #include <cstddef>
+
+-#if defined(GLOG_USE_GLOG_EXPORT)
+-#  include "glog/export.h"
+-#endif
++#include "glog/export.h"
+
+ #if !defined(GLOG_EXPORT)
+ #  error <glog/vlog_is_on.h> was not included correctly. See the documentation for how to consume the library.
+--- a/src/glog/log_severity.h
++++ b/src/glog/log_severity.h
+@@ -30,9 +30,7 @@
+ #ifndef BASE_LOG_SEVERITY_H__
+ #define BASE_LOG_SEVERITY_H__
+
+-#if defined(GLOG_USE_GLOG_EXPORT)
+-#  include "glog/export.h"
+-#endif
++#include "glog/export.h"
+
+ #if !defined(GLOG_EXPORT)
+ #  error <glog/log_severity.h> was not included correctly. See the documentation for how to consume the library.

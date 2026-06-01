@@ -162,7 +162,8 @@ void DeleteThreadOutOfDutyCallback(std::uint64_t handle) {
     queue->callbacks.EraseIf([&](auto&& e) { return e.id == handle; });
   });
 
-  FLARE_CHECK(ptr.unique());  // It shouldn't be referenced anywhere else.
+  FLARE_CHECK(ptr.use_count() ==
+              1);  // It shouldn't be referenced anywhere else.
   // Let `ptr` go.
 }
 
