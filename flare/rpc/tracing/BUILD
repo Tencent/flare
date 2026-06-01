@@ -23,8 +23,22 @@ cc_library(
     ':framework_tags',
     ':tracing_ops_provider',
     ':tracing_ops',
+    '//flare/base/internal:macro',
+    '//flare/base/internal:test_prod',
+    '//flare/base:chrono',
+    '//flare/base:dependency_registry',
+    '//flare/base:function',
+    '//flare/base:maybe_owning',
+    '//flare/base:never_destroyed',
+    '//flare/base:string',
+    '//flare/rpc/internal:sampler',
+    '//thirdparty/opentracing-cpp:opentracing',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':framework_tags',
+    ':tracing_ops',
+  ],
 )
 
 cc_library(
@@ -51,11 +65,10 @@ cc_library(
   ],
   srcs = 'tracing_ops_provider.cc',
   deps = [
-    ':framework_tags',
     '//flare/base:dependency_registry',
     '//flare/base:function',
-    '//flare/base/net:endpoint',
     '//thirdparty/opentracing-cpp:opentracing',
+    '//flare/base/internal:macro',
   ],
   visibility = 'PUBLIC',
 )
@@ -80,6 +93,7 @@ cc_library(
     '//flare/rpc/internal:sampler',
     '//thirdparty/gflags:gflags',
     '//thirdparty/opentracing-cpp:opentracing',
+    '//flare/base/internal:hash_map',
   ],
   visibility = 'PUBLIC',
 )
@@ -111,7 +125,6 @@ cc_test(
   deps = [
     ':tracing',
     '//flare/base:overloaded',
-    '//flare/base/internal:cpu',
     '//flare/fiber:fiber',
     '//flare/rpc:rpc',
     '//flare/testing:echo_service_proto_flare',

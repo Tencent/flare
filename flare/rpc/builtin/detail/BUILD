@@ -19,7 +19,6 @@ cc_library(
   deps = [
     '//flare/base:function',
     '//flare/base:string',
-    '//flare/base/encoding:base64',
   ],
   visibility = '//flare/rpc/builtin/...',
 )

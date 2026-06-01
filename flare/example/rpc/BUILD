@@ -33,6 +33,11 @@ cc_flare_library(
     ':echo_service_proto',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':echo_service_proto',
+    ':flare_gen_echo_service_proto_flare',
+    '//flare/rpc:protobuf',
+  ],
 )
 
 proto_library(
@@ -51,6 +56,11 @@ cc_flare_library(
     ':relay_service_proto',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':flare_gen_relay_service_proto_flare',
+    ':relay_service_proto',
+    '//flare/rpc:protobuf',
+  ],
 )
 
 cc_binary(
@@ -125,7 +135,6 @@ cc_binary(
   deps = [
     ':echo_service_proto_flare',
     '//flare:init',
-    '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/rpc:rpc',
     '//thirdparty/gflags:gflags',

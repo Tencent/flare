@@ -47,7 +47,6 @@ cc_library(
     '//flare/base:logging',
     '//flare/base:never_destroyed',
     '//flare/base/internal:macro',
-    '//flare/init:on_init',
     '//flare/testing/detail:dirty_hook',
     '//thirdparty/googletest:gmock',
     '//thirdparty/googletest:gtest',
@@ -58,7 +57,11 @@ cc_library(
 cc_test(
   name = 'hooking_mock_test',
   srcs = 'hooking_mock_test.cc',
-  deps = ':hooking_mock',
+  deps = [':hooking_mock'],
+  keep_deps = [
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )
 
 cc_library(
@@ -83,6 +86,9 @@ cc_library(
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -93,7 +99,11 @@ cc_test(
     ':main',
     ':rpc_mock',
     '//flare/rpc:rpc',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )
 
 cc_library(
@@ -102,8 +112,6 @@ cc_library(
   srcs = 'rpc_controller.cc',
   deps = [
     '//flare/rpc:protobuf',
-    '//flare/rpc/protocol/protobuf:rpc_client_controller',
-    '//flare/rpc/protocol/protobuf:rpc_server_controller',
   ],
   visibility = 'PUBLIC',
 )
@@ -137,8 +145,13 @@ proto_library(
 cc_flare_library(
   name = 'echo_service_proto_flare',
   srcs = 'echo_service.proto',
-  deps = ':echo_service_proto',
+  deps = [':echo_service_proto'],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':echo_service_proto',
+    ':flare_gen_echo_service_proto_flare',
+    '//flare/rpc:protobuf',
+  ],
 )
 
 proto_library(
@@ -153,8 +166,13 @@ proto_library(
 cc_flare_library(
   name = 'relay_service_proto_flare',
   srcs = 'relay_service.proto',
-  deps = ':relay_service_proto',
+  deps = [':relay_service_proto'],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':flare_gen_relay_service_proto_flare',
+    ':relay_service_proto',
+    '//flare/rpc:protobuf',
+  ],
 )
 
 cc_library(
@@ -180,7 +198,12 @@ cc_test(
     ':http_mock',
     ':main',
     '//flare/fiber:fiber',
-  ]
+    '//flare/net/http:http_client',
+  ],
+  keep_deps = [
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )
 
 cc_library(
@@ -197,6 +220,7 @@ cc_library(
     '//flare/testing/detail:gmock_actions',
     '//thirdparty/googletest:gmock',
     '//thirdparty/googletest:gtest',
+    '//flare/base:logging',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
@@ -210,7 +234,12 @@ cc_test(
     ':redis_mock',
     '//flare/net/redis:redis',
     '//thirdparty/googletest:gmock',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/googletest:gmock',
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )
 
 cc_library(
@@ -238,7 +267,6 @@ cc_test(
     ':endpoint',
     ':main',
     ':naked_server',
-    '//flare/io/native:native',
     '//flare/io/util:socket',
   ]
 )
@@ -258,6 +286,7 @@ cc_library(
     '//flare/testing/detail:gmock_actions',
     '//flare/testing/detail:implicitly_casting',
     '//thirdparty/googletest:gmock',
+    '//flare/base:type_index',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
@@ -272,5 +301,10 @@ cc_test(
     '//flare/net/cos:cos_client',
     '//flare/net/cos/ops/object:get_object',
     '//thirdparty/googletest:gmock',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/googletest:gmock',
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )

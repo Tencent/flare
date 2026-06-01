@@ -75,7 +75,6 @@ cc_test(
   deps = [
     '//flare/base:compression',
     '//flare/base/buffer:compression_output_stream',
-    '//flare:init',
     '//flare/testing:main',
   ],
 )

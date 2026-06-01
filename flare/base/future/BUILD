@@ -40,7 +40,6 @@ cc_test(
   name = 'future_test',
   srcs = ['future_test.cc'],
   deps = [
-    ':future',
     '//flare/base:future',
     '//flare/base:callback',
   ]

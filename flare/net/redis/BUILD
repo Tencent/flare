@@ -25,8 +25,20 @@ cc_library(
     ':redis_client',
     ':redis_command',
     ':redis_object',
+    '//flare/base/internal:early_init',
+    '//flare/base/internal:lazy_init',
+    '//flare/base/internal:time_view',
+    '//flare/base:buffer',
+    '//flare/base:function',
+    '//flare/base:future',
+    '//flare/base:maybe_owning',
+    '//flare/base:string',
+    '//thirdparty/gflags:gflags',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':redis_client',
+  ],
 )
 
 cc_library(
@@ -66,6 +78,7 @@ cc_library(
   deps = [
     '//flare/base:buffer',
     '//flare/base:string',
+    '//flare/base:logging',
   ],
   visibility = 'PUBLIC',
 )
@@ -96,8 +109,6 @@ cc_library(
   deps = [
     ':message',
     ':reader',
-    ':redis_command',
-    ':redis_object',
     '//flare/base:buffer',
     '//flare/base:casting',
     '//flare/rpc/protocol:stream_protocol',
@@ -141,7 +152,6 @@ cc_library(
     '//flare/base:string',
     '//flare/base/encoding:hex',
     '//flare/base/internal:early_init',
-    '//flare/base/internal:lazy_init',
     '//flare/rpc:message_dispatcher_factory',
     '//flare/rpc/internal:stream_call_gate_pool',
     '//flare/rpc/internal:stream_call_gate',
@@ -159,8 +169,6 @@ cc_library(
     ':redis_object',
     '//flare/base:future',
     '//flare/base:maybe_owning',
-    '//flare/base:string',
-    '//flare/base/internal:early_init',
     '//flare/base/internal:lazy_init',
     '//flare/base/internal:time_view',
     '//flare/fiber:fiber',
@@ -190,9 +198,7 @@ cc_library(
     '//flare/base:string',
     '//flare/init:on_init',
     '//flare/rpc:message_dispatcher_factory',
-    '//flare/rpc/load_balancer:round_robin',
     '//flare/rpc/message_dispatcher:message_dispatcher',
-    '//flare/rpc/name_resolver:list',
   ],
   link_all_symbols = True,
 )

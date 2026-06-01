@@ -27,8 +27,6 @@ cc_library(
   deps = [
     ':dry_runner',
     ':dumper',
-    ':log_reader',
-    ':log_writer',
     ':packet_desc',
     '//flare/base:buffer',
     '//flare/base:casting',
@@ -42,8 +40,8 @@ cc_library(
     '//flare/base/net:endpoint',
     '//flare/base/net:endpoint',
     '//flare/fiber:fiber',
-    '//flare/rpc/binlog/text_only:dumper',
     '//thirdparty/gflags:gflags',
+    '//flare/base:maybe_owning',
   ],
   visibility = 'PUBLIC',
 )
@@ -69,6 +67,9 @@ cc_library(
     '//thirdparty/protobuf:protobuf',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_library(
@@ -84,7 +85,6 @@ cc_library(
     '//flare/base:never_destroyed',
     '//flare/base:string',
     '//flare/base/experimental:lazy_eval',
-    '//flare/base/experimental:uuid',
     '//flare/base/internal:index_alloc',  # ???
     '//flare/base/net:endpoint',
     '//flare/rpc/binlog:tags',
@@ -92,6 +92,9 @@ cc_library(
     '//thirdparty/gflags:gflags',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    '//flare/base/internal:index_alloc',
+  ],
 )
 
 cc_test(
@@ -130,7 +133,6 @@ cc_library(
   srcs = 'log_writer.cc',
   deps = [
     ':dumper',
-    '//flare/base:chrono',
     '//flare/base/experimental:uuid',
     '//flare/base/internal:dpc',
     '//flare/rpc/binlog:tags',
@@ -180,7 +182,6 @@ cc_library(
     '//flare/base:never_destroyed',
     '//flare/base:status',
     '//flare/base:string',
-    '//flare/base/experimental:uuid',
     '//flare/base/net:endpoint',
     '//flare/fiber:fiber',
     '//thirdparty/gflags:gflags',

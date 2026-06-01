@@ -73,6 +73,8 @@ cc_test(
     '//flare/io/util:socket',
     '//flare/testing:endpoint',
     '//flare/testing:main',
+    '//flare/base:chrono',
+    '//flare/io/util:rate_limiter',
   ]
 )
 

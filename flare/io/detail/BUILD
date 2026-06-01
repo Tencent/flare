@@ -133,7 +133,6 @@ cc_test(
     ':read_at_most',
     '//flare/base:random',
     '//flare/io/util:socket',
-    '//flare/testing:endpoint',
     '//flare/testing:main',
   ]
 )

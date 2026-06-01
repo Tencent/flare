@@ -48,11 +48,11 @@ cc_library(
     'jemalloc_profiler_http_handler.h',
   ],
   deps = [
-    '//flare/base:deferred',
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:prof_utility',
     '//thirdparty/jemalloc:jemalloc',
     '//thirdparty/jsoncpp:jsoncpp',
+    '//flare/base:string',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
@@ -65,7 +65,6 @@ cc_library(
   deps = [
     '//flare/base:function',
     '//flare/base/internal:hash_map',
-    '//flare/base/net:endpoint',
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:uri_matcher',
   ],
@@ -89,8 +88,6 @@ cc_library(
   deps = [
     '//flare/base:function',
     '//flare/base/encoding:base64',
-    '//flare/base/internal:hash_map',
-    '//flare/base/net:endpoint',
     '//flare/rpc:http',
     '//flare/rpc/builtin/detail:uri_matcher',
   ],

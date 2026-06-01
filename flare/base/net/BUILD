@@ -19,8 +19,6 @@ cc_library(
   deps = [
     '//flare/base:likely',
     '//flare/base:logging',
-    '//flare/base:object_pool',
-    '//flare/base:ref_ptr',
     '//flare/base:string',
     '//flare/base:expected',
   ],
@@ -49,7 +47,6 @@ cc_library(
   hdrs = 'uri.h',
   srcs = 'uri.cc',
   deps = [
-    '//flare/base:likely',
     '//flare/base:logging',
     '//flare/base:string',
     '//flare/base/experimental:byte_set',

@@ -57,6 +57,9 @@ cc_library(
     '//flare/base:enum',
     '//flare/net/internal:http_engine',
     '//flare/rpc/message_dispatcher:message_dispatcher',
+    '//flare/base:status',
+    '//flare/base:string',
+    '//flare/net/internal:http_task',
   ]
 )
 
@@ -76,6 +79,7 @@ cc_library(
     '//flare/fiber:future',
     '//flare/net/cos/ops:operation',
     '//thirdparty/gflags:gflags',
+    ':cos_status',
   ],
   visibility = 'PUBLIC',
 )
@@ -92,6 +96,7 @@ cc_test(
     '//flare/rpc:rpc',
     '//flare/testing:endpoint',
     '//flare/testing:main',
+    '//flare/net/cos/ops:operation',
   ]
 )
 

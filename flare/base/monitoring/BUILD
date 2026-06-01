@@ -17,7 +17,6 @@ cc_library(
   hdrs = 'common.h',
   srcs = 'common.cc',
   deps = [
-    '//flare/base:logging',
     '//flare/base:string',
     '//flare/base/net:endpoint',
     '//thirdparty/jsoncpp:jsoncpp',
@@ -43,9 +42,7 @@ cc_library(
     ':event',
     ':monitoring_system',
     '//flare/base:chrono',
-    '//flare/base:logging',
     '//flare/base:never_destroyed',
-    '//flare/base:string',
     '//flare/base/internal:hash_map',
     '//flare/base/internal:time_keeper',
     '//thirdparty/gflags:gflags',
@@ -84,9 +81,7 @@ cc_library(
   deps = [
     ':dispatcher',
     ':monitoring_system',
-    '//flare/base:dependency_registry',
     '//flare/base:function',
-    '//flare/base:logging',
     '//flare/base:never_destroyed',
     '//flare/base:string',
     '//flare/base/internal:hash_map',

@@ -56,7 +56,10 @@ cc_library(
     deps = [
         '//thirdparty/glog:glog',
         '#m',
-    ] + (['#pthread'] if _is_linux else []),
+    ] + ([',#pthread'] if _is_linux else []),
+    keep_deps = [
+      '//thirdparty/glog:glog',
+    ],
 )
 
 cc_library(
@@ -125,6 +128,10 @@ cc_library(
         '//thirdparty/zlib:z',
     ],
     warning = 'no',
+    keep_deps = [
+      ':protobuf_lite',
+      '//thirdparty/zlib:z',
+    ],
 )
 
 # This provides just the header files for use in projects that need to build
@@ -275,6 +282,9 @@ cc_library(
     ],
     extra_cppflags = COPTS,
     deps = [":protobuf"],
+    keep_deps = [
+      ':protobuf',
+    ],
 )
 
 cc_binary(

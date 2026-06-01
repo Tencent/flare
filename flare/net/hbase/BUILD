@@ -23,8 +23,17 @@ cc_library(
   deps = [
     ':hbase_client',
     ':hbase_server',
+    ':call_context',
+    ':hbase_controller_common',
+    '//flare/base/internal:test_prod',
+    '//flare/base/net:endpoint',
+    '//flare/rpc/protocol:stream_service',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':hbase_client',
+    ':hbase_server',
+  ],
 )
 
 cc_library(
@@ -37,8 +46,16 @@ cc_library(
     ':hbase_channel',
     ':hbase_client_controller',
     ':hbase_client_protocol',
+    ':call_context',
+    ':hbase_controller_common',
+    '//flare/base/net:endpoint',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':hbase_channel',
+    ':hbase_client_controller',
+    ':hbase_client_protocol',
+  ],
 )
 
 cc_library(
@@ -51,8 +68,16 @@ cc_library(
     ':hbase_service',
     ':hbase_server_controller',
     ':hbase_server_protocol',
+    ':hbase_controller_common',
+    '//flare/base/internal:test_prod',
+    '//flare/rpc/protocol:stream_service',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    ':hbase_server_controller',
+    ':hbase_server_protocol',
+    ':hbase_service',
+  ],
 )
 
 cc_library(
@@ -90,7 +115,10 @@ cc_library(
     '//flare/net/hbase/proto:rpc_proto',
     '//flare/rpc/protocol:message',
     '//thirdparty/protobuf:protobuf',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_library(
@@ -110,11 +138,14 @@ cc_library(
     '//flare/rpc/internal:correlation_id',
     '//flare/rpc/internal:stream_call_gate_pool',
     '//flare/rpc/internal:stream_call_gate',
-    '//flare/rpc/name_resolver:list',
     '//flare/rpc/name_resolver:name_resolver',
     '//thirdparty/protobuf:protobuf',
+    '//flare/net/hbase/proto:rpc_proto',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -139,14 +170,16 @@ cc_library(
   srcs = 'hbase_controller_common.cc',
   deps = [
     '//flare/base:buffer',
-    '//flare/base:logging',
     '//flare/base/internal:time_view',
     '//flare/base/internal:test_prod',
     '//flare/base/net:endpoint',
     '//flare/net/hbase/proto:constants',
     '//flare/net/hbase/proto:rpc_proto',
     '//thirdparty/protobuf:protobuf',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -154,6 +187,7 @@ cc_test(
   srcs = 'hbase_controller_common_test.cc',
   deps = [
     ':hbase_controller_common',
+    '//flare/base:chrono',
   ]
 )
 
@@ -203,19 +237,17 @@ cc_library(
   hdrs = 'hbase_client_protocol.h',
   srcs = 'hbase_client_protocol.cc',
   deps = [
-    ':call_context_factory',
     ':call_context',
     ':hbase_client_controller',
     ':message',
     '//flare/base:down_cast',
     '//flare/base:endian',
-    '//flare/base:logging',
     '//flare/base/buffer:zero_copy_stream',
     '//flare/base/internal:test_prod',
     '//flare/net/hbase/proto:rpc_proto',
-    '//flare/rpc/protocol:controller',
     '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
+    '//flare/net/hbase/proto:constants',
   ]
 )
 
@@ -228,14 +260,13 @@ cc_library(
     ':call_context',
     ':hbase_server_controller',
     ':message',
-    '//flare/base:logging',
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base/buffer:zero_copy_stream',
     '//flare/base/internal:test_prod',
     '//flare/net/hbase/proto:rpc_proto',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
+    '//flare/net/hbase/proto:constants',
   ]
 )
 
@@ -268,12 +299,9 @@ cc_library(
     ':message',
     '//flare/base:callback',
     '//flare/base:down_cast',
-    '//flare/base/internal:lazy_init',
-    '//flare/fiber:fiber',
     '//flare/rpc/internal:fast_latch',
     '//flare/rpc/internal:rpc_metrics',
     '//flare/rpc/protocol:stream_service',
-    '//flare/net/hbase/proto:rpc_proto',
   ],
   visibility = 'PUBLIC',
 )

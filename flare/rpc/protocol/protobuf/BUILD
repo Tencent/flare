@@ -33,6 +33,15 @@ cc_library(
     ':service_method_locator',
     ':service',
     ':std_protocol',
+    ':call_context',
+    ':rpc_controller_common',
+    '//flare/base/internal:lazy_init',
+    '//flare/base/internal:test_prod',
+    '//flare/base:ref_ptr',
+    '//flare/base:status',
+    '//flare/base:string',
+    '//flare/rpc/internal:stream_call_gate_pool',
+    '//thirdparty/gflags:gflags',
   ],
   visibility = [
     '//flare/rpc:rpc',
@@ -40,7 +49,20 @@ cc_library(
     '//flare/rpc:for_internal_use_only_protobuf_plugin_deps',
     '//flare/rpc:protobuf',
     '//flare/testing:rpc_mock',
-  ]
+  ],
+  keep_deps = [
+    ':baidu_std_protocol',
+    ':poppy_protocol',
+    ':proto_over_http_protocol',
+    ':qzone_protocol',
+    ':rpc_channel',
+    ':rpc_client_controller',
+    ':rpc_meta_proto',
+    ':rpc_server_controller',
+    ':service',
+    ':service_method_locator',
+    ':std_protocol',
+  ],
 )
 
 proto_library(
@@ -84,10 +106,15 @@ cc_library(
     '//thirdparty/gflags:gflags',
     '//thirdparty/protobuf:protobuf',
     '//thirdparty/gflags:gflags',
+    '//flare/base:logging',
+    '//flare/base:object_pool',
   ],
   visibility = [
     '//flare/rpc/binlog/gdt:dumper_test',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -96,7 +123,6 @@ cc_test(
   deps = [
     ':message',
     '//flare/testing:main',
-    '//flare/testing:message_proto',
   ]
 )
 
@@ -105,12 +131,14 @@ cc_library(
   hdrs = 'call_context.h',
   srcs = 'call_context.cc',
   deps = [
-    '//flare/base:logging',
     '//flare/base:maybe_owning',
     '//flare/base:object_pool',
     '//flare/rpc/protocol:controller',
     '//thirdparty/protobuf:protobuf',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_library(
@@ -119,7 +147,6 @@ cc_library(
   srcs = 'call_context_factory.cc',
   deps = [
     ':call_context',
-    ':rpc_server_controller',
     '//flare/rpc/protocol:controller',
   ]
 )
@@ -142,7 +169,10 @@ cc_library(
   visibility = [
     '//flare/rpc/protocol/http/builtin:rpc_reflect_handler',
     '//flare/rpc/protocol/http/builtin:rpc_reflect_handler_test',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -166,7 +196,10 @@ cc_library(
   ],
   visibility = [
     '//flare/rpc/protocol/http/builtin:rpc_reflect_handler',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -178,7 +211,10 @@ cc_test(
     '//thirdparty/googletest:gmock',
     '//thirdparty/jsoncpp:jsoncpp',
     '//thirdparty/protobuf:protobuf',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_library(
@@ -194,20 +230,20 @@ cc_library(
     ':rpc_meta_proto',
     ':rpc_options',
     ':service_method_locator',
-    ':std_protocol',
     '//flare/base:buffer',
-    '//flare/base:demangle',
     '//flare/base:down_cast',
     '//flare/base:maybe_owning',
     '//flare/base:string',
     '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/protocol/protobuf/detail:dirty_http',
     '//thirdparty/protobuf:protobuf',
+    '//flare/base:enum',
   ],
-  link_all_symbols = True
+  link_all_symbols = True,
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -222,6 +258,7 @@ cc_test(
     '//flare/init:on_init',
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:main',
+    ':message',
   ]
 )
 
@@ -229,7 +266,6 @@ cc_test(
   name = 'proto_over_http_protocol_streaming_rpc_test',
   srcs = 'proto_over_http_protocol_streaming_rpc_test.cc',
   deps = [
-    ':protobuf',
     '//flare/base/thread:latch',
     '//flare/base:callback',
     '//flare/base:random',
@@ -252,17 +288,16 @@ cc_library(
     ':message',
     ':rpc_meta_proto',
     ':service_method_locator',
-    '//flare/base:buffer',
-    '//flare/base:compression',
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
   ],
-  link_all_symbols = True
+  link_all_symbols = True,
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -283,8 +318,6 @@ cc_test(
   name = 'std_protocol_streaming_rpc_test',
   srcs = 'std_protocol_streaming_rpc_test.cc',
   deps = [
-    ':std_protocol',
-    ':protobuf',
     '//flare/fiber:fiber',
     '//flare/testing:main',
     '//flare/testing:endpoint',
@@ -306,18 +339,19 @@ cc_library(
     ':rpc_meta_proto',
     ':rpc_options',
     ':service_method_locator',
-    '//flare/base:buffer',
     '//flare/base:down_cast',
     '//flare/base:overloaded',
     '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/protocol/protobuf/detail:qzone_header',
     '//flare/rpc/protocol/protobuf/detail:utility',
     '//thirdparty/protobuf:protobuf',
+    '//flare/base:likely',
   ],
-  link_all_symbols = True
+  link_all_symbols = True,
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -338,8 +372,6 @@ cc_test(
   name = 'qzone_protocol_streaming_rpc_test',
   srcs = 'qzone_protocol_streaming_rpc_test.cc',
   deps = [
-    ':qzone_protocol',
-    ':protobuf',
     '//flare/fiber:fiber',
     '//flare/testing:main',
     '//flare/testing:endpoint',
@@ -358,8 +390,8 @@ cc_library(
     '//flare/base:status',
     '//flare/base/internal:test_prod',
     '//flare/rpc/internal:stream_call_gate_pool',
-    '//flare/rpc/protocol:controller',
     '//thirdparty/gflags:gflags',
+    '//flare/base:logging',
   ],
   visibility = ['//flare/testing:rpc_controller'],
 )
@@ -368,9 +400,7 @@ cc_test(
   name = 'rpc_client_controller_test',
   srcs = 'rpc_client_controller_test.cc',
   deps = [
-    ':rpc_channel',
     ':rpc_client_controller',
-    ':rpc_server_controller',
     '//flare/base:callback',
     '//flare/base:string',
     '//flare/fiber:fiber',
@@ -393,17 +423,18 @@ cc_library(
     ':message',
     '//flare/base:buffer',
     '//flare/base:down_cast',
-    '//flare/base:status',
     '//flare/base/internal:time_view',
     '//flare/base/net:endpoint',
-    '//flare/rpc/internal:stream_call_gate_pool',
     '//flare/rpc/internal:stream_call_gate',
     '//flare/rpc/internal:stream',
-    '//flare/rpc/protocol:controller',
     '//flare/rpc/protocol/protobuf:call_context',
     '//flare/rpc/protocol/protobuf:rpc_meta_proto',
     '//thirdparty/gflags:gflags',
-  ]
+    '//flare/base:tsc',
+  ],
+  keep_deps = [
+    ':call_context',
+  ],
 )
 
 cc_library(
@@ -414,10 +445,13 @@ cc_library(
     ':rpc_controller_common',
     '//flare/base:string',
     '//flare/base/internal:test_prod',
-    '//flare/rpc/internal:session_context',
     '//thirdparty/protobuf:protobuf',
+    '//flare/base:logging',
   ],
   visibility = ['//flare/testing:rpc_controller'],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_test(
@@ -425,13 +459,12 @@ cc_test(
   srcs = 'rpc_server_controller_test.cc',
   deps = [
     ':rpc_server_controller',
-    ':rpc_client_controller',
-    ':rpc_channel',
     '//flare/fiber:fiber',
     '//flare/testing:main',
     '//flare/testing:endpoint',
     '//flare/testing:echo_service_proto_flare',
     '//flare/rpc:rpc',
+    '//flare/base:logging',
   ],
 )
 
@@ -443,11 +476,9 @@ cc_library(
     ':binlog_proto',
     ':binlog',
     ':call_context',
-    ':message',
     ':rpc_options',
     ':rpc_server_controller',
     ':service_method_locator',
-    '//flare/base:buffer',
     '//flare/base:callback',
     '//flare/base:deferred',
     '//flare/base:down_cast',
@@ -455,17 +486,15 @@ cc_library(
     '//flare/base:string',
     '//flare/base/internal:hash_map',
     '//flare/base/internal:test_prod',
-    '//flare/fiber:fiber',
     '//flare/rpc:rpc_options_proto',
-    '//flare/rpc/binlog:binlog',
     '//flare/rpc/internal:fast_latch',
     '//flare/rpc/internal:rpc_metrics',
     '//flare/rpc/internal:session_context',
-    '//flare/rpc/internal:stream',
     '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/protocol:stream_service',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
+    '//thirdparty/jsoncpp:jsoncpp',
   ],
   visibility = ['//flare/rpc:*'],
 )
@@ -478,7 +507,10 @@ cc_library(
   ],
   visibility = [
     '//flare/testing:rpc_mock',
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_library(
@@ -517,10 +549,13 @@ cc_library(
     '//flare/rpc/internal:fast_latch',
     '//flare/rpc/internal:session_context',
     '//flare/rpc/internal:stream_call_gate',
-    '//flare/rpc/protocol:stream_protocol',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
     '//thirdparty/opentracing-cpp:opentracing',
+    ':rpc_meta_proto',
+    '//flare/base/internal:annotation',
+    '//flare/base:object_pool',
+    '//flare/base:tsc',
   ]
 )
 
@@ -539,7 +574,11 @@ cc_test(
   ],
   testdata = [
     ('testdata/', 'conf/'),
-  ]
+  ],
+  keep_deps = [
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )
 
 
@@ -551,13 +590,13 @@ cc_test(
     ':message',
     ':rpc_server_controller',
     ':service',
-    ':std_protocol',
     '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/rpc/internal:stream_io_adaptor',
     '//flare/rpc/protocol:stream_protocol',
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:main',
+    '//flare/base:deferred',
   ]
 )
 
@@ -575,6 +614,13 @@ for block_size in ['4K', '64K', '1M']:
       '//flare/testing:echo_service_proto_flare',
       '//flare/testing:endpoint',
       '//flare/testing:main',
+    ],
+    keep_deps = [
+      # `:protobuf` is the umbrella that bundles per-protocol libs (std/
+      # baidu_std/poppy/...). integration_test pulls them in via runtime
+      # registration, not via any direct header include, so blade flags
+      # it unused.
+      ':protobuf',
     ],
     defs = ['BUFFER_BLOCK_SIZE=\\"%s\\"' % block_size]
   )
@@ -608,19 +654,19 @@ cc_library(
     ':compression',
     ':message',
     ':rpc_meta_proto',
-    ':rpc_options',
     ':service_method_locator',
     ':std_protocol',  # For the same reason as of `proto_over_http`.
-    '//flare/base:buffer',
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
   ],
-  link_all_symbols = True
+  link_all_symbols = True,
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+    ':std_protocol',
+  ],
 )
 
 cc_test(
@@ -653,20 +699,20 @@ cc_library(
     ':message',
     ':poppy_rpc_meta_proto',
     ':rpc_meta_proto',
-    ':rpc_options',
     ':service_method_locator',
     ':std_protocol',  # For the same reason as of `proto_over_http`.
-    '//flare/base:buffer',
     '//flare/base:down_cast',
     '//flare/base:endian',
     '//flare/base:string',
     '//flare/base/buffer:zero_copy_stream',
-    '//flare/rpc/protocol:controller',
-    '//flare/rpc/protocol:message',
     '//flare/rpc/protocol:stream_protocol',
     '//thirdparty/protobuf:protobuf',
   ],
-  link_all_symbols = True
+  link_all_symbols = True,
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+    ':std_protocol',
+  ],
 )
 
 cc_test(
@@ -725,9 +771,7 @@ cc_library(
     '//flare/init:on_init',
     '//flare/rpc:message_dispatcher_factory',
     '//flare/rpc/load_balancer:load_balancer',
-    '//flare/rpc/load_balancer:round_robin',
     '//flare/rpc/message_dispatcher:message_dispatcher',
-    '//flare/rpc/name_resolver:list',
     '//flare/rpc/name_resolver:name_resolver',
   ],
   link_all_symbols = True,

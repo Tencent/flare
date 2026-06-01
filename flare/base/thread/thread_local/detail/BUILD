@@ -24,4 +24,7 @@ cc_library(
     '//flare/base/thread:thread_local',
     '//flare/base/thread/thread_local:ref_counted',
   ],
+  keep_deps = [
+    '//flare/base:align',
+  ],
 )

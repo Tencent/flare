@@ -25,6 +25,7 @@ cc_library(
   deps = [
     ':chrono',
     '//flare/base/internal:logging',
+    ':likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -32,7 +33,7 @@ cc_library(
 cc_test(
   name = 'logging_test',
   srcs = 'logging_test.cc',
-  deps = ':logging'
+  deps = [':logging', ':chrono'],
 )
 
 cc_benchmark(
@@ -60,6 +61,7 @@ cc_library(
     '//flare/base/internal:logging',
     '//flare/base/internal:memory_barrier',
     '//flare/base/internal:time_keeper',
+    ':likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -91,6 +93,7 @@ cc_library(
     '//flare/base/internal:annotation',
     '//flare/base/internal:logging',
     '//thirdparty/glog:glog',
+    ':likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -101,6 +104,7 @@ cc_test(
   deps = [
     ':tsc',
     ':logging',
+    ':chrono',
   ],
 )
 
@@ -160,12 +164,10 @@ cc_library(
   hdrs = 'buffer.h',
   srcs = 'buffer.cc',
   deps = [
-    ':object_pool',
-    ':ref_ptr',
     '//flare/base/buffer:builtin_buffer_block',
     '//flare/base/buffer:polymorphic_buffer',
-    '//flare/base/internal:logging',
     '//flare/base/internal:singly_linked_list',
+    ':logging',
   ],
   visibility = 'PUBLIC',
 )
@@ -351,7 +353,6 @@ cc_test(
   srcs = 'endian_test.cc',
   deps = [
     ':endian',
-    ':logging',
   ]
 )
 
@@ -367,6 +368,7 @@ cc_library(
     '//flare/base/internal:logging',
     '//flare/base/internal:meta',
     '//thirdparty/jsoncpp:jsoncpp',
+    ':function',
   ],
   visibility = 'PUBLIC',
 )
@@ -409,6 +411,7 @@ cc_library(
     ':demangle',
     '//flare/base/internal:logging',
     '//flare/base/internal:index_alloc',
+    ':likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -443,6 +446,7 @@ cc_library(
   hdrs = 'id_alloc.h',
   deps = [
     '//flare/base/internal:annotation',
+    ':likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -536,6 +540,9 @@ cc_library(
     '//thirdparty/protobuf:protobuf',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    '//thirdparty/protobuf:protobuf',
+  ],
 )
 
 cc_library(
@@ -565,7 +572,6 @@ cc_library(
   ],
   deps = [
     ':dependency_registry',
-    ':expected',
     ':function',
     ':logging',
     ':never_destroyed',
@@ -574,7 +580,6 @@ cc_library(
     '//flare/base/internal:time_keeper',
     '//flare/base/option:key',
     '//flare/base/thread:thread_cached',
-    '//flare/init:on_init',
     '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
   ],
@@ -619,7 +624,6 @@ cc_library(
     '//flare/base/internal:cpu',
     '//flare/base/internal:dpc',
     '//flare/base/internal:hash_map',
-    '//flare/base/internal:logging',
     '//flare/base/internal:time_keeper',
     '//flare/base/monitoring:dispatcher',
     '//flare/base/monitoring:event',
@@ -629,6 +633,8 @@ cc_library(
     '//flare/base/thread:thread_local',
     '//flare/base/thread/thread_local:ref_counted',
     '//thirdparty/gflags:gflags',
+    ':align',
+    ':tsc',
   ],
   visibility = 'PUBLIC',
 )
@@ -657,11 +663,13 @@ cc_test(
   deps = [
     ':down_cast',
     ':monitoring',
-    ':random',
     '//flare/base/monitoring:monitoring_system',
     '//flare/fiber:fiber',
     '//flare/init:override_flag',
     '//flare/testing:main',
+    '//thirdparty/gflags:gflags',
+  ],
+  keep_deps = [
     '//thirdparty/gflags:gflags',
   ],
 )
@@ -679,10 +687,6 @@ cc_library(
   deps = [
     '//flare/base/buffer:compression_output_stream',
     '//flare/base/compression:compression',
-    '//flare/base/compression:gzip',
-    '//flare/base/compression:lz4',
-    '//flare/base/compression:snappy',
-    '//flare/base/compression:zstd',
   ],
   visibility = 'PUBLIC',
 )
@@ -739,6 +743,7 @@ cc_library(
     '//flare/base/internal:hash_map',
     '//flare/base/internal:lazy_init',
     '//flare/base/internal:logging',
+    '//flare/base/internal:macro',
   ],
   visibility = 'PUBLIC',
 )

@@ -56,7 +56,6 @@ cc_test(
   name = 'disabled_test',
   srcs = 'disabled_test.cc',
   deps = [
-    ':disabled',
     '//flare/base:object_pool',
   ]
 )
@@ -81,7 +80,6 @@ cc_test(
   name = 'thread_local_test',
   srcs = 'thread_local_test.cc',
   deps = [
-    ':thread_local',
     '//flare/base:object_pool',
   ]
 )
@@ -93,7 +91,6 @@ cc_library(
   deps = [
     ':types',
     '//flare/base:align',
-    '//flare/base:chrono',
     '//flare/base:deferred',
     '//flare/base:demangle',
     '//flare/base:erased_ptr',
@@ -135,6 +132,7 @@ cc_library(
   srcs = 'global.cc',
   deps = [
     ':types',
+    '//flare/base:logging',
   ],
   visibility = ['//flare/base:object_pool'],
 )

@@ -29,7 +29,10 @@ cc_binary(
   ] + ([] if _is_darwin else [
     '//flare/rpc/builtin:tcmalloc_profiler_http_handler',
     '//thirdparty/gperftools:tcmalloc_and_profiler',
-  ])
+  ]),
+  keep_deps = [
+    '//thirdparty/gflags:gflags',
+  ],
 )
 
 cc_binary(
@@ -45,7 +48,10 @@ cc_binary(
     '//flare/rpc:rpc',
     '//flare/rpc/builtin:jemalloc_profiler_http_handler',
     '//thirdparty/gflags:gflags',
-  ] + ([] if _is_darwin else ['//thirdparty/gperftools:profiler'])
+  ] + ([] if _is_darwin else ['//thirdparty/gperftools:profiler']),
+  keep_deps = [
+    '//thirdparty/gflags:gflags',
+  ],
 )
 
 cc_binary(

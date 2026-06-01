@@ -31,7 +31,6 @@ cc_library(
     ':load_balancer',
     '//flare/base:hazptr',
     '//flare/base:string',
-    '//flare/io:io_basic',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
@@ -56,7 +55,6 @@ cc_library(
     ':load_balancer',
     '//flare/base:hazptr',
     '//flare/base:random',
-    '//flare/io:io_basic',
   ],
   link_all_symbols = True,
   visibility = 'PUBLIC',
@@ -65,5 +63,8 @@ cc_library(
 cc_test(
   name = 'round_robin_test',
   srcs = [],
-  deps = []
+  keep_deps = [
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )

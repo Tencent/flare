@@ -40,5 +40,8 @@ cc_library(
 cc_test(
   name = 'composited_test',
   srcs = [],
-  deps = []
+  keep_deps = [
+    '//thirdparty/googletest:gtest',
+    '//thirdparty/googletest:gtest_main',
+  ],
 )

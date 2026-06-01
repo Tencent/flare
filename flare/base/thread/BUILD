@@ -22,6 +22,8 @@ cc_library(
     '//flare/base:never_destroyed',
     '//flare/base/thread:thread_local',
     '//flare/base/internal:biased_mutex',
+    '//flare/base:align',
+    '//flare/base:likely',
   ],
   visibility = 'PUBLIC',
 )
@@ -137,6 +139,9 @@ cc_library(
     '//flare/base/thread/thread_local/detail:atomic_ptr',
   ],
   visibility = 'PUBLIC',
+  keep_deps = [
+    '//flare/base:likely',
+  ],
 )
 
 cc_test(
