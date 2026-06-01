@@ -17,13 +17,9 @@ cc_library(
   hdrs = 'write_mostly.h',
   deps = [
     '//flare/base:align',
-    '//flare/base:chrono',
     '//flare/base/thread:thread_local',
   ],
   visibility = ['//flare/base:write_mostly'],
-  keep_deps = [
-    '//flare/base:chrono',
-  ],
 )
 
 cc_library(

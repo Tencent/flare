@@ -403,13 +403,9 @@ cc_library(
     '//flare/base/net:endpoint',
     '//flare/rpc/internal:stream_call_gate',
     '//flare/rpc/internal:stream',
-    '//flare/rpc/protocol/protobuf:call_context',
     '//flare/rpc/protocol/protobuf:rpc_meta_proto',
     '//thirdparty/gflags:gflags',
     '//flare/base:tsc',
-  ],
-  keep_deps = [
-    ':call_context',
   ],
 )
 
@@ -545,10 +541,6 @@ cc_test(
   testdata = [
     ('testdata/', 'conf/'),
   ],
-  keep_deps = [
-    '//thirdparty/googletest:gtest',
-    '//thirdparty/googletest:gtest_main',
-  ],
 )
 
 
@@ -575,7 +567,6 @@ for block_size in ['4K', '64K', '1M']:
     name = 'integration_test_' + block_size,
     srcs = 'integration_test.cc',
     deps = [
-      ':protobuf',
       '//flare/base:compression',
       '//flare/base:string',
       '//flare/base/thread:latch',
@@ -586,7 +577,6 @@ for block_size in ['4K', '64K', '1M']:
       '//flare/testing:main',
     ],
     defs = ['BUFFER_BLOCK_SIZE=\\"%s\\"' % block_size],
-    keep_deps = [':protobuf'],
   )
 
 cc_library(

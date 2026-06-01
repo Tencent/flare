@@ -16,15 +16,11 @@ cc_library(
   name = 'atomic_ptr',
   hdrs = 'atomic_ptr.h',
   deps = [
-    '//flare/base:align',
     '//flare/base:ref_ptr',
     '//flare/base/internal:copyable_atomic',
   ],
   visibility = [
     '//flare/base/thread:thread_local',
     '//flare/base/thread/thread_local:ref_counted',
-  ],
-  keep_deps = [
-    '//flare/base:align',
   ],
 )

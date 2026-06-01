@@ -89,6 +89,8 @@ cc_library(
   ],
   visibility = 'PUBLIC',
   keep_deps = [
+    # Umbrella re-export: this facade exposes the HTTP filter / handler types
+    # AND link-registers the HTTP protocol with the RPC server.
     '//flare/rpc/protocol/http:http',
   ],
 )

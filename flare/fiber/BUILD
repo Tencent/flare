@@ -93,16 +93,12 @@ cc_library(
   name = 'future',
   hdrs = 'future.h',
   deps = [
-    ':fiber_basic',
     '//flare/base:delayed_init',
     '//flare/base:future',
     '//flare/base/internal:time_view',
     '//flare/fiber/detail:fiber_impl',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    ':fiber_basic',
-  ],
 )
 
 cc_library(

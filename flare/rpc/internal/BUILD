@@ -214,9 +214,6 @@ cc_library(
     '//flare/base/thread:thread_local',
   ],
   visibility = ['//flare/rpc/...'],
-  keep_deps = [
-    '//flare/base:logging',
-  ],
 )
 
 cc_test(

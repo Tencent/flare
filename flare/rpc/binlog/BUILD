@@ -82,16 +82,12 @@ cc_library(
     '//flare/base:never_destroyed',
     '//flare/base:string',
     '//flare/base/experimental:lazy_eval',
-    '//flare/base/internal:index_alloc',  # ???
     '//flare/base/net:endpoint',
     '//flare/rpc/binlog:tags',
     '//flare/rpc/internal:sampler',
     '//thirdparty/gflags:gflags',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//flare/base/internal:index_alloc',
-  ],
 )
 
 cc_test(

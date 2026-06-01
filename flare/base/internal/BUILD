@@ -224,9 +224,6 @@ cc_library(
     '#dl',
   ],
   visibility = ['//flare/...'],
-  keep_deps = [
-    '//thirdparty/gflags:gflags',
-  ],
 )
 
 cc_library(
@@ -387,13 +384,9 @@ cc_library(
   deps = [
     ':logging',
     ':meta',
-    '//flare/base:logging',
     '//flare/base:likely',
   ],
   visibility = ['//flare/...'],
-  keep_deps = [
-    '//flare/base:logging',
-  ],
 )
 
 cc_test(

@@ -45,9 +45,6 @@ cc_library(
     '//flare/base/thread/thread_local/detail:atomic_ptr',
   ],
   visibility = 'PUBLIC',
-  keep_deps = [
-    '//flare/base:function',
-  ],
 )
 
 cc_test(
