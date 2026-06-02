@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
 
     - name: Setup bazel
       run: |
@@ -33,7 +33,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
 
     # foreign_cc autotools deps (jemalloc/openssl/curl/nghttp2) run autogen.sh,
     # which needs autoconf/automake/libtool (not preinstalled on the runner).
