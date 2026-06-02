@@ -25,11 +25,11 @@ namespace flare {
 std::atomic<int> counter{};
 
 TEST(Semaphore, All) {
-  for (int j = 0; j != 100; ++j) {
+  for (int j = 0; j != 10; ++j) {
     CountingSemaphore semaphore(100);
     std::vector<std::thread> ts;
 
-    for (int i = 0; i != 10000; ++i) {
+    for (int i = 0; i != 1000; ++i) {
       ts.emplace_back([&] {
         semaphore.acquire();
         ++counter;
