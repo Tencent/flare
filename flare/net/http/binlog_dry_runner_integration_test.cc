@@ -217,7 +217,12 @@ TEST(DryRunner, All) {
         ASSERT_TRUE(outgoing_resp);
         EXPECT_EQ(kDummyHttpResponseBody, *outgoing_resp->body());
         resp->set_body(kServerEchoResponseBody);
-        EXPECT_NEAR(100ms / 1ms, (ReadSteadyClock() - start) / 1ms, 20);
+        // Tolerance widened from 20ms to 50ms: GitHub Actions runners are
+        // shared VMs whose scheduling jitter occasionally pushes the observed
+        // elapsed time above 120ms (we've seen 136ms in CI). The test's intent
+        // is to confirm the dry-runner's 100ms simulated latency is honored at
+        // the millisecond scale, not to assert a hard real-time budget.
+        EXPECT_NEAR(100ms / 1ms, (ReadSteadyClock() - start) / 1ms, 50);
       }));
   server.Start();
 
