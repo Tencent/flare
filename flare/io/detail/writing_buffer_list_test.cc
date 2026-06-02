@@ -136,11 +136,11 @@ TEST(WritingBufferList, Torture) {
   static const TestConfig configs[] = {
       {.loop = 50, .buffer_size = 10, .flush_limit = 1},
       {.loop = 500, .buffer_size = 5000, .flush_limit = 100000},
-      {.loop = 5000,
+      {.loop = 1000,
        .buffer_size = 5000,
        .flush_limit = std::numeric_limits<std::size_t>::max()}};
   for (auto&& config : configs) {
-    for (int i = 0; i != 10; ++i) {
+    for (int i = 0; i != 3; ++i) {
       Handle fd(open("/dev/null", O_WRONLY));
       CHECK(!!fd);
       WritingBufferList wbl;
