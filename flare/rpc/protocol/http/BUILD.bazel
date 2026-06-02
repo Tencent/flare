@@ -151,6 +151,7 @@ cc_test(
 
 cc_test(
     name = "buffer_io_benchmark",
+    tags = ["benchmark"],
     srcs = ["buffer_io_benchmark.cc"],
     deps = [
         ":buffer_io",

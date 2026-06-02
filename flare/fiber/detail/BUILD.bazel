@@ -25,6 +25,7 @@ cc_library(
 
 cc_test(
     name = "context_benchmark",
+    tags = ["benchmark"],
     srcs = ["context_benchmark.cc"],
     deps = [
         ":context",
@@ -72,6 +73,7 @@ cc_library(
 
 cc_test(
     name = "assembly_benchmark",
+    tags = ["benchmark"],
     srcs = ["assembly_benchmark.cc"],
     deps = [
         ":assembly",

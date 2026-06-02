@@ -97,6 +97,7 @@ cc_test(
 
 cc_test(
     name = "seqlocked_benchmark",
+    tags = ["benchmark"],
     srcs = ["seqlocked_benchmark.cc"],
     deps = [
         ":seqlocked",

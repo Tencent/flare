@@ -25,9 +25,11 @@ jobs:
       run: bazel build ...
 
     - name: Test
-      # Build and Execute tests
+      # Build and Execute tests. Benchmarks (cc_test name = "*_benchmark",
+      # tagged "benchmark") are excluded from CI -- they're for manual perf
+      # runs, not pass/fail validation.
       working-directory: ${{github.workspace}}
-      run: bazel test --test_output=errors ...
+      run: bazel test --test_output=errors --test_tag_filters=-benchmark ...
 
   build_on_macos:
     runs-on: macos-latest

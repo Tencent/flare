@@ -187,6 +187,7 @@ cc_test(
 
 cc_test(
     name = "fiber_local_benchmark",
+    tags = ["benchmark"],
     srcs = ["fiber_local_benchmark.cc"],
     deps = [
         ":fiber",
@@ -241,6 +242,7 @@ cc_test(
 
 cc_test(
     name = "execution_context_benchmark",
+    tags = ["benchmark"],
     srcs = ["execution_context_benchmark.cc"],
     deps = [
         ":fiber",

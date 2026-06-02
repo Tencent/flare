@@ -126,6 +126,7 @@ cc_test(
 
 cc_test(
     name = "memory_node_shared_benchmark",
+    tags = ["benchmark"],
     srcs = ["memory_node_shared_benchmark.cc"],
     deps = [
         "//flare/base:object_pool",

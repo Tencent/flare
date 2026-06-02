@@ -57,6 +57,7 @@ cc_test(
 
 cc_test(
     name = "ref_counted_benchmark",
+    tags = ["benchmark"],
     srcs = ["ref_counted_benchmark.cc"],
     deps = [
         ":ref_counted",
