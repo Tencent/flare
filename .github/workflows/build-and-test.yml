@@ -34,6 +34,13 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build ccache
+        # Apt installs only the versioned binaries; /usr/bin/gcc still points
+        # at the distro default (gcc-11 on 22.04, gcc-13 on 24.04). Register
+        # the matrix version with update-alternatives so plain `gcc`/`g++`
+        # actually resolve to it -- otherwise blade's shutil.which('gcc')
+        # and ccache's compiler dispatch both pick up the wrong version.
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.cc }} 100
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.cc }} 100
         # /usr/lib/ccache holds symlinks (gcc, g++, gcc-10, ...) -> ccache.
         # Prepending to PATH makes blade's shutil.which('gcc') resolve to the
         # ccache shim; ccache then dispatches to the real compiler via its
@@ -63,13 +70,11 @@ jobs:
     - name: ccache stats (before)
       run: ccache --zero-stats && ccache --show-config
     - name: Build
-      run: |
-        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
+      run: ./blade build ... -k
     - name: ccache stats (after)
       run: ccache --show-stats
     - name: Run tests
-      run: |
-        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
+      run: ./blade test ...
 
   # Latest compiler (gcc 13).
   build_on_ubuntu_24_04:
@@ -91,6 +96,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build ccache
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.cc }} 100
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.cc }} 100
         echo "/usr/lib/ccache" >> $GITHUB_PATH
     - name: Cache blade build dir
       uses: actions/cache@v4
@@ -110,13 +117,11 @@ jobs:
     - name: ccache stats (before)
       run: ccache --zero-stats && ccache --show-config
     - name: Build
-      run: |
-        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
+      run: ./blade build ... -k
     - name: ccache stats (after)
       run: ccache --show-stats
     - name: Run tests
-      run: |
-        CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
+      run: ./blade test ...
 
   build_on_macos:
     runs-on: macos-latest
