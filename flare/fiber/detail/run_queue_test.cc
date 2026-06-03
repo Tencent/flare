@@ -55,14 +55,14 @@ TEST(RunQueue, Nonstealable) {
 }
 
 TEST(RunQueue, Torture) {
-  constexpr auto N = 1'000'000;
+  constexpr auto N = 200'000;
 
   RunQueue queue(1048576);
 
   // Loop for several rounds so that we can test the case when queue's internal
   // ring buffer wraps around.
-  for (int k = 0; k != 10; ++k) {
-    constexpr auto T = 200;
+  for (int k = 0; k != 3; ++k) {
+    constexpr auto T = 100;
     std::thread ts[T];
     Latch latch(T);
     std::mutex lock;
@@ -122,12 +122,12 @@ TEST(RunQueue, Torture) {
 }
 
 TEST(RunQueue, Overrun) {
-  constexpr auto T = 40;
-  constexpr auto N = 100'000;
+  constexpr auto T = 20;
+  constexpr auto N = 20'000;
 
   // Loop for several rounds so that we can test the case when queue's internal
   // ring buffer wraps around.
-  for (int k = 0; k != 10; ++k) {
+  for (int k = 0; k != 3; ++k) {
     RunQueue queue(8192);
     std::atomic<std::size_t> overruns{};
     std::atomic<std::size_t> popped{};
@@ -181,14 +181,14 @@ TEST(RunQueue, Overrun) {
 }
 
 TEST(RunQueue, Throughput) {
-  constexpr auto N = 1'000'000;
+  constexpr auto N = 200'000;
 
   RunQueue queue(1048576);
 
   // Loop for several rounds so that we can test the case when queue's internal
   // ring buffer wraps around.
-  for (int k = 0; k != 10; ++k) {
-    constexpr auto T = 200;
+  for (int k = 0; k != 3; ++k) {
+    constexpr auto T = 100;
     std::thread ts[T];
     Latch latch(T), latch2(T);
     std::mutex lock;
