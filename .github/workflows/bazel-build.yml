@@ -13,6 +13,22 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
+    # Cache bazel's output base. Restoring it makes a "warm" CI run reuse
+    # everything bazel already compiled (foreign_cc thirdparty, all .o, test
+    # results) -- the next push that touches only a few .cc files rebuilds
+    # those plus their downstream, instead of the full ~14 min cold build.
+    # Key is tied to WORKSPACE + every BUILD.bazel + thirdparty tarballs so
+    # any structural change invalidates; restore-keys lets us fall back to
+    # the most recent cache on the same OS even if those don't match.
+    - name: Cache bazel
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/bazel
+        key: bazel-${{ runner.os }}-${{ hashFiles('WORKSPACE', '**/BUILD.bazel', 'thirdparty/**/*.tar.gz', 'thirdparty/**/*.zip', 'thirdparty/**/*.patch') }}
+        restore-keys: |
+          bazel-${{ runner.os }}-
+
     - name: Setup bazel
       run: |
         rm -rf /usr/local/bin/bazel
@@ -36,6 +52,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
+
+    - name: Cache bazel
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/bazel
+        key: bazel-${{ runner.os }}-${{ hashFiles('WORKSPACE', '**/BUILD.bazel', 'thirdparty/**/*.tar.gz', 'thirdparty/**/*.zip', 'thirdparty/**/*.patch') }}
+        restore-keys: |
+          bazel-${{ runner.os }}-
 
     # foreign_cc autotools deps (jemalloc/openssl/curl/nghttp2) run autogen.sh,
     # which needs autoconf/automake/libtool (not preinstalled on the runner).
