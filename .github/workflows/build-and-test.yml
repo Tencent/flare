@@ -33,13 +33,18 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build
-    # Cache blade's build dir. The thirdparty/ subtree is the big win
-    # (foreign_cc curl/openssl/jemalloc/nghttp2 each take minutes to build);
-    # the rest of build64_release/ also caches per-target .o so unchanged
-    # cc_libraries don't recompile. Key is per-(OS,gcc) since binaries are
-    # not portable; hashed inputs cover the thirdparty source archives so
-    # any upstream bump invalidates.
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build ccache
+        # /usr/lib/ccache holds symlinks (gcc, g++, gcc-10, ...) -> ccache.
+        # Prepending to PATH makes blade's shutil.which('gcc') resolve to the
+        # ccache shim; ccache then dispatches to the real compiler via its
+        # own PATH inspection. Blade reads no env var here.
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
+    # build64_release cache covers thirdparty/foreign_cc artifacts (curl/openssl/
+    # jemalloc/nghttp2 etc.); those are autotools/cmake subbuilds, not plain
+    # cc_libraries, so ccache can't help with them. The .o files inside
+    # build64_release/ rarely survive an incremental run because actions/checkout
+    # resets source mtimes -- that's precisely what ccache (content-hash based)
+    # solves for the regular cc_library/cc_test compilations.
     - name: Cache blade build dir
       uses: actions/cache@v4
       with:
@@ -48,9 +53,20 @@ jobs:
         key: blade-${{ runner.os }}-${{ matrix.cc }}-${{ hashFiles('thirdparty/**/*.tar.gz', 'thirdparty/**/*.zip', 'thirdparty/**/BUILD', 'thirdparty/**/*.patch') }}
         restore-keys: |
           blade-${{ runner.os }}-${{ matrix.cc }}-
+    - name: Cache ccache db
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ccache
+        key: ccache-${{ runner.os }}-${{ matrix.cc }}-${{ github.sha }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ matrix.cc }}-
+    - name: ccache stats (before)
+      run: ccache --zero-stats && ccache --show-config
     - name: Build
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
+    - name: ccache stats (after)
+      run: ccache --show-stats
     - name: Run tests
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
@@ -74,7 +90,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build
+        sudo apt-get install -y gcc-${{ matrix.cc }} g++-${{ matrix.cc }} ninja-build ccache
+        echo "/usr/lib/ccache" >> $GITHUB_PATH
     - name: Cache blade build dir
       uses: actions/cache@v4
       with:
@@ -83,9 +100,20 @@ jobs:
         key: blade-${{ runner.os }}-${{ matrix.cc }}-${{ hashFiles('thirdparty/**/*.tar.gz', 'thirdparty/**/*.zip', 'thirdparty/**/BUILD', 'thirdparty/**/*.patch') }}
         restore-keys: |
           blade-${{ runner.os }}-${{ matrix.cc }}-
+    - name: Cache ccache db
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ccache
+        key: ccache-${{ runner.os }}-${{ matrix.cc }}-${{ github.sha }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ matrix.cc }}-
+    - name: ccache stats (before)
+      run: ccache --zero-stats && ccache --show-config
     - name: Build
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade build ... -k
+    - name: ccache stats (after)
+      run: ccache --show-stats
     - name: Run tests
       run: |
         CC=gcc-${{ matrix.cc }} CXX=g++-${{ matrix.cc }} ./blade test ...
@@ -109,6 +137,21 @@ jobs:
     # runner; ninja is not). autoconf/automake/libtool are needed by autotools-
     # based thirdparty packages (e.g. jemalloc's autogen.sh).
     - name: Install dependencies
-      run: brew install ninja autoconf automake libtool
+      run: |
+        brew install ninja autoconf automake libtool ccache
+        # brew's ccache pkg installs symlinks (gcc, g++, clang, ...) into
+        # $(brew --prefix)/opt/ccache/libexec. Same trick as Linux.
+        echo "$(brew --prefix)/opt/ccache/libexec" >> $GITHUB_PATH
+    - name: Cache ccache db
+      uses: actions/cache@v4
+      with:
+        path: ~/Library/Caches/ccache
+        key: ccache-${{ runner.os }}-${{ github.sha }}
+        restore-keys: |
+          ccache-${{ runner.os }}-
+    - name: ccache stats (before)
+      run: ccache --zero-stats && ccache --show-config
     - name: Build
       run: ./blade build flare/... -k
+    - name: ccache stats (after)
+      run: ccache --show-stats
