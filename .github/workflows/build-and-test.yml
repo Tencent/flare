@@ -7,15 +7,17 @@ on:
     branches: [master]
 
 jobs:
-  # Oldest supported compiler (gcc 10, first with usable C++20). Pinned to
-  # ubuntu-22.04 because GitHub's ubuntu-20.04 runners are deprecated and the
-  # queue can stall for tens of minutes. gcc-10 is still in 22.04's main archive.
+  # Oldest supported compiler (gcc 11, first libstdc++ with std::atomic
+  # wait/notify per P1135 -- required since #158 replaced the Linux-only
+  # futex path in fiber/detail/scheduling_group.cc). Pinned to ubuntu-22.04
+  # because GitHub's ubuntu-20.04 runners are deprecated and the queue can
+  # stall for tens of minutes; gcc-11 is the distro default for 22.04.
   build_on_ubuntu_22_04:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: ['3.10']
-        cc: [10]
+        cc: [11]
 
     steps:
     - uses: actions/checkout@v6
