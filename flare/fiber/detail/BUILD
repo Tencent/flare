@@ -187,7 +187,8 @@ cc_test(
     '//flare/fiber/detail:testing',
     '//flare/base:chrono',
     '//flare/base:tsc',
-  ]
+  ],
+  exclusive = True,
 )
 
 cc_library(

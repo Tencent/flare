@@ -115,7 +115,8 @@ cc_test(
     '//flare/base:object_pool',
     '//flare/base/thread:latch',
     '//flare/base:random',
-  ]
+  ],
+  exclusive = True,
 )
 
 cc_benchmark(

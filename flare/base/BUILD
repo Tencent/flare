@@ -75,7 +75,8 @@ cc_test(
     ':random',
     ':string',
     '//flare/testing:main',
-  ]
+  ],
+  exclusive = True,
 )
 
 cc_benchmark(
@@ -652,6 +653,7 @@ cc_test(
   ],
   # Heap checker is rather slow that we'd timeout if it's enabled.
   heap_check = '',
+  exclusive = True,
 )
 
 cc_test(
