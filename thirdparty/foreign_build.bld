@@ -112,14 +112,22 @@ def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
     dyld_path = ('DYLD_LIBRARY_PATH=%s:$DYLD_LIBRARY_PATH '
                  'DYLD_FALLBACK_LIBRARY_PATH=%s:$DYLD_FALLBACK_LIBRARY_PATH ' % (
                      lib_path_env, lib_path_env)) if is_darwin else ''
+    # Pass CC/CXX explicitly from the resolved toolchain rather than letting
+    # autoconf pick from $CC/$CXX or its own detection. Matches the cmake
+    # path above and keeps the thirdparty layer in sync with whatever
+    # blade.cc_toolchain.tool() decided at config time.
+    cc = blade.cc_toolchain.tool('cc') or 'cc'
+    cxx = blade.cc_toolchain.tool('cxx') or 'c++'
     configure = ('cd $OUT_DIR/%s && '
                  'LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH '
                  '%s'
+                 'CC=%s CXX=%s '
                  'LDFLAGS="$LDFLAGS %s" '
                  './%s --prefix=%s %s' % (
                      source_dir,
                      lib_path_env,
                      dyld_path,
+                     cc, cxx,
                      rpath_flags,
                      configure_file_name,
                      full_install_dir,
