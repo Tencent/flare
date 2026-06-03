@@ -37,6 +37,7 @@ cc_test(
 
 cc_test(
     name = "out_of_duty_callback_benchmark",
+    tags = ["benchmark"],
     srcs = ["out_of_duty_callback_benchmark.cc"],
     deps = [
         ":out_of_duty_callback",
@@ -89,6 +90,7 @@ cc_test(
 
 cc_test(
     name = "thread_cached_benchmark",
+    tags = ["benchmark"],
     srcs = ["thread_cached_benchmark.cc"],
     deps = [
         ":thread_cached",

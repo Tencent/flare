@@ -178,6 +178,7 @@ cc_test(
 
 cc_test(
     name = "rpc_metrics_benchmark",
+    tags = ["benchmark"],
     srcs = ["rpc_metrics_benchmark.cc"],
     deps = [
         ":rpc_metrics",

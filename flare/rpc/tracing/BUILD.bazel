@@ -97,6 +97,7 @@ cc_test(
 
 cc_test(
     name = "tracing_ops_benchmark",
+    tags = ["benchmark"],
     srcs = ["tracing_ops_benchmark.cc"],
     deps = [
         ":framework_tags",

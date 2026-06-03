@@ -40,6 +40,7 @@ cc_test(
 
 cc_test(
     name = "logging_benchmark",
+    tags = ["benchmark"],
     srcs = ["logging_benchmark.cc"],
     deps = [
         ":logging",
@@ -84,6 +85,7 @@ cc_test(
 
 cc_test(
     name = "hazptr_benchmark",
+    tags = ["benchmark"],
     srcs = ["hazptr_benchmark.cc"],
     deps = [
         ":hazptr",
@@ -116,6 +118,7 @@ cc_test(
 
 cc_test(
     name = "tsc_benchmark",
+    tags = ["benchmark"],
     srcs = ["tsc_benchmark.cc"],
     deps = [
         ":tsc",
@@ -149,6 +152,7 @@ cc_test(
 
 cc_test(
     name = "chrono_benchmark",
+    tags = ["benchmark"],
     srcs = ["chrono_benchmark.cc"],
     deps = [
         ":chrono",
@@ -471,6 +475,7 @@ cc_test(
 
 cc_test(
     name = "casting_benchmark",
+    tags = ["benchmark"],
     srcs = ["casting_benchmark.cc"],
     deps = [
         ":casting",
@@ -511,6 +516,7 @@ cc_test(
 
 cc_test(
     name = "id_alloc_benchmark",
+    tags = ["benchmark"],
     srcs = ["id_alloc_benchmark.cc"],
     deps = [
         ":id_alloc",
@@ -539,6 +545,7 @@ cc_test(
 
 cc_test(
     name = "function_benchmark",
+    tags = ["benchmark"],
     srcs = ["function_benchmark.cc"],
     deps = [
         ":function",
@@ -664,6 +671,7 @@ cc_test(
 
 cc_test(
     name = "option_benchmark",
+    tags = ["benchmark"],
     srcs = ["option_benchmark.cc"],
     deps = [
         ":option",
@@ -735,6 +743,7 @@ cc_test(
 
 cc_test(
     name = "monitoring_benchmark",
+    tags = ["benchmark"],
     srcs = ["monitoring_benchmark.cc"],
     deps = [
         ":monitoring",

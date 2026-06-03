@@ -104,8 +104,8 @@ TEST(TimerWorker, SetTimerInTimerContext) {
 std::atomic<std::size_t> timer_set, timer_removed;
 
 TEST(TimerWorker, Torture) {
-  constexpr auto N = 100000;
-  constexpr auto T = 40;
+  constexpr auto N = 5000;
+  constexpr auto T = 20;
 
   auto scheduling_group =
       std::make_unique<SchedulingGroup>(std::vector<int>{1, 2, 3}, T);

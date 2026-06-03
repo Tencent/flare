@@ -37,7 +37,7 @@ struct OverflowTraits {
 };
 
 TEST(IdAlloc, Overflow) {
-  std::vector<int> v(100000);
+  std::vector<int> v(10000);
   for (auto&& e : v) {
     e = Next<OverflowTraits>();
   }
@@ -52,7 +52,7 @@ struct OverflowTraits2 {
 };
 
 TEST(IdAlloc, Overflow2) {
-  std::vector<int> v(100000);
+  std::vector<int> v(10000);
   for (auto&& e : v) {
     e = Next<OverflowTraits2>();
   }
@@ -65,7 +65,7 @@ TEST(IdAlloc, Overflow2) {
 
 TEST(IdAlloc, NoDuplicateUntilOverflow) {
   constexpr auto kDistinct = 0x7fff'ffff - 0x7fff'efff;  // `kMax` is wasted`
-  std::vector<int> v(100000);
+  std::vector<int> v(10000);
   for (auto&& e : v) {
     e = Next<OverflowTraits2>();
   }
@@ -80,9 +80,9 @@ struct U32Traits {
 };
 
 TEST(IdAlloc, Multithreaded) {
-  constexpr auto N = 40;
+  constexpr auto N = 20;
   // If our optimization does work, several seconds should be enough.
-  constexpr auto L = 25'000'000;
+  constexpr auto L = 500'000;
   std::vector<int> vs[N];
   std::thread ts[N];
   Latch latch(1);

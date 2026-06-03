@@ -69,6 +69,7 @@ cc_test(
 
 cc_test(
     name = "circular_buffer_benchmark",
+    tags = ["benchmark"],
     srcs = ["circular_buffer_benchmark.cc"],
     deps = [
         ":circular_buffer",
@@ -105,6 +106,7 @@ cc_test(
 
 cc_test(
     name = "dpc_benchmark",
+    tags = ["benchmark"],
     srcs = ["dpc_benchmark.cc"],
     deps = [
         ":background_task_host",
@@ -261,6 +263,7 @@ cc_library(
 
 cc_test(
     name = "memory_barrier_benchmark",
+    tags = ["benchmark"],
     srcs = ["memory_barrier_benchmark.cc"],
     deps = [
         ":memory_barrier",
@@ -357,6 +360,7 @@ cc_test(
 
 cc_test(
     name = "biased_mutex_benchmark",
+    tags = ["benchmark"],
     srcs = ["biased_mutex_benchmark.cc"],
     deps = [
         ":biased_mutex",
@@ -407,6 +411,7 @@ cc_test(
 
 cc_test(
     name = "case_insensitive_hash_map_benchmark",
+    tags = ["benchmark"],
     srcs = ["case_insensitive_hash_map_benchmark.cc"],
     deps = [
         ":case_insensitive_hash_map",
@@ -438,6 +443,7 @@ cc_test(
 
 cc_test(
     name = "hash_map_benchmark",
+    tags = ["benchmark"],
     srcs = ["hash_map_benchmark.cc"],
     deps = [
         ":hash_map",

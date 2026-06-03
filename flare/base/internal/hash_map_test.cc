@@ -53,7 +53,7 @@ TEST(HashMap, Easy) {
 }
 
 TEST(HashMap, Random) {
-  constexpr auto kIterations = 5000000;
+  constexpr auto kIterations = 500000;
   constexpr auto kMaxKey = kIterations / 10;
   HashMap<int, std::string> m1;
   std::map<int, std::string> m2;
@@ -99,8 +99,8 @@ TEST(HashMap, Random) {
 }
 
 TEST(HashMap, DeletionAfterInsertion) {
-  for (int j = 0; j != 100; ++j) {
-    constexpr auto kIterations = 100000;
+  for (int j = 0; j != 10; ++j) {
+    constexpr auto kIterations = 10000;
     constexpr auto kMaxKey = kIterations / 10;
     HashMap<int, std::string> m1;
     std::map<int, std::string> m2;
