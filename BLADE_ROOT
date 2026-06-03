@@ -1,6 +1,12 @@
 global_config(
     duplicated_source_action='error',
-    test_timeout=600,  # In seconds
+    # Per-test wall timeout for normal hardware. Slower runners scale up via
+    # the `--test-timeout-multiplier` CLI flag (see .github/workflows/...).
+    # Profiled on M2 (release/-O2): the slowest tests today are CPU-heavy
+    # ones around 30-40s, all already exclusive=True so they don't fight
+    # for cores. 60s gives ~50% headroom over the slowest legit test;
+    # anything blowing past that is almost certainly hung.
+    test_timeout=60,  # In seconds
     glob_error_severity='error',
     legacy_public_targets=load_value('build/blade/legacy_public_targets.conf'),
 )
@@ -18,7 +24,11 @@ cc_test_config(
         'strict' if blade.cc_toolchain.target_arch != 'aarch64' else ''
     ),
     gperftools_libs='thirdparty/gperftools:tcmalloc',
-    gtest_libs=['thirdparty/googletest:gtest', '#pthread'],
+    # On macOS pthread is part of libSystem and auto-linked; '#pthread' here
+    # would produce "ld: warning: ignoring duplicate libraries: '-lpthread'"
+    # on every cc_test. Restrict to Linux.
+    gtest_libs=lambda blade: ['thirdparty/googletest:gtest'] + (
+        ['#pthread'] if blade.cc_toolchain.target_os == 'linux' else []),
     gtest_main_libs=['thirdparty/googletest:gtest_main'],
     pprof_path='thirdparty/gperftools/bin/pprof',
 )

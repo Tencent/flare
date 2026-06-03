@@ -19,9 +19,8 @@ autotools_build(
 foreign_cc_library(
     name = 'crypto',
     deps = [
-      '#dl',
       ':openssl_build',
-    ] + (['#pthread'] if _is_linux else []),
+    ] + (['#dl', '#pthread'] if _is_linux else []),
     visibility = 'PUBLIC',
     has_dynamic=True,
 )

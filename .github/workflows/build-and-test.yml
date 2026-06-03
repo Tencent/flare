@@ -76,7 +76,11 @@ jobs:
     - name: ccache stats (after)
       run: ccache --show-stats
     - name: Run tests
-      run: ./blade test ...
+      # BLADE_ROOT sets test_timeout=60 -- the slowest legit test runs in
+      # ~40s on M2 release/-O2. GHA runners are slower and contended, so
+      # scale up here. 5x = 300s effective; still tight enough that a real
+      # hang (10+ min) is caught fast.
+      run: ./blade test --test-timeout-multiplier=5 ...
 
   # Latest compiler (gcc 13).
   build_on_ubuntu_24_04:
@@ -123,7 +127,11 @@ jobs:
     - name: ccache stats (after)
       run: ccache --show-stats
     - name: Run tests
-      run: ./blade test ...
+      # BLADE_ROOT sets test_timeout=60 -- the slowest legit test runs in
+      # ~40s on M2 release/-O2. GHA runners are slower and contended, so
+      # scale up here. 5x = 300s effective; still tight enough that a real
+      # hang (10+ min) is caught fast.
+      run: ./blade test --test-timeout-multiplier=5 ...
 
   build_on_macos:
     runs-on: macos-latest
