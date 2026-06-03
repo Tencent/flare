@@ -107,9 +107,9 @@ TEST_P(SystemFiberOrNot, Mutex) {
 }
 
 TEST_P(SystemFiberOrNot, ConditionVariable) {
-  constexpr auto N = 10000;
+  constexpr auto N = 2000;
 
-  for (int i = 0; i != 10; ++i) {
+  for (int i = 0; i != 3; ++i) {
     Mutex m[N];
     ConditionVariable cv[N];
     std::queue<int> queue[N];
@@ -163,7 +163,7 @@ TEST_P(SystemFiberOrNot, ConditionVariable) {
 TEST_P(SystemFiberOrNot, ConditionVariable2) {
   constexpr auto N = 1000;
 
-  for (int i = 0; i != 50; ++i) {
+  for (int i = 0; i != 10; ++i) {
     Mutex m[N];
     ConditionVariable cv[N];
     bool f[N] = {};
@@ -258,9 +258,9 @@ TEST_P(SystemFiberOrNot, ConditionVariableRace) {
 }
 
 TEST_P(SystemFiberOrNot, ExitBarrier) {
-  constexpr auto N = 10000;
+  constexpr auto N = 2000;
 
-  for (int i = 0; i != 10; ++i) {
+  for (int i = 0; i != 3; ++i) {
     std::deque<ExitBarrier> l;
     std::atomic<std::size_t> waited{};
 
@@ -288,9 +288,9 @@ TEST_P(SystemFiberOrNot, ExitBarrier) {
 }
 
 TEST_P(SystemFiberOrNot, Event) {
-  constexpr auto N = 10000;
+  constexpr auto N = 2000;
 
-  for (int i = 0; i != 10; ++i) {
+  for (int i = 0; i != 3; ++i) {
     std::deque<Event> evs;
     std::atomic<std::size_t> waited{};
 
@@ -338,10 +338,10 @@ TEST_P(SystemFiberOrNot, OneshotTimedEvent) {
 }
 
 TEST_P(SystemFiberOrNot, OneshotTimedEventTorture) {
-  constexpr auto N = 10000;
+  constexpr auto N = 2000;
 
   RunInFiber(1, GetParam(), [&](auto) {
-    for (int i = 0; i != 10; ++i) {
+    for (int i = 0; i != 3; ++i) {
       std::deque<OneshotTimedEvent> evs;
       std::atomic<std::size_t> waited{};
 

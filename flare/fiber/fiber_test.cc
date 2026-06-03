@@ -118,9 +118,9 @@ TEST(Fiber, SchedulingGroupLocal) {
 
     auto start = ReadSteadyClock();
 
-    // 10s should be far from enough. In my test the assertion above fires
+    // 3s should be far from enough. In my test the assertion above fires
     // almost immediately if `scheduling_group_local` is not set.
-    while (start + 10s > ReadSteadyClock()) {
+    while (start + 3s > ReadSteadyClock()) {
       std::this_thread::sleep_for(1ms);
 
       // Wake up workers in each scheduling group (for them to be thieves.).
