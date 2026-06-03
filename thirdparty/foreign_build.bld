@@ -272,16 +272,26 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
     if options:
         cmake_options += ' '
         cmake_options += ' '.join(options)
+    # Read the compiler from the resolved toolchain rather than hard-coding
+    # `CC=gcc CXX=g++`. blade has already picked the toolchain at config time
+    # (BLADE_ROOT cc_toolchain_config or its fallback to shutil.which); using
+    # toolchain.tool() keeps the cmake subbuild in sync with the rest of the
+    # build instead of always invoking the distro-default gcc/g++. The
+    # fallback strings are only used if the toolchain proxy returns None
+    # (which shouldn't happen for cc/cxx, but is the documented contract).
+    cc = blade.cc_toolchain.tool('cc') or 'cc'
+    cxx = blade.cc_toolchain.tool('cxx') or 'c++'
     # On macOS, the host compiler defaults to the SDK minimum deployment target
     # (e.g. 15.0), while cmake auto-detects the full OS version (e.g. 15.7).
     # Align cmake to the compiler's default to avoid linker warnings.
     cmd = ' && '.join([
         'rm -fr {build_dir}', 'mkdir -p {build_dir}', 'cd {build_dir}',
-        'CXX=g++ CC=gcc cmake {options}'
+        'CXX={cxx} CC={cc} cmake {options}'
         ' $$(if [ "$$(uname)" = "Darwin" ]; then'
         ' echo "-DCMAKE_OSX_DEPLOYMENT_TARGET=$$(sw_vers -productVersion | cut -d. -f1).0";'
         ' fi) ../{source_dir}'
-    ]).format(build_dir=build_dir, options=cmake_options, source_dir=source_dir)
+    ]).format(build_dir=build_dir, options=cmake_options,
+              source_dir=source_dir, cc=cc, cxx=cxx)
     build_file = blade.path.join(build_dir_name, 'Makefile')
     gen_rule(name=name,
              srcs=[blade.path.join(source_dir, _BLADE_UNPACK_STAMP)],
