@@ -1,6 +1,12 @@
 global_config(
     duplicated_source_action='error',
-    test_timeout=600,  # In seconds
+    # Per-test wall timeout for normal hardware. Slower runners scale up via
+    # the `--test-timeout-multiplier` CLI flag (see .github/workflows/...).
+    # Profiled on M2 (release/-O2): the slowest tests today are CPU-heavy
+    # ones around 30-40s, all already exclusive=True so they don't fight
+    # for cores. 60s gives ~50% headroom over the slowest legit test;
+    # anything blowing past that is almost certainly hung.
+    test_timeout=60,  # In seconds
     glob_error_severity='error',
     legacy_public_targets=load_value('build/blade/legacy_public_targets.conf'),
 )
