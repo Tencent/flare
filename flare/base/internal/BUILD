@@ -95,7 +95,8 @@ cc_test(
     '//flare/base:write_mostly',
     '//flare/fiber:fiber',
     '//flare/testing:main',
-  ]
+  ],
+  exclusive = True,
 )
 
 cc_benchmark(
