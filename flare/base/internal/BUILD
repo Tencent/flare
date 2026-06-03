@@ -193,8 +193,7 @@ cc_library(
     '//flare/base/thread:attribute',
     '//thirdparty/gflags:gflags',
     '//thirdparty/glog:glog',
-    '#dl',
-  ],
+  ] + (['#dl'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = [
     '//flare/...',
     '//yadcc/...',  # FIXME: Move `cpu` out to `flare/base`.
@@ -222,8 +221,7 @@ cc_library(
     '//flare/base:never_destroyed',
     '//thirdparty/curl:curl',
     '//thirdparty/gflags:gflags',
-    '#dl',
-  ],
+  ] + (['#dl'] if blade.cc_toolchain.target_os == 'linux' else []),
   visibility = ['//flare/...'],
 )
 

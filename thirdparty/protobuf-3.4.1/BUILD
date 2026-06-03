@@ -55,8 +55,7 @@ cc_library(
     export_incs = ['src'],
     deps = [
         '//thirdparty/glog:glog',
-        '#m',
-    ] + (['#pthread'] if _is_linux else []),
+    ] + (['#m', '#pthread'] if _is_linux else []),
 )
 
 cc_library(
