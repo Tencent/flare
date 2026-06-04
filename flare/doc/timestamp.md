@@ -72,7 +72,7 @@ inline std::uint64_t ReadTsc();
 **用 TSC 当通用时钟通常是个坏主意**：
 
 - TSC 可能受 [CPU 节能状态影响](https://patchwork.kernel.org/patch/4043361/)（虽然现代 x86 普遍 "invariant TSC"——constant rate 不受 P-state 影响——已是事实标配，但不保证 100%）
-- 虚拟化环境下虚拟机迁移可能引起 TSC 漂移或速率变化（[Intel VT-x](https://www.intel.com/content/dam/www/public/us/en/documents/white-papers/timestamp-counter-scaling-virtualization-white-paper.pdf) / [AMD-V](https://lore.kernel.org/patchwork/patch/235892/) 提供补偿，但**取决于 hypervisor 实现**）
+- 虚拟化环境下虚拟机迁移可能引起 TSC 漂移或速率变化（[Intel VT-x](https://kib.kiev.ua/x86docs/Intel/WhitePapers/333159-001.pdf) / [AMD-V](https://lore.kernel.org/patchwork/patch/235892/) 提供补偿，但**取决于 hypervisor 实现**）
 - TSC ↔ 物理时间换算需要除法（CPI 高），见下文 `DurationFromTsc` 的优化
 
 而且 `rdtsc` 本身 CPI 并不低——根据 [Agner](https://www.agner.org/optimize/instruction_tables.pdf) 的数据，Skylake 上 ~25 cycle，2.5 GHz 下约 **10 ns**。比 `ReadCoarseSteadyClock` 慢。

@@ -3,10 +3,6 @@
     {
       "pattern": "^https?://bazel\\.build",
       "comment": "Apparently UA-filtering markdown-link-check; returns status 0 to the action even though curl from a normal client gets 200. Verified manually."
-    },
-    {
-      "pattern": "^https?://www\\.intel\\.com/.*\\.pdf",
-      "comment": "Intel's PDF whitepaper CDN UA-filters non-browser clients to 403. The PDFs are reachable from any browser; flagging would force us to drop canonical references."
     }
   ],
   "retryOn429": true,
