@@ -1,10 +1,17 @@
 name: Bazel Build
 
 on:
+  # Skip when every changed file is markdown. See the matching note in
+  # build-and-test.yml; the markdown-link-check workflow still runs and
+  # verifies documentation correctness independently.
   push:
     branches: [master]
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     branches: [master]
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
   build:
