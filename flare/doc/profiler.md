@@ -1,4 +1,4 @@
-# Profiller
+# Profiler
 
 Flare 开发的服务支持在运行期间对程序进行[动态分析](https://en.wikipedia.org/wiki/Profiling_(computer_programming))，以发现程序的性能热点或者内存分配情况。
 
@@ -12,7 +12,7 @@ Flare 开发的服务支持在运行期间对程序进行[动态分析](https://
 
 ## Cpu Profiler
 
-`flag::Server`默认已经链接了[`prof_cpu_handler`](../rpc/protocol/http/builtin/prof_cpu_handler.h)。运行中可以`Http`访问`uri`: `/prof/cpu/start`, `/prof/cpu/view`, `/prof/cpu/stop`分别来开启, 查看, 停止。需要在运行机器上提前安装`pprof`, 在`/prof/cpu/view`的时候会通过`shell`调用`pprof`分析采样结果生成对应的函数调用图。采样频率由环境变量`CPUPROFILE_FREQUENCY`控制, 默认每秒钟100次。
+`flare::Server`默认已经链接了[`prof_cpu_handler`](../rpc/protocol/http/builtin/prof_cpu_handler.h)。运行中可以`Http`访问`uri`: `/prof/cpu/start`, `/prof/cpu/view`, `/prof/cpu/stop`分别来开启, 查看, 停止。需要在运行机器上提前安装`pprof`, 在`/prof/cpu/view`的时候会通过`shell`调用`pprof`分析采样结果生成对应的函数调用图。采样频率由环境变量`CPUPROFILE_FREQUENCY`控制, 默认每秒钟100次。
 
 ## Mem Profiler
 

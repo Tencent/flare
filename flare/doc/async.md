@@ -20,7 +20,7 @@ flare::Expected<EchoResponse, flare::Status> rc = stub.Echo(
 
 ## 显式异步
 
-用户还可以通过 Async 函数发起异步操作，该函数会在内部创建一个 Fiber 对象调度执行，并返回一个 [Futrue](future.md) 对象，调用端可以通过 Future 对象获取异步执行的结果。
+用户还可以通过 [`flare::fiber::Async`](../fiber/async.h) 函数发起异步操作，该函数会在内部创建一个 Fiber 对象调度执行，并返回一个 [Future](future.md) 对象，调用端可以通过 Future 对象获取异步执行的结果。
 
 ---
 [返回目录](README.md)
