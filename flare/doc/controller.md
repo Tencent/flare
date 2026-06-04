@@ -2,7 +2,7 @@
 
 RpcController 控制一次单独的 RPC 调用，并可设置一些调用相关的选项获得调用的附加信息。
 
-客户端和服务器端分别使用 [`RpcClientController`](../rpc/rpc_client_controller.h) 和 [`RpcServerController`](../rpc/rpc_server_controller.h)，二者都继承自 [`RpcController`](../rpc/rpc_controller.h)。在不同的场景下，比如客户端发起调用前、调用返回后，以及服务器端处理函数里，都只能使用其中特定的一些成员函数。
+客户端和服务器端分别使用 [`RpcClientController`](../rpc/rpc_client_controller.h) 和 [`RpcServerController`](../rpc/rpc_server_controller.h)，二者都继承自 `protobuf::RpcControllerCommon`。在不同的场景下，比如客户端发起调用前、调用返回后，以及服务器端处理函数里，都只能使用其中特定的一些成员函数。
 
 通过 RpcController，除了获取和设置调用错误外，还可以：
 
