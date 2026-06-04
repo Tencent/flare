@@ -15,6 +15,10 @@
     {
       "pattern": "^https?://linux\\.die\\.net/",
       "comment": "linux.die.net man-page mirror 403s automated UAs. Original man-pages are reachable; flagging would force us to drop canonical man-page references."
+    },
+    {
+      "pattern": "^https?://dev\\.mysql\\.com/",
+      "comment": "MySQL documentation behind UA filtering; 403s the link checker but works in a browser."
     }
   ],
   "retryOn429": true,
