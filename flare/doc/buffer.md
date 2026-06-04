@@ -89,5 +89,8 @@ auto result = nbb.DestructiveGet();
 std::vector<char> data{'a', 'b', 'c', 'd', 'e', 'f', 'g'};
 NoncontiguousBufferBuilder nbb;
 nbb.Append(MakeForeignBuffer(std::move(data)));
-auto result = nbb.DestructiveGet()));
+auto result = nbb.DestructiveGet();
 ```
+
+---
+[返回目录](README.md)

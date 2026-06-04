@@ -3,6 +3,22 @@
     {
       "pattern": "^https?://bazel\\.build",
       "comment": "Apparently UA-filtering markdown-link-check; returns status 0 to the action even though curl from a normal client gets 200. Verified manually."
+    },
+    {
+      "pattern": "^https?://(en\\.)?cppreference\\.com/",
+      "comment": "Cloudflare in front of cppreference 403s the link-check user agent; the URLs work for any browser. Verified manually."
+    },
+    {
+      "pattern": "^https?://stackoverflow\\.com/",
+      "comment": "Stack Exchange UA-filters automated link checkers to 403."
+    },
+    {
+      "pattern": "^https?://linux\\.die\\.net/",
+      "comment": "linux.die.net man-page mirror 403s automated UAs. Original man-pages are reachable; flagging would force us to drop canonical man-page references."
+    },
+    {
+      "pattern": "^https?://dev\\.mysql\\.com/",
+      "comment": "MySQL documentation behind UA filtering; 403s the link checker but works in a browser."
     }
   ],
   "retryOn429": true,

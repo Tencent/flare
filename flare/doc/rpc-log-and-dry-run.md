@@ -29,7 +29,7 @@
 
 *框架在初始化录制流量的上下文时会生成一个`binlog_correlation_id`，但是如果服务逻辑请求了多个相同的后端（协议、Channel地址、方法名均相同），我们可能需要服务代码本身通过`SetBinlogCorrelationId`来对各个请求进行区分以便于我们后续在回放时关联响应。其余情况下通常框架可以自动填充必要的`binlog_correlation_id`。*
 
-为了方便调试观察，我们不但会录制请求本身，在可能的情况下，还会额外录制一份数据包的字符串表达以便于对比。由于不同的流量录制平台展示需求不同，这个录制行为取决于具体的[`Dumper::InspectXxxPacket`](binlog/../../rpc/binlog/dumper.h)的实现方。
+为了方便调试观察，我们不但会录制请求本身，在可能的情况下，还会额外录制一份数据包的字符串表达以便于对比。由于不同的流量录制平台展示需求不同，这个录制行为取决于具体的[`Dumper::InspectXxxPacket`](../rpc/binlog/dumper.h)的实现方。
 
 框架方面录制流量时需要指定如下参数：
 
@@ -52,7 +52,7 @@
 
 显然，通常而言，录制流量和回放时应当使用相同的平台。
 
-考虑到各个回访平台的内部数据的不同，我们需要针对各个回放平台分别提供[`DryRunner`、`DryRunContext`](../binlog/../rpc/binlog/dry_runner.h)的实现。
+考虑到各个回访平台的内部数据的不同，我们需要针对各个回放平台分别提供[`DryRunner`、`DryRunContext`](../rpc/binlog/dry_runner.h)的实现。
 
 在启用回放时，收到请求之后服务端会：
 
