@@ -215,7 +215,11 @@ def autotools_build(name,
              cmd_name='MAKE',
              deps=deps + with_packages + [':' + target_configure],
              generated_incs='',
-             export_incs=blade.path.join(install_dir, include_dir),
+             # Third-party install include dirs go via `-isystem` so that
+             # warnings raised inside vendored headers (glog self-deprecation,
+             # openssl pedantic notes, etc.) don't fail our `-Werror` build.
+             # Requires blade 5b305b0+ (system_export_incs gen_rule param).
+             system_export_incs=blade.path.join(install_dir, include_dir),
              heavy=True)
 
 
@@ -357,7 +361,9 @@ def cmake_build(name,
              cmd_name='CMAKE BUILD',
              deps=deps + [':' + target_generate],
              generated_incs=package_name,
-             export_incs=blade.path.join(install_dir, include_dir),
+             # Same rationale as autotools_build above: third-party install
+             # include dirs go via `-isystem` (blade 5b305b0+).
+             system_export_incs=blade.path.join(install_dir, include_dir),
              heavy=True)
 
 

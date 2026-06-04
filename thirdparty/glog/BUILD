@@ -35,11 +35,7 @@ cmake_build(
         '//thirdparty/gflags:gflags',
     ],
     strip_include_prefix='glog',
-    patches=[
-        'no_export_guard.patch',
-        'build_static_with_shared.patch',
-        'silence_self_deprecation.patch',
-    ],
+    patches=['no_export_guard.patch', 'build_static_with_shared.patch'],
     generate_dynamic=True,
 )
 
