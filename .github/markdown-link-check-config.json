@@ -1,0 +1,10 @@
+{
+  "ignorePatterns": [
+    {
+      "pattern": "^https?://bazel\\.build",
+      "comment": "Apparently UA-filtering markdown-link-check; returns status 0 to the action even though curl from a normal client gets 200. Verified manually."
+    }
+  ],
+  "retryOn429": true,
+  "aliveStatusCodes": [200, 206]
+}
