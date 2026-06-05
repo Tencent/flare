@@ -17,9 +17,9 @@
 
 对于最终用户而言，协议通过字符串标识，如（以Protocol Buffers为例）打开[`RpcChannel`](../rpc/rpc_channel.h)时使用的[URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier)中的`scheme`段，以及初始化[`Server`](../rpc/server.h)时调用`Server::AddProtocol`时传入的协议名。
 
-## 内置协义
+## 内置协议
 
-关于内置协义相关信息，可以参考下列文档：
+关于内置协议相关信息，可以参考下列文档：
 
 - [增加新协议](protocol/new.md)
 - [HTTP](protocol/http.md)

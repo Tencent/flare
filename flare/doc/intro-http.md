@@ -61,7 +61,7 @@ class HttpHandler {
 - [`Content-Length`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Length)：填写为`HttpResponse::body()`的字节长度。
 - [`Content-Encoding`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Encoding)：服务端并不强制一定使用客户端指定的压缩[`Accept-Encoding`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Encoding), 现在也没有对消息主体使用任何压缩模式, 所以不设置此字段。
 
-**业务代码需要自行通过`HttpResponse::set_status`指定[HTTP返回值](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)，如`HttpResponse::Status_OK`（即200）。**
+**业务代码需要自行通过`HttpResponse::set_status`指定[HTTP返回值](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes)，如`HttpStatus::OK`（即200）。**
 
 因此，一个简单的Echo服务（假设通过[`GET`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/GET)方法请求）实现如下：
 
@@ -70,7 +70,7 @@ class EchoHandler : public flare::HttpHandler {
  public:
   void OnGet(const flare::HttpRequest& request, flare::HttpResponse* response,
              flare::HttpServerContext* context) override {
-    response->set_status(flare::HttpResponse::Status_OK);
+    response->set_status(flare::HttpStatus::OK);
     response->set_body(request.body());
   }
 };
@@ -108,7 +108,7 @@ template <class F> std::unique_ptr<HttpHandler> NewHttpXxxHandler(F&& f);
 
 ```cpp
 auto handler = flare::NewHttpGetHandler([](auto&& r, auto&& w, auto&& c) {
-  w->set_status(flare::HttpResponse::Status_OK);
+  w->set_status(flare::HttpStatus::OK);
   w->set_body(r.body());
 };
 ```
@@ -153,7 +153,7 @@ server->AddHttpHandler("/path/to/echo2", std::move(handler));
 // Or:
 server->AddHttpHandler("/path/to/echo3",
                     flare::NewHttpGetHandler([](auto&& r, auto&& w, auto&& c) {
-                      w->set_status(flare::HttpResponse::Status_OK);
+                      w->set_status(flare::HttpStatus::OK);
                       w->set_body("Echo from a fancy lambda: " + r.body());
                     }));
 ```
