@@ -207,7 +207,7 @@ FLARE_CHECK_EQ(x, y, "x ({}) does not equal to y ({}). The reason is that [{}]."
 ## 注意
 
 你有可能会遇到几种失败情况导致编译失败：
-- 完美转发失败，详情可查看[Effective Modern Cpp Item30](https://github.com/CnTransGroup/EffectiveModernCppChinese/blob/master/src/5.RRefMovSemPerfForw/item30.md)，常见的失败情况有`bit-fields`，解决方法为使用一元加号，详情可查看[fmtlib::fmt issues 1284](https://github.com/fmtlib/fmt/issues/1284)。参数之所以不使用`const&`进行传递，可以查看提案[P2418R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2418r2.html)。
+- 完美转发失败，详情可查看《Effective Modern C++》Item 30（"Familiarize yourself with perfect forwarding failure cases"），常见的失败情况有`bit-fields`，解决方法为使用一元加号，详情可查看[fmtlib::fmt issues 1284](https://github.com/fmtlib/fmt/issues/1284)。参数之所以不使用`const&`进行传递，可以查看提案[P2418R2](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p2418r2.html)。
 - 指针，解决方法为使用`fmt::ptr`或者手动将其他类型的指针转换为`const void*`。
 
 ---

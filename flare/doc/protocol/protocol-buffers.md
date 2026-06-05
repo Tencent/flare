@@ -246,7 +246,7 @@ Rpc-Error-Reason: Error description.
 
 - `Rpc-SeqNo`：用于多个请求共享一个链接时关联请求与响应。
 - `Content-Type`：同请求中对应的头。
-- `Rpc-Error-Code`：错误码，定义参见[rpc_meta.proto](../../rpc/protobuf/rpc_meta.proto)，可以通过`RpcServerController`设置，`RpcClientController`访问。
+- `Rpc-Error-Code`：错误码，定义参见[rpc_meta.proto](../../rpc/protocol/protobuf/rpc_meta.proto)，可以通过`RpcServerController`设置，`RpcClientController`访问。
 - `Rpc-Error-Reason`：错误的文本描述。可以通过`RpcServerController`设置、`RpcClientController`访问。
 
 ##### 示例
