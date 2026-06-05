@@ -83,7 +83,7 @@ fiber环境通常可以直接使用pthread相关原语，但是需要注意**避
 std::vector<int> ComputeInParallel(const std::vector<Data>& datum) {
   std::vector<Future<int>> fs;
   for (auto&& data : datum) {
-    fs.push_back(flare::Async([p = &data] { /* ... */ }));
+    fs.push_back(flare::fiber::Async([p = &data] { /* ... */ }));
   }
   return flare::fiber::BlockingGet(flare::WhenAll(&fs));
 }

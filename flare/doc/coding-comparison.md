@@ -248,7 +248,7 @@ void StreamCall() {
   FLARE_CHECK(channel.Open(/* address */));
   EchoService_Stub stub(&channel);
   auto reader = stub.StreamEcho(request, &controller);
-  while (auto v = read.Read()) {
+  while (auto v = reader.Read()) {
     FLARE_LOG_INFO("{}", v->body());
   }
   if (controller.Failed()) {

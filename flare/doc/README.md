@@ -16,8 +16,10 @@
 - [HTTP](intro-http.md)
 - [配置](option.md)
 - [日志](logging.md)
+- [缓冲区](buffer.md)
 - [测试](testing.md)
 - [调试](debugging.md)
+- [GDB 插件](gdb-plugin.md)
 - [Profiler](profiler.md)
 - [监控](monitoring.md)
 - [表单提交](rpc-form.md)
@@ -39,6 +41,7 @@
 
 - [性能指引](performance-guide.md)
 - [性能测试](benchmark.md)
+- [代码对比](coding-comparison.md)
 - [RTTI](rtti.md)
 - [对象池](object-pool.md)
 - [时间戳](timestamp.md)

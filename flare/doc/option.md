@@ -170,15 +170,15 @@ void FancyMethod() {
 `XxxOption<RawType, Parser>`允许用户指定一个如下形式的转换类，在本地将配置中心的配置数据做必要的类型转换（如`std::string` -> `Json::Value`）：
 
 ```cpp
-struct SomeParer {
+struct SomeParser {
   static std::optional<SomeType> TryParse(const RawType& value);
 };
 ```
 
-`XxxOption>RawType, SomeParser>`在检测到配置更新后，会尝试使用`SomeParser`解析`RawType`。如果解析失败则不会更新本地配置，如果解析成功则用解析后的结果更新本地配置。
+`XxxOption<RawType, SomeParser>`在检测到配置更新后，会尝试使用`SomeParser`解析`RawType`。如果解析失败则不会更新本地配置，如果解析成功则用解析后的结果更新本地配置。
 
 ```cpp
-Option<std::string, StringToJsonParser> some_config;
+Option<std::string, JsonParser> some_config;
 
 void FancierMethod() {
   // Get JSON value.

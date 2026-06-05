@@ -30,7 +30,7 @@ TEST(TestExample, Example1) {
   // ...
 }
 
-}  // namespace flare::testing::detail
+}  // namespace example
 
 FLARE_TEST_MAIN  // Expands to definition of `main`.
 ```

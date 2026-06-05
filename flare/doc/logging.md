@@ -70,7 +70,7 @@ FLARE_CHECK_EQ(x, y, "x ({}) does not equal to y ({}). The reason is that [{}]."
 
   可以看到，所有通过`FLARE_XXX`在这一RPC上下文中输出的日志均带有`crash_id: body123`的前缀，在第二次`AddLoggingItemToRpc`之后还有`crash_id 2: body1234`前缀。
 
-  另外，上述代码未体现的是：即便对于并行代码（通过[`flare::Async`](../fiber/async.h)发等起的）的场景，只要能够正确传递执行上下文（此处的要求同[分布式追踪](tracing.md)），这儿的日志前缀就可以正确的保留、传递。
+  另外，上述代码未体现的是：即便对于并行代码（通过[`flare::fiber::Async`](../fiber/async.h)发起的）的场景，只要能够正确传递执行上下文（此处的要求同[分布式追踪](tracing.md)），这儿的日志前缀就可以正确的保留、传递。
 
 - [`flare::fiber::AddLoggingItemToFiber`、`flare::fiber::AddLoggingTagToFiber`](../fiber/logging.h)：这一方法允许增加一个针对当前[fiber](fiber.md)的日志前缀。通常而言这个方法较为底层，我们不推荐服务实现方直接使用。
 - [`flare::fiber::AddLoggingItemToExecution`、`flare::fiber::AddLoggingTagToExecution`](../fiber/logging.h)：这一方法允许增加一个针对当前[执行上下文](../fiber/execution_context.h)的日志前缀。这一方法较为底层通常不推荐服务实现方使用。
