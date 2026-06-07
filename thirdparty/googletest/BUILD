@@ -10,8 +10,19 @@ cmake_build(
         '-DCMAKE_BUILD_TYPE=Release',
         '-DCMAKE_CXX_FLAGS=-Wno-deprecated-copy',
     ],
-    #patches=['generate_dynamic.patch'],
-    generate_dynamic=False,
+    # googletest's CMake emits either static or shared per configure (it keys
+    # solely off BUILD_SHARED_LIBS), so a single pass can't produce both. The
+    # static pass above yields libgtest.a (used by static_link consumers); this
+    # shared pass yields libgtest.dylib. Release builds default to dynamic_link
+    # (BLADE_ROOT), so cc_tests link the dylib -- giving gtest's UnitTest
+    # registry a single process-wide instance. Without a shared gtest, the
+    # static archive gets force_loaded (link_all_symbols) into every mock/main
+    # dylib, producing multiple registries where TEST() registers into one and
+    # RUN_ALL_TESTS() reads another ("does NOT link in any test case"). Using
+    # BUILD_SHARED_LIBS directly means the stale generate_dynamic.patch (written
+    # for 1.10) is no longer needed.
+    shared_cmake_options=['-DBUILD_SHARED_LIBS=ON'],
+    generate_dynamic=True,
 )
 
 foreign_cc_library(
@@ -21,7 +32,7 @@ foreign_cc_library(
         ':googletest_build',
     ],
     visibility='PUBLIC',
-    has_dynamic=False,
+    has_dynamic=True,
 )
 
 foreign_cc_library(
@@ -31,7 +42,7 @@ foreign_cc_library(
         ':googletest_build',
     ],
     visibility='PUBLIC',
-    has_dynamic=False,
+    has_dynamic=True,
 )
 
 foreign_cc_library(
@@ -40,7 +51,7 @@ foreign_cc_library(
         ':googletest_build',
     ],
     visibility='PUBLIC',
-    has_dynamic=False,
+    has_dynamic=True,
 )
 
 foreign_cc_library(
@@ -50,7 +61,7 @@ foreign_cc_library(
         ':googletest_build',
     ],
     visibility='PUBLIC',
-    has_dynamic=False,
+    has_dynamic=True,
 )
 
 cc_library(

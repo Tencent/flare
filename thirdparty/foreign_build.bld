@@ -326,6 +326,7 @@ def cmake_build(name,
                 strip_include_prefix='',
                 cmake_options=None,
                 generate_dynamic=False,
+                shared_cmake_options=None,
                 patches=[]):
     source_dir = source_dir or _get_package_name(source_package)
     lib_names = lib_names or [package_name]
@@ -349,17 +350,37 @@ def cmake_build(name,
     full_install_dir = blade.path.join(blade.current_target_dir(), install_dir)
     strip_include_dir = blade.path.normpath(
         blade.path.join(include_dir, strip_include_prefix))
-    cmds = [
-        _cmd_with_log(build_cmd, log_file),
-        _EXPORT_HEADERS.format(install_dir=full_install_dir,
-                               include_dir=strip_include_dir),
-    ]
+    src_files = [build_file]
+    generate_deps = [':' + target_generate]
+    cmds = [_cmd_with_log(build_cmd, log_file)]
+    # Packages whose CMake can only emit static *or* shared in a single
+    # configure (e.g. googletest, which keys solely off BUILD_SHARED_LIBS)
+    # need a second pass to produce both. `shared_cmake_options` triggers an
+    # extra configure+install into the SAME prefix with those extra options
+    # appended; the static pass installs the `.a`, the shared pass the
+    # dynamic lib, and headers are installed by both (idempotent). Other
+    # `generate_dynamic` packages emit both natively and leave this unset.
+    if shared_cmake_options:
+        shared_build_dir, shared_build_file = _cmake_generate(
+            name=package_name + '_generate_shared',
+            package_name=package_name + '_shared',
+            source_dir=source_dir,
+            install_dir=install_dir,
+            deps=[':' + target_unpack] + deps,
+            options=cmake_options + shared_cmake_options)
+        src_files.append(shared_build_file)
+        generate_deps.append(':' + package_name + '_generate_shared')
+        cmds.append(_cmd_with_log(
+            'make -C {dir} -j16 install'.format(dir=shared_build_dir),
+            log_file))
+    cmds.append(_EXPORT_HEADERS.format(install_dir=full_install_dir,
+                                       include_dir=strip_include_dir))
     gen_rule(name=name,
-             srcs=[build_file],
+             srcs=src_files,
              outs=build_outs,
              cmd=' && '.join(cmds),
              cmd_name='CMAKE BUILD',
-             deps=deps + [':' + target_generate],
+             deps=deps + generate_deps,
              generated_incs=package_name,
              # Same rationale as autotools_build above: third-party install
              # include dirs go via `-isystem` (blade 5b305b0+).
