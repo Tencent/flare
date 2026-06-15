@@ -98,6 +98,15 @@ def flare_dependencies():
             sha256 = "4ec935d99aa4950eadfefbd49c9fad863185ac24c32001162c44a683ef61b580",
         )
 
+    if not native.existing_rule("com_github_cyan4973_xxhash"):
+        http_archive(
+            name = "com_github_cyan4973_xxhash",
+            build_file = Label("//bazel:xxhash.BUILD"),
+            urls = ["https://github.com/Cyan4973/xxHash/archive/refs/tags/v0.8.0.zip"],
+            strip_prefix = "xxHash-0.8.0",
+            sha256 = "064333c754f166837bbefefa497642a60b3f8035e54bae52eb304d3cb3ceb655",
+        )
+
     if not native.existing_rule("com_github_google_boringssl"):
         http_archive(
             name = "com_github_google_boringssl",
