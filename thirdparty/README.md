@@ -1,0 +1,94 @@
+# thirdparty 依赖与 vcpkg 迁移状态
+
+本目录的第三方库正在从「本地 foreign build（源码 tarball + autotools/cmake）」逐步迁移到
+**vcpkg**（通过 blade 的 `vcpkg#<port>:<lib>` 机制，详见 `BLADE_ROOT` 的 `vcpkg_config`）。
+
+迁移后 `//thirdparty/<lib>:<target>` 的引用方式保持不变 —— `BUILD` 改成一个薄
+`cc_library` 包装，`deps=['vcpkg#<port>:<lib>']`，业务代码无需改动。
+
+## ✅ 已迁移到 vcpkg
+
+| 库 | 版本 | vcpkg_config 关键项 | 说明 |
+|---|---|---|---|
+| fmt | 7.1.3（钉定） | `'fmt': '7.1.3'` | 无特殊处理 |
+| gflags | 2.2.2（钉定） | `linkage='auto'`, `link_all_symbols=True` | 单例（全局 flag 注册表）。`link_all_symbols` whole-archive 静态 `.a`，保证 flag 注册的静态初始化即使未被引用也运行 |
+| glog | 0.7.1（钉定） | `linkage='auto'`, `link_all_symbols=True`, `include_prefix={'thirdparty/glog':'glog'}`, `cmake_options=['-DGFLAGS_NOTHREADS=OFF']` | 单例（在 gflags 里注册 logtostderr 等）。wrapper 额外依赖 `//thirdparty/gflags:gflags`（静态 `glog.a` 需要 gflags 符号在链接行上）。protobuf-3.4.1 用 `thirdparty/glog/logging.h` → 重映射到 `include/glog`。`GFLAGS_NOTHREADS=OFF` 绕过 gflags-config.cmake 在**静态** gflags 下的模板 bug（默认会找不存在的 `gflags_nothreads_static`） |
+| zlib | baseline | `include_prefix=['zlib','thirdparty/zlib']` | flare 用 `zlib/zlib.h`，protobuf-3.4.1 用 `thirdparty/zlib/zlib.h`，两个前缀都暴露（vcpkg 把头放在 include 顶层） |
+| lz4 | baseline | `include_prefix='lz4'` | flare 用 `lz4/<h>`，vcpkg 在 include 顶层 |
+| zstd | baseline | `include_prefix='zstd'` | 同上 |
+| snappy | baseline | `include_prefix='snappy'`, `cmake_options=['-DSNAPPY_WITH_RTTI=ON']` | vcpkg 的 snappy 默认 `-fno-rtti`，而 flare 用到 `snappy::Sink/Source` 的 RTTI |
+| xxhash | baseline | `include_prefix='xxhash'` | 迁移时删掉了源码树里残留的整份 upstream（其 `xxhash.h` 经 `thirdparty/` extra_inc 把 vcpkg 的头 shadow 掉了，导致一直在用旧的 in-tree 头） |
+
+**`linkage='auto'`**：静态 `.a` 始终构建；动态库**按需**构建——仅当某个
+`dynamic_link` 二进制真正依赖时（镜像 `cc_library` 的 `generate_dynamic`）。这样静态链接的
+构建期工具拿到自包含的 `.a`，而 `dynamic_link` 的 release 二进制共享同一份动态库。详见
+blade 文档 `doc/*/vcpkg.md`。
+
+**配套的 blade 改动**（PR #1314）：
+
+- 新增 `linkage='auto'`（静态 + 按需动态，动态构建落在独立的 `blade-<triplet>-shared` 树）。
+- 给链接了 vcpkg 动态库的 `cc_binary` 烤 `LC_RPATH`（绝对 install lib 目录 + macOS 的
+  `@executable_path/<exe>.runfiles`），使 `@rpath/<lib>` 在原地运行、`blade run`、以及
+  **构建期被当工具执行**（protoc 插件）时都能加载，无需 `DYLD_LIBRARY_PATH`。
+
+**配套的 flare 改动**：protoc 插件（`v1_plugin` / `v2_plugin`）设 `dynamic_link=False` ——
+它们是构建期工具，静态/自包含链接，避免运行期解析 `@rpath` 动态库。
+
+## ❌ 保留 foreign build（无法 / 不宜迁移）
+
+### 硬性阻塞——无法迁移
+
+- **ctemplate**（本地 2.4）
+  vcpkg 的 ctemplate port **只支持 Windows**（`"supports": "windows & !arm"`）。它的
+  CMakeLists 强制编译 `src/windows/port.cc`，该文件首行即
+  `#error "You should only be including windows/port.cc in a windows environment!"`，
+  并依赖 Win32 API（`GetTempPathA`、`HANDLE`、`_mkdir`、`INVALID_HANDLE_VALUE`）及
+  `base/mutex.h`（非 Windows 架构无实现）。在 macOS/Linux 上即便加 `--allow-unsupported`
+  也会编译失败。要走 vcpkg 只能自写 overlay port，成本/维护代价过高。
+
+- **protobuf（protobuf-3.4.1）**
+  flare 钉死在 3.4.1 这个非常老的版本：仓库里 check-in 的 `*.pb.{h,cc}` 以及 protoc
+  插件都绑定 3.4.1 的 codegen + 运行时 ABI。vcpkg 没有 3.4.1，更新版本的 protobuf 与
+  flare 的生成代码 / 插件不兼容。
+
+### 版本钉死——vcpkg 只有差异过大的新版
+
+flare 的 foreign build 钉死在特定旧版本（且常带 flare 本地 patch）；vcpkg baseline 只提供
+高得多的版本，非 drop-in，迁移需要改代码 / 处理 ABI，且会丢失本地 patch。
+
+| 库 | 本地版本 | vcpkg baseline | 阻塞点 |
+|---|---|---|---|
+| yaml-cpp | 0.6.3 | 0.9.0 | ABI 变化：链接出现 undefined `YAML::detail::node_data::convert_to_map`（头/库版本错配）；本地有 `generate_dynamic.patch` |
+| jsoncpp | 0.10.7 | 1.9.6 | 0.x→1.x 大版本 API 变化（Reader/Writer 弃用、头布局 `jsoncpp/` vs `json/`）；本地有 `no_multi_arch_libdir.patch` |
+| openssl | 1.1.1w | 3.6.3 | 1.1→3.x 大版本，弃用/移除 API 较多，风险高 |
+| nghttp2 | 1.41.0 | 1.69.0 | 仅被 curl 使用，需与 curl/openssl 同进退 |
+| curl | 7.71.0 | 8.20.0 | 传递依赖 openssl + nghttp2，被上面两个阻塞 |
+
+> 这几个并非「技术上不可能」，而是「当前不划算」：要么接受新版本并改适配，要么把
+> 本地 patch 移植成 vcpkg overlay。等有需要再单独评估。
+>
+> 升级这些旧版库以解锁迁移的技术债，跟踪于
+> [Tencent/flare#179](https://github.com/Tencent/flare/issues/179)。
+
+### 刻意保留 foreign
+
+- **gperftools（2.8）/ jemalloc（5.2.1）**
+  分配器（malloc 替换）。flare 对它们有专门接线：`cc_config.gperftools_libs`、
+  `pprof_path='thirdparty/gperftools/bin/pprof'`（指向源码树里的 pprof 工具）、特定的
+  链接顺序 / whole-archive。vcpkg 虽有这两个 port，但替换 malloc 这类全局行为 + 自带
+  pprof 工具是 flare 专属，迁移高风险、低收益。
+
+- **googletest（1.17.0）**
+  vcpkg 里 port 名为 `gtest`（非 `googletest`）。非阻塞，但它通过
+  `cc_test_config.gtest_libs / gtest_main_libs` 接线，迁移需要同步改这两处配置 ——
+  暂缓。
+
+## 迁移一个库的步骤（备忘）
+
+1. 在 `BLADE_ROOT` 的 `vcpkg_config.packages` 加一条；需要时配 `include_prefix`
+   （flare 的 include 路径 ≠ vcpkg 的 include 布局时）、`linkage`、`cmake_options`。
+2. 把 `thirdparty/<lib>/BUILD` 改成薄 `cc_library(deps=['vcpkg#<port>:<lib>'])` 包装，
+   保持原 target 名不变。
+3. 删掉源码树里残留的 in-tree 头文件（否则 `cc_config.extra_incs` 里的 `thirdparty/`
+   会让它 shadow vcpkg 的头——参见 xxhash 的教训）。
+4. 构建一个消费者验证；跑 `blade test` 确认运行期能加载到 `@rpath` 动态库。

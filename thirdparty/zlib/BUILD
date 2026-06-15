@@ -1,20 +1,3 @@
-include('//thirdparty/foreign_build.bld')
-
-cmake_build(name='zlib_build',
-            source_package='zlib-1.3.2.tar.gz',
-            package_name='zlib',
-            lib_names=['z'],
-            cmake_options=[
-                '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
-                '-DCMAKE_BUILD_TYPE=Release',
-            ],
-            generate_dynamic=True)
-
-foreign_cc_library(
-    name='z',
-    deps=[
-        ':zlib_build',
-    ],
-    visibility='PUBLIC',
-    has_dynamic=True,
-)
+# zlib via vcpkg (vcpkg#zlib:z). include_prefix exposes the headers as
+# "zlib/<h>" (flare's include style). //thirdparty/zlib:z is unchanged.
+cc_library(name='z', hdrs=[], deps=['vcpkg#zlib:z'], visibility='PUBLIC')
