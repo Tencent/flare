@@ -22,6 +22,8 @@ build --copt=-Wno-sign-compare
 # enable_platform_specific_config auto-applies the :macos config on macOS hosts.
 common --enable_platform_specific_config
 build:macos --linkopt=-Wl,-no_warn_duplicate_libraries
+# Also cover exec/host-config links (build tools, e.g. protoc/codegen).
+build:macos --host_linkopt=-Wl,-no_warn_duplicate_libraries
 
 # Silence warnings from third-party code while keeping flare's own warnings.
 # Covers both fetched deps (external/) and in-repo vendored libs (thirdparty/,
