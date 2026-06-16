@@ -15,6 +15,14 @@ build:opt --compilation_mode=opt
 
 build --copt=-Wno-sign-compare
 
+# macOS: external deps (gflags/glog/protobuf/...) redundantly pass -lpthread/-lm,
+# which are no-ops on macOS (libSystem) but make Xcode 15+'s ld64 warn
+# "ignoring duplicate libraries". flare's own such linkopts are gated out in
+# BUILD files; this silences the residual from deps we don't control.
+# enable_platform_specific_config auto-applies the :macos config on macOS hosts.
+common --enable_platform_specific_config
+build:macos --linkopt=-Wl,-no_warn_duplicate_libraries
+
 # Silence warnings from third-party code while keeping flare's own warnings.
 # Covers both fetched deps (external/) and in-repo vendored libs (thirdparty/,
 # e.g. blake3, xxhash, rapidxml). `-w` is appended last so it wins.
