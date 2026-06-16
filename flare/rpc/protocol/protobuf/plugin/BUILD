@@ -87,6 +87,10 @@ cc_binary(
   srcs = [
     'v1_plugin.cc',
   ],
+  # A protoc plugin runs as a build-time tool, before blade's run harness sets
+  # DYLD_LIBRARY_PATH, so link it statically and self-contained (it pulls the
+  # singleton vcpkg libs' static .a, no @rpath dylib to resolve at build time).
+  dynamic_link = False,
   deps = [
     ':async_decl_generator',
     ':basic_decl_generator',
@@ -105,6 +109,8 @@ cc_binary(
   srcs = [
     'v2_plugin.cc',
   ],
+  # Build-time protoc plugin: link statically/self-contained (see v1_plugin).
+  dynamic_link = False,
   deps = [
     ':async_decl_generator',
     ':basic_decl_generator',

@@ -1,25 +1,9 @@
-include('//thirdparty/foreign_build.bld')
-
-cmake_build(
-    name='fmt_build',
-    source_package='fmt-7.1.3.tar.gz',
-    package_name='fmt',
-    lib_names=['fmt'],
-    cmake_options=[
-        '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
-        '-DCMAKE_BUILD_TYPE=Release',
-        '-DFMT_TEST=OFF',
-    ],
-    strip_include_prefix='fmt',
-    patches=['generate_dynamic.patch'],
-    generate_dynamic=True,
-)
-
-foreign_cc_library(
-    name='fmt',
-    deps=[
-        ':fmt_build',
-    ],
-    visibility='PUBLIC',
-    has_dynamic=True,
+# fmt is provided by vcpkg (vcpkg#fmt:fmt, pinned to 7.1.3 in BLADE_ROOT).
+# This thin wrapper keeps the //thirdparty/fmt:fmt reference unchanged for
+# every consumer.
+cc_library(
+    name = 'fmt',
+    hdrs = [],
+    deps = ['vcpkg#fmt:fmt'],
+    visibility = 'PUBLIC',
 )

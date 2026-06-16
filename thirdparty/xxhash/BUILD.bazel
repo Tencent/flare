@@ -1,22 +1,9 @@
-cc_library(
+# xxhash is fetched from upstream for Bazel (see //bazel:deps.bzl); this alias
+# keeps the //thirdparty/xxhash:xxhash label stable for consumers
+# (flare/base/experimental). The in-tree source was removed when the blade
+# build moved to vcpkg (//thirdparty/xxhash/BUILD wraps vcpkg#xxhash:xxhash).
+alias(
     name = "xxhash",
-    srcs = ["xxhash.c"],
-    hdrs = ["xxhash.h"],
-    include_prefix = "xxhash",
+    actual = "@com_github_cyan4973_xxhash//:xxhash",
     visibility = ["//visibility:public"],
-)
-
-cc_test(
-    name = "xxhash_test",
-    srcs = ["xxhash_test.cc"],
-    deps = [
-        ":xxhash",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_binary(
-    name = "xxhsum",
-    srcs = ["xxhsum.c"],
-    deps = [":xxhash"],
 )
