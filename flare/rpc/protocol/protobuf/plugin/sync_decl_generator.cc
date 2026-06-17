@@ -17,7 +17,6 @@
 #include <string>
 #include <vector>
 
-
 #include "flare/base/logging.h"
 #include "flare/base/string.h"
 #include "flare/rpc/protocol/protobuf/plugin/names.h"
