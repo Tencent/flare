@@ -1,69 +1,52 @@
-include('//thirdparty/foreign_build.bld')
-
-cmake_build(
-    name='googletest_build',
-    source_package='googletest-1.17.0.tar.gz',
-    package_name='googletest',
-    lib_names=['gmock', 'gmock_main', 'gtest', 'gtest_main'],
-    cmake_options=[
-        '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
-        '-DCMAKE_BUILD_TYPE=Release',
-        '-DCMAKE_CXX_FLAGS=-Wno-deprecated-copy',
-    ],
-    # googletest's CMake emits either static or shared per configure (it keys
-    # solely off BUILD_SHARED_LIBS), so a single pass can't produce both. The
-    # static pass above yields libgtest.a (used by static_link consumers); this
-    # shared pass yields libgtest.dylib. Release builds default to dynamic_link
-    # (BLADE_ROOT), so cc_tests link the dylib -- giving gtest's UnitTest
-    # registry a single process-wide instance. Without a shared gtest, the
-    # static archive gets force_loaded (link_all_symbols) into every mock/main
-    # dylib, producing multiple registries where TEST() registers into one and
-    # RUN_ALL_TESTS() reads another ("does NOT link in any test case"). Using
-    # BUILD_SHARED_LIBS directly means the stale generate_dynamic.patch (written
-    # for 1.10) is no longer needed.
-    shared_cmake_options=['-DBUILD_SHARED_LIBS=ON'],
-    generate_dynamic=True,
-)
-
-foreign_cc_library(
-    name='gmock',
-    deps=[
-        ':gtest',
-        ':googletest_build',
-    ],
-    visibility='PUBLIC',
-    has_dynamic=True,
-)
-
-foreign_cc_library(
-    name='gmock_main',
-    deps=[
-        ':gmock',
-        ':googletest_build',
-    ],
-    visibility='PUBLIC',
-    has_dynamic=True,
-)
-
-foreign_cc_library(
+# Thin wrappers over vcpkg gtest (see BLADE_ROOT vcpkg_config, pinned 1.17.0 to
+# match the previously vendored source). Consumers keep depending on
+# //thirdparty/googletest:{gtest,gtest_main,gmock,gmock_main}; cc_test_config's
+# gtest_libs / gtest_main_libs are unchanged.
+#
+# linkage='auto' (set in BLADE_ROOT, NO link_all_symbols): gtest's UnitTest
+# registry must be a single process-wide instance. dynamic_link tests link the
+# shared libgtest, and gmock links *against* that gtest rather than
+# whole-archiving a second static copy -- the multiple-registry trap the old
+# foreign build documented as "does NOT link in any test case".
+cc_library(
     name='gtest',
-    deps=[
-        ':googletest_build',
-    ],
+    hdrs=[],
+    deps=['vcpkg#gtest:gtest'],
     visibility='PUBLIC',
-    has_dynamic=True,
 )
 
-foreign_cc_library(
+cc_library(
     name='gtest_main',
+    hdrs=[],
     deps=[
+        'vcpkg#gtest:gtest_main',
         ':gtest',
-        ':googletest_build',
     ],
     visibility='PUBLIC',
-    has_dynamic=True,
 )
 
+cc_library(
+    name='gmock',
+    hdrs=[],
+    deps=[
+        'vcpkg#gtest:gmock',
+        ':gtest',
+    ],
+    visibility='PUBLIC',
+)
+
+cc_library(
+    name='gmock_main',
+    hdrs=[],
+    deps=[
+        'vcpkg#gtest:gmock_main',
+        ':gmock',
+    ],
+    visibility='PUBLIC',
+)
+
+# Production code includes "gtest/gtest_prod.h" (the FRIEND_TEST macro) without
+# linking gtest, so this stays a standalone committed header -- never a lib dep.
 cc_library(
     name='gtest_prod',
     hdrs='gtest/gtest_prod.h',
