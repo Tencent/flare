@@ -21,7 +21,6 @@
 #include <string>
 
 #include "google/protobuf/compiler/code_generator.h"
-#include "google/protobuf/compiler/cpp/cpp_helpers.h"
 #include "google/protobuf/compiler/plugin.h"
 #include "google/protobuf/compiler/plugin.pb.h"
 
@@ -251,19 +250,10 @@ void V1Generator::GenerateEpilogue(const google::protobuf::FileDescriptor* file,
 
 }  // namespace flare::protobuf::plugin
 
-// To recognize service option `gdt.streaming_response`, we need either:
-//
-// - Link with `//common/rpc:rpc_options_proto`, which we want to avoid in the
-//   first place, or
-//
-// - Do some dirty hack.
-struct StreamingResponseInitializer {
-  StreamingResponseInitializer() {
-    google::protobuf::internal::ExtensionSet::RegisterExtension(
-        google::protobuf::MethodOptions::internal_default_instance(), 10003, 8,
-        false, false);
-  }
-} streaming_response_initializer;
+// The `gdt.streaming_response` option (MethodOptions field 10003) is registered
+// by flare/rpc/protocol/protobuf/rpc_options.cc, which this plugin links
+// transitively through the decl generators. protobuf 3.21 makes a duplicate
+// extension registration fatal, so the old manual hack here was removed.
 
 int main(int argc, char* argv[]) {
   flare::protobuf::plugin::V1Generator gen;

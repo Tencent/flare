@@ -1,11 +1,13 @@
+# Thin wrappers over vcpkg protobuf 3.21.12 (see BLADE_ROOT vcpkg_config).
+# Consumers keep depending on //thirdparty/protobuf:{protobuf,protoc}.
 cc_library(
     name = 'protobuf',
-    deps = ['//thirdparty/protobuf-3.4.1:protobuf'],
+    deps = ['vcpkg#protobuf:protobuf'],
 )
 
 cc_library(
     name = 'protoc',
-    deps = ['//thirdparty/protobuf-3.4.1:protoc_lib'],
+    deps = ['vcpkg#protobuf:protoc'],
 )
 
 proto_library(
