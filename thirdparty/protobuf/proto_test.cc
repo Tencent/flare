@@ -5,7 +5,7 @@
 
 #include <utility>
 
-#include "thirdparty/googletest/gtest/gtest.h"
+#include "gtest/gtest.h"
 
 namespace gdt {
 
