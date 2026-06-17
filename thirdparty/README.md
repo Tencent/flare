@@ -12,12 +12,14 @@
 |---|---|---|---|
 | fmt | 7.1.3（钉定） | `'fmt': '7.1.3'` | 无特殊处理 |
 | gflags | 2.2.2（钉定） | `linkage='auto'`, `link_all_symbols=True` | 单例（全局 flag 注册表）。`link_all_symbols` whole-archive 静态 `.a`，保证 flag 注册的静态初始化即使未被引用也运行 |
-| glog | 0.7.1（钉定） | `linkage='auto'`, `link_all_symbols=True`, `include_prefix={'thirdparty/glog':'glog'}`, `cmake_options=['-DGFLAGS_NOTHREADS=OFF']` | 单例（在 gflags 里注册 logtostderr 等）。wrapper 额外依赖 `//thirdparty/gflags:gflags`（静态 `glog.a` 需要 gflags 符号在链接行上）。protobuf-3.4.1 用 `thirdparty/glog/logging.h` → 重映射到 `include/glog`。`GFLAGS_NOTHREADS=OFF` 绕过 gflags-config.cmake 在**静态** gflags 下的模板 bug（默认会找不存在的 `gflags_nothreads_static`） |
-| zlib | baseline | `include_prefix=['zlib','thirdparty/zlib']` | flare 用 `zlib/zlib.h`，protobuf-3.4.1 用 `thirdparty/zlib/zlib.h`，两个前缀都暴露（vcpkg 把头放在 include 顶层） |
+| glog | 0.7.1（钉定） | `linkage='auto'`, `link_all_symbols=True`, `cmake_options=['-DGFLAGS_NOTHREADS=OFF']` | 单例（在 gflags 里注册 logtostderr 等）。wrapper 额外依赖 `//thirdparty/gflags:gflags`（静态 `glog.a` 需要 gflags 符号在链接行上）。`GFLAGS_NOTHREADS=OFF` 绕过 gflags-config.cmake 在**静态** gflags 下的模板 bug（默认会找不存在的 `gflags_nothreads_static`） |
+| zlib | baseline | `include_prefix='zlib'` | flare 用 `zlib/zlib.h`，vcpkg 把头放在 include 顶层 |
 | lz4 | baseline | `include_prefix='lz4'` | flare 用 `lz4/<h>`，vcpkg 在 include 顶层 |
 | zstd | baseline | `include_prefix='zstd'` | 同上 |
 | snappy | baseline | `include_prefix='snappy'`, `cmake_options=['-DSNAPPY_WITH_RTTI=ON']` | vcpkg 的 snappy 默认 `-fno-rtti`，而 flare 用到 `snappy::Sink/Source` 的 RTTI |
 | xxhash | baseline | `include_prefix='xxhash'` | 迁移时删掉了源码树里残留的整份 upstream（其 `xxhash.h` 经 `thirdparty/` extra_inc 把 vcpkg 的头 shadow 掉了，导致一直在用旧的 in-tree 头） |
+| protobuf | 3.21.12（钉定） | `'protobuf': {'version': '3.21.12'}` | 最后一个不依赖 Abseil 的版本（v22+ 起 Abseil 成为硬依赖）。`proto_library_config` 用 vcpkg 的 protoc + libprotobuf（`vcpkg#protobuf`，生成代码匹配运行时）。需改 flare 源码适配 3.4→3.21 API（`cpp_helpers.h` 改名为 `helpers.h` 且本就未用；删掉与 `rpc_options.cc` 重复的 ext-10003 注册——3.21 重复注册会 fatal；`Status::error_message()`→`ToString()`）；`cc_flare_library` 自定义规则把 `vcpkg#` protoc 解析到 blade 安装路径。详见 #184 |
+| yaml-cpp | baseline（0.9.0） | `linkage='auto'`, `link_all_symbols=True` | 被 `flare/base/monitoring:init`（构建成 `.dylib`）依赖，需要按需动态库（旧 foreign build 也是动态）。`link_all_symbols` 把静态 `.a` whole-archive 进 wrapper 的 `.dylib`，使其真正导出 yaml-cpp 符号（wrapper 自身无 srcs）——这才是之前误判为「ABI 阻塞」的 `convert_to_map` undefined 的真因 |
 
 **`linkage='auto'`**：静态 `.a` 始终构建；动态库**按需**构建——仅当某个
 `dynamic_link` 二进制真正依赖时（镜像 `cc_library` 的 `generate_dynamic`）。这样静态链接的
@@ -46,10 +48,8 @@ blade 文档 `doc/*/vcpkg.md`。
   `base/mutex.h`（非 Windows 架构无实现）。在 macOS/Linux 上即便加 `--allow-unsupported`
   也会编译失败。要走 vcpkg 只能自写 overlay port，成本/维护代价过高。
 
-- **protobuf（protobuf-3.4.1）**
-  flare 钉死在 3.4.1 这个非常老的版本：仓库里 check-in 的 `*.pb.{h,cc}` 以及 protoc
-  插件都绑定 3.4.1 的 codegen + 运行时 ABI。vcpkg 没有 3.4.1，更新版本的 protobuf 与
-  flare 的生成代码 / 插件不兼容。
+  > protobuf 原先也列在这里（钉死 3.4.1），现已升级到 vcpkg 3.21.12 并迁移完成，
+  > 见上方 ✅ 表格与 #184。
 
 ### 版本钉死——vcpkg 只有差异过大的新版
 
@@ -58,7 +58,7 @@ flare 的 foreign build 钉死在特定旧版本（且常带 flare 本地 patch�
 
 | 库 | 本地版本 | vcpkg baseline | 阻塞点 |
 |---|---|---|---|
-| yaml-cpp | 0.6.3 | 0.9.0 | ABI 变化：链接出现 undefined `YAML::detail::node_data::convert_to_map`（头/库版本错配）；本地有 `generate_dynamic.patch` |
+| benchmark | 1.5.3 | 1.9.5 | 1.8 起 `benchmark::DoNotOptimize(const T&)` 标记 deprecated，而 flare 的 `*_benchmark.cc` 大量用它；gcc + `-Werror=deprecated-declarations` 会编译失败（clang/macOS 不触发）。需改 flare 源码（改用非 const 重载）或钉到 1.7.x，单独处理 |
 | jsoncpp | 0.10.7 | 1.9.6 | 0.x→1.x 大版本 API 变化（Reader/Writer 弃用、头布局 `jsoncpp/` vs `json/`）；本地有 `no_multi_arch_libdir.patch` |
 | openssl | 1.1.1w | 3.6.3 | 1.1→3.x 大版本，弃用/移除 API 较多，风险高 |
 | nghttp2 | 1.41.0 | 1.69.0 | 仅被 curl 使用，需与 curl/openssl 同进退 |

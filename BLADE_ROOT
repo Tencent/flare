@@ -206,5 +206,13 @@ vcpkg_config(
         'snappy': {'include_prefix': 'snappy',
                    'cmake_options': ['-DSNAPPY_WITH_RTTI=ON']},
         'xxhash': {'include_prefix': 'xxhash'},
+        # yaml-cpp ships at vcpkg's native include/yaml-cpp/ layout, which
+        # already matches how flare includes it -- no include_prefix.
+        # yaml-cpp is pulled into a dynamic_link lib (flare/base/monitoring:init,
+        # built as a .dylib). linkage='auto' builds the on-demand shared yaml-cpp
+        # (the old foreign build was shared too); link_all_symbols whole-archives
+        # the static .a into the wrapper's .dylib so it actually exports the
+        # yaml-cpp symbols the consumer needs (the wrapper has no srcs of its own).
+        'yaml-cpp': {'linkage': 'auto', 'link_all_symbols': True},
     },
 )
