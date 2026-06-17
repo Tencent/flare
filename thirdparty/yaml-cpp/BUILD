@@ -1,32 +1,17 @@
-include('//thirdparty/foreign_build.bld')
-
-
-cmake_build(
-    name='yaml-cpp_build',
-    source_package='yaml-cpp-yaml-cpp-0.6.3.tar.gz',
-    package_name='yaml-cpp',
-    lib_names=['yaml-cpp'],
-    cmake_options=[
-        '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
-        '-DCMAKE_BUILD_TYPE=Release',
-        '-DYAML_CPP_BUILD_TESTS=OFF',
-    ],
-    strip_include_prefix='yaml-cpp',
-    patches=['generate_dynamic.patch']
-)
-
-foreign_cc_library(
-    name='yaml-cpp',
-    deps=[
-        ':yaml-cpp_build',
-    ],
-    visibility = 'PUBLIC',
-)
-
-# For compatibility reasons.
+# Thin wrapper over vcpkg yaml-cpp (see BLADE_ROOT vcpkg_config). Consumers keep
+# depending on //thirdparty/yaml-cpp:yaml-cpp (or the :yaml_cpp compat alias).
 cc_library(
-    name = 'yaml_cpp',
-    hdrs = 'yaml.h',
-    deps = [':yaml-cpp'],
-    visibility = 'PUBLIC',
+    name='yaml-cpp',
+    hdrs=[],
+    deps=['vcpkg#yaml-cpp:yaml-cpp'],
+    visibility='PUBLIC',
+)
+
+# For compatibility reasons (the underscore-named alias). Consumers include
+# "yaml-cpp/yaml.h" via the dep, so no own hdrs.
+cc_library(
+    name='yaml_cpp',
+    hdrs=[],
+    deps=[':yaml-cpp'],
+    visibility='PUBLIC',
 )
