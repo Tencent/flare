@@ -14,72 +14,18 @@
 
 #include "flare/io/util/openssl.h"
 
-#include <pthread.h>
-#include <stdint.h>
-
-#include "openssl/crypto.h"
-#include "openssl/engine.h"
-#include "openssl/err.h"
-#include "openssl/ssl.h"
-
 namespace flare::io::util {
 
-pthread_mutex_t* ssl_lock = nullptr;
+// OpenSSL 1.1+ (flare now links 3.x via vcpkg) auto-initializes the library,
+// error strings and algorithms on first use and is internally thread-safe. The
+// legacy OpenSSL 1.0.x ceremony this file used to perform -- SSL_library_init,
+// ERR_load_*/SSL_load_error_strings, ENGINE_load_builtin_engines, and the
+// CRYPTO_set_locking_callback / CRYPTO_num_locks thread-locking shims -- is
+// obsolete (deprecated no-ops; CRYPTO_num_locks() returns 0). Both entry points
+// are kept (so callers need no change) but are now empty.
 
-void CallbackLockFunction(int32_t mode, int32_t type, const char* file,
-                          int32_t line) {
-  if (mode & CRYPTO_LOCK) {
-    pthread_mutex_lock(&(ssl_lock[type]));
-  } else {
-    pthread_mutex_unlock(&(ssl_lock[type]));
-  }
-}
+void InitializeOpenSSL() {}
 
-unsigned long CallbackIdFunction() {
-#ifdef __APPLE__
-  uint64_t tid;
-  pthread_threadid_np(pthread_self(), &tid);
-  return static_cast<unsigned long>(tid);
-#else
-  // pthread_t is unsigned long on Linux/glibc.
-  return static_cast<unsigned long>(pthread_self());
-#endif
-}
-
-void InitializeOpenSSL() {
-  ERR_load_ERR_strings();
-  ERR_load_crypto_strings();
-  SSL_load_error_strings();
-  SSL_library_init();
-  OpenSSL_add_all_algorithms();
-  ENGINE_load_builtin_engines();
-
-  // when openssl is used in multi-thread environment.
-  ssl_lock = reinterpret_cast<pthread_mutex_t*>(
-      OPENSSL_malloc(CRYPTO_num_locks() * sizeof(pthread_mutex_t)));
-
-  uint32_t ssl_lock_num = CRYPTO_num_locks();
-  for (int i = 0; i < ssl_lock_num; ++i) {
-    pthread_mutex_init(&(ssl_lock[i]), nullptr);
-  }
-
-  CRYPTO_set_id_callback(CallbackIdFunction);
-  CRYPTO_set_locking_callback(CallbackLockFunction);
-}
-
-void DestroyOpenSSL() {
-  if (!ssl_lock) return;
-
-#ifndef FLARE_WITH_BORINGSSL
-  ENGINE_cleanup();
-#endif
-  CRYPTO_set_locking_callback(nullptr);
-  uint32_t ssl_lock_num = CRYPTO_num_locks();
-  for (int i = 0; i < ssl_lock_num; ++i) {
-    pthread_mutex_destroy(&(ssl_lock[i]));
-  }
-  OPENSSL_free(ssl_lock);
-  ssl_lock = nullptr;
-}
+void DestroyOpenSSL() {}
 
 }  // namespace flare::io::util

@@ -1,50 +1,18 @@
-include('//thirdparty/foreign_build.bld')
-
-_SSL_PATH = get_install_dir('openssl')
+# curl via vcpkg (vcpkg#curl:curl, baseline in BLADE_ROOT; openssl + http2
+# features). flare includes "curl/<h>" (vcpkg native include/curl/ layout). curl
+# links its TLS/http2/zlib deps from the same vcpkg install; declare them
+# explicitly so a static curl's references resolve.
 _is_linux = blade.cc_toolchain.target_os == 'linux'
-_NGHTTP2_PATH = get_install_dir('nghttp2')
-_ZLIB_PATH = get_install_dir('zlib')
 
-autotools_build(
-    name='curl_build',
-    source_package='curl-7.71.0.tar.bz2',
-    package_name='curl',
-    lib_names=['curl'],
-    configure_options=' '.join([
-        '--with-nghttp2=' + _NGHTTP2_PATH,
-        '--with-ssl=' + _SSL_PATH,
-        '--with-zlib=' + _ZLIB_PATH,
-        '--enable-shared',
-        '--enable-static',
-        '--with-pic',
-        '--disable-ldap',
-        '--disable-ldaps',
-        '--without-brotli',
-        '--without-libidn',
-        '--without-libidn2',
-	'--without-librtmp',
-	'--without-libpsl'
-    ]),
-    deps=[
-        '//thirdparty/nghttp2:nghttp2',
-        '//thirdparty/openssl:crypto',
-        '//thirdparty/openssl:ssl',
-        '//thirdparty/zlib:z',
-    ],
-    ld_library_path=[_SSL_PATH + '/lib', _NGHTTP2_PATH + '/lib', _ZLIB_PATH + '/lib'],
-    strip_include_prefix='curl',
-    generate_dynamic=True,
-)
-
-foreign_cc_library(
+cc_library(
     name='curl',
+    hdrs=[],
     deps=[
-        ':curl_build',
-        '//thirdparty/nghttp2:nghttp2',
-        '//thirdparty/openssl:crypto',
+        'vcpkg#curl:curl',
         '//thirdparty/openssl:ssl',
+        '//thirdparty/openssl:crypto',
+        '//thirdparty/nghttp2:nghttp2',
         '//thirdparty/zlib:z',
     ] + (['#pthread', '#rt'] if _is_linux else []),
     visibility='PUBLIC',
-    has_dynamic=True,
 )

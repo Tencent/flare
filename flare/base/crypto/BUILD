@@ -37,6 +37,9 @@ cc_library(
   name = 'sha',
   hdrs = 'sha.h',
   srcs = 'sha.cc',
+  # OpenSSL 3.x deprecates the low-level SHA*/HMAC APIs (still valid until 4.0);
+  # flare builds -Werror, so silence just this deprecation.
+  extra_cppflags = ['-Wno-deprecated-declarations'],
   deps = [
     '//flare/base:buffer',
     '//flare/base/crypto/detail:openssl_impl',
@@ -60,6 +63,9 @@ cc_library(
   name = 'md5',
   hdrs = 'md5.h',
   srcs = 'md5.cc',
+  # OpenSSL 3.x deprecates the low-level MD5/HMAC APIs (still valid until 4.0);
+  # flare builds -Werror, so silence just this deprecation.
+  extra_cppflags = ['-Wno-deprecated-declarations'],
   deps = [
     '//flare/base:buffer',
     '//flare/base/crypto/detail:openssl_impl',
