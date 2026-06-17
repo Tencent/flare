@@ -11,28 +11,31 @@
 | 库 | 版本 | vcpkg_config 关键项 | 说明 |
 |---|---|---|---|
 | fmt | 7.1.3（钉定） | `'fmt': '7.1.3'` | 无特殊处理 |
-| gflags | 2.2.2（钉定） | `linkage='auto'`, `link_all_symbols=True` | 单例（全局 flag 注册表）。`link_all_symbols` whole-archive 静态 `.a`，保证 flag 注册的静态初始化即使未被引用也运行 |
-| glog | 0.7.1（钉定） | `linkage='auto'`, `link_all_symbols=True`, `cmake_options=['-DGFLAGS_NOTHREADS=OFF']` | 单例（在 gflags 里注册 logtostderr 等）。wrapper 额外依赖 `//thirdparty/gflags:gflags`（静态 `glog.a` 需要 gflags 符号在链接行上）。`GFLAGS_NOTHREADS=OFF` 绕过 gflags-config.cmake 在**静态** gflags 下的模板 bug（默认会找不存在的 `gflags_nothreads_static`） |
+| gflags | 2.2.2（钉定） | `link_all_symbols=True` | 单例（全局 flag 注册表）。`link_all_symbols` whole-archive 静态 `.a`，保证静态链接的 protoc 插件里 flag 注册的静态初始化即使未被引用也运行 |
+| glog | 0.7.1（钉定） | `link_all_symbols=True`, `cmake_options=['-DGFLAGS_NOTHREADS=OFF']` | 单例（在 gflags 里注册 logtostderr 等）。`GFLAGS_NOTHREADS=OFF` 绕过 gflags-config.cmake 在**静态** gflags 下的模板 bug（默认会找不存在的 `gflags_nothreads_static`） |
 | zlib | baseline | `include_prefix='zlib'` | flare 用 `zlib/zlib.h`，vcpkg 把头放在 include 顶层 |
 | lz4 | baseline | `include_prefix='lz4'` | flare 用 `lz4/<h>`，vcpkg 在 include 顶层 |
 | zstd | baseline | `include_prefix='zstd'` | 同上 |
 | snappy | baseline | `include_prefix='snappy'`, `cmake_options=['-DSNAPPY_WITH_RTTI=ON']` | vcpkg 的 snappy 默认 `-fno-rtti`，而 flare 用到 `snappy::Sink/Source` 的 RTTI |
 | xxhash | baseline | `include_prefix='xxhash'` | 迁移时删掉了源码树里残留的整份 upstream（其 `xxhash.h` 经 `thirdparty/` extra_inc 把 vcpkg 的头 shadow 掉了，导致一直在用旧的 in-tree 头） |
-| protobuf | 3.21.12（钉定） | `'protobuf': {'version': '3.21.12'}` | 最后一个不依赖 Abseil 的版本（v22+ 起 Abseil 成为硬依赖）。`proto_library_config` 用 vcpkg 的 protoc + libprotobuf（`vcpkg#protobuf`，生成代码匹配运行时）。需改 flare 源码适配 3.4→3.21 API（`cpp_helpers.h` 改名为 `helpers.h` 且本就未用；删掉与 `rpc_options.cc` 重复的 ext-10003 注册——3.21 重复注册会 fatal；`Status::error_message()`→`ToString()`）；`cc_flare_library` 自定义规则把 `vcpkg#` protoc 解析到 blade 安装路径。详见 #184 |
-| yaml-cpp | baseline（0.9.0） | `linkage='auto'`, `link_all_symbols=True` | 被 `flare/base/monitoring:init`（构建成 `.dylib`）依赖，需要按需动态库（旧 foreign build 也是动态）。`link_all_symbols` 把静态 `.a` whole-archive 进 wrapper 的 `.dylib`，使其真正导出 yaml-cpp 符号（wrapper 自身无 srcs）——这才是之前误判为「ABI 阻塞」的 `convert_to_map` undefined 的真因 |
-| benchmark | 1.7.1（钉定） | `'benchmark': {'version': '1.7.1'}` | 钉到 1.7.1：1.8.0 起把 `benchmark::DoNotOptimize(const T&)` 标记 deprecated，而 flare 的 `*_benchmark.cc` 大量用它，gcc + `-Werror=deprecated-declarations` 会编译失败（clang/macOS 不触发）；1.7.1 是该弃用之前的最后一系列。vcpkg 原生 `include/benchmark/` 布局，无需 `include_prefix` |
+| protobuf | 3.21.12（钉定） | `'protobuf': {'version': '3.21.12'}` | 最后一个不依赖 Abseil 的版本（v22+ 起 Abseil 成为硬依赖）。`proto_library_config` 用 vcpkg 的 protoc + libprotobuf（`vcpkg#protobuf`，生成代码匹配运行时）。默认 `'auto'` linkage 让所有 proto dylib 共享同一份 `libprotobuf`，即同一个 `DescriptorPool::generated_pool()`——否则静态 protobuf 被 `proto_library`（`link_all_symbols=True`）whole-archive 进每个 proto dylib，各有一份 pool，跨 dylib 的 `FindFileByName` 取不到 → 段错误。需改 flare 源码适配 3.4→3.21 API（删掉与 `rpc_options.cc` 重复的 ext-10003 注册——3.21 重复注册会 fatal；`Status::error_message()`→`ToString()`）；`cc_flare_library` 把 `vcpkg#` protoc 解析到 blade 安装路径。详见 #184 |
+| yaml-cpp | baseline（0.9.0） | `link_all_symbols=True` | 被 `flare/base/monitoring:init`（构建成 `.dylib`）依赖。`link_all_symbols` 把静态 `.a` 整体 whole-archive，确保消费者拿到全部 yaml-cpp 符号 |
+| benchmark | 1.7.1（钉定） | `'benchmark': {'version': '1.7.1', 'linkage': 'static'}` | 钉到 1.7.1：1.8.0 起把 `benchmark::DoNotOptimize(const T&)` 标记 deprecated，而 flare 的 `*_benchmark.cc` 大量用它，gcc + `-Werror=deprecated-declarations` 会编译失败（clang/macOS 不触发）；1.7.1 是该弃用之前的最后一系列。`linkage='static'`：google/benchmark 无共享构建也不需要（每个 `*_benchmark` 可执行文件各链一次），默认 `'auto'` 会因构建不出 `.dylib` 而失败 |
+| gtest | 1.17.0（钉定） | `'gtest': {'version': '1.17.0'}` | vcpkg port 名为 `gtest`；通过 `cc_test_config.gtest_libs / gtest_main_libs` 接到 `//thirdparty/googletest:{gtest,gtest_main,gmock,gmock_main}`。`*_main` 库装在 vcpkg 的 `lib/manual-link/`（blade 已能在该子目录解析）。单例（UnitTest 注册表）由默认 `'auto'` 自动给到单份共享实例 |
 
-**`linkage='auto'`**：静态 `.a` 始终构建；动态库**按需**构建——仅当某个
-`dynamic_link` 二进制真正依赖时（镜像 `cc_library` 的 `generate_dynamic`）。这样静态链接的
-构建期工具拿到自包含的 `.a`，而 `dynamic_link` 的 release 二进制共享同一份动态库。详见
-blade 文档 `doc/*/vcpkg.md`。
+**默认 `linkage='auto'`**（blade 的默认值，对齐 `cc_library`）：静态 `.a` 始终构建；
+动态库**按需**构建——仅当某个 `dynamic_link` 二进制真正依赖时（analyze 阶段设置的
+`generate_dynamic`，vcpkg 安装在 analyze 之后跑，故只为被需要的 port 建共享库，落在独立的
+`blade-<triplet>-shared` 树）。这样静态链接的构建期工具（如 protoc 插件）拿到自包含的 `.a`，
+而 `dynamic_link` 二进制共享同一份动态库——进程级单例（protobuf descriptor pool、
+gflags/glog/gtest 注册表）因此自动只有一份，无需逐库标注。详见 blade 文档
+`doc/*/build_rules/vcpkg.md`。仅非默认选择（`benchmark` 的 `'static'`、各 `link_all_symbols`
+/ `include_prefix` / `cmake_options`）才在 `BLADE_ROOT` 显式写出。
 
-**配套的 blade 改动**（PR #1314）：
-
-- 新增 `linkage='auto'`（静态 + 按需动态，动态构建落在独立的 `blade-<triplet>-shared` 树）。
-- 给链接了 vcpkg 动态库的 `cc_binary` 烤 `LC_RPATH`（绝对 install lib 目录 + macOS 的
-  `@executable_path/<exe>.runfiles`），使 `@rpath/<lib>` 在原地运行、`blade run`、以及
-  **构建期被当工具执行**（protoc 插件）时都能加载，无需 `DYLD_LIBRARY_PATH`。
+**配套的 blade 改动**：默认 `linkage='auto'`；为链接 vcpkg 动态库的 `cc_binary` 烤
+`LC_RPATH`，使 `@rpath/<lib>` 在原地运行、`blade run`、构建期当工具执行（protoc 插件）时都能
+加载，无需 `DYLD_LIBRARY_PATH`；chainload 工具链设 `CMAKE_POSITION_INDEPENDENT_CODE`，让静态
+vcpkg `.a` 能链进 `.so`。
 
 **配套的 flare 改动**：protoc 插件（`v1_plugin` / `v2_plugin`）设 `dynamic_link=False` ——
 它们是构建期工具，静态/自包含链接，避免运行期解析 `@rpath` 动态库。
@@ -51,6 +54,13 @@ blade 文档 `doc/*/vcpkg.md`。
 
   > protobuf 原先也列在这里（钉死 3.4.1），现已升级到 vcpkg 3.21.12 并迁移完成，
   > 见上方 ✅ 表格与 #184。
+
+- **opentracing-cpp**（本地 1.5.1）
+  vcpkg 的 opentracing（baseline 1.6.0）内置的 `variant.hpp` 用了 `std::result_of`，它在
+  C++17 起被弃用、C++20 移除，flare 的现代工具链（Xcode clang）直接编译失败（`no type named
+  'result_of' in namespace 'std'`）。flare 的 foreign build 正是靠本地 `variant.patch` /
+  `cxx17.patch` 修掉这点（bazel 侧也有对应的 `opentracing-cpp-cxx20.patch`）。vcpkg port 不带
+  这些补丁，要走 vcpkg 只能自写带 patch 的 overlay port，成本过高。
 
 ### 版本钉死——vcpkg 只有差异过大的新版
 
@@ -78,10 +88,10 @@ flare 的 foreign build 钉死在特定旧版本（且常带 flare 本地 patch�
   链接顺序 / whole-archive。vcpkg 虽有这两个 port，但替换 malloc 这类全局行为 + 自带
   pprof 工具是 flare 专属，迁移高风险、低收益。
 
-- **googletest（1.17.0）**
-  vcpkg 里 port 名为 `gtest`（非 `googletest`）。非阻塞，但它通过
-  `cc_test_config.gtest_libs / gtest_main_libs` 接线，迁移需要同步改这两处配置 ——
-  暂缓。
+- **blake3 / rapidxml**
+  都是源码树里直接 vendored 的头/源文件（blake3 是一组 `.c`，rapidxml 头文件-only），并非
+  foreign build——没有 tarball/cmake_build 样板可省。迁到 vcpkg 反而要引入 vcpkg 依赖 +
+  bazel 侧 alias（参考 xxhash 的做法），收益很小，暂不动。
 
 ## 迁移一个库的步骤（备忘）
 
