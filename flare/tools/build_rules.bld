@@ -21,6 +21,14 @@
 
 def _make_protoc_cmd(srcs, deps):
     protoc = blade.config.get_item('proto_library_config', 'protoc')
+    if protoc.startswith('vcpkg#'):
+        # blade's `vcpkg#` scheme is only understood by its built-in
+        # proto_library. This gen_rule runs protoc directly, so resolve it to
+        # the protoc blade installs in its vcpkg tree. The path is
+        # $BUILD_DIR-relative (the protobuf_libs dep below guarantees the port
+        # is installed first), and `blade-*` is the single host overlay triplet
+        # -- the shell expands it.
+        protoc = '$BUILD_DIR/.cache/vcpkg/installed/blade-*/tools/protobuf/protoc'
     protobuf_incs = blade.config.get_item('proto_library_config',
                                           'protobuf_incs')
     plugin = 'flare/rpc/protocol/protobuf/plugin/v2_plugin'

@@ -140,11 +140,13 @@ cc_library_config(
 )
 
 proto_library_config(
-    protoc='thirdparty/protobuf/bin/%s/%s/protoc-3.4.1'
-    % (blade.host_os, blade.host_arch),
-    protobuf_libs=['//thirdparty/protobuf:protobuf'],
-    protobuf_path='thirdparty',
-    protobuf_incs='thirdparty/protobuf-3.4.1/src',
+    # protoc + libprotobuf from vcpkg (pinned to 3.21.12, the last abseil-free
+    # protobuf). vcpkg#protobuf resolves to the protoc blade installs, so the
+    # generated code matches the linked runtime.
+    protoc='vcpkg#protobuf',
+    protobuf_libs=['vcpkg#protobuf:protobuf'],
+    protobuf_path='',
+    protobuf_incs=[],
     protoc_direct_dependencies=True,
     well_known_protos=[
         'google/protobuf/any.proto',
@@ -170,6 +172,10 @@ vcpkg_config(
     baseline = '06a7fdd564234908731c59ac46a624f808e87b1c',
     root = '/Volumes/code/vcpkg',
     packages = {
+        # 3.21.12: the last protobuf release before v22 made Abseil a hard
+        # dependency. flare's source predates the descriptor name()->string_view
+        # change (v23+), so it builds against 3.21.
+        'protobuf': {'version': '3.21.12'},
         'fmt': '7.1.3',
         # gflags/glog are singletons (global flag registry; glog registers flags
         # like logtostderr in gflags). linkage='auto': the static .a is always
@@ -181,22 +187,18 @@ vcpkg_config(
         # registration initializers survive even when unreferenced.
         'gflags': {'version': '2.2.2', 'linkage': 'auto',
                    'link_all_symbols': True},
-        # flare includes "glog/logging.h" (native vcpkg layout); the kept
-        # protobuf-3.4.1 uses "thirdparty/glog/logging.h" -> remap to include/glog.
+        # flare includes "glog/logging.h" -- vcpkg's native layout, no remap.
         # GFLAGS_NOTHREADS=OFF: with a *static* gflags, gflags-config.cmake has a
         # template bug (it tests an unsubstituted `PACKAGE_NAME@_static` target)
         # and defaults GFLAGS_NOTHREADS=TRUE, so glog's find_package(gflags) asks
         # for the nonexistent gflags_nothreads_static. Forcing it OFF picks the
         # built gflags_static (glog uses Threads anyway).
         'glog': {'version': '0.7.1', 'linkage': 'auto', 'link_all_symbols': True,
-                 'include_prefix': {'thirdparty/glog': 'glog'},
                  'cmake_options': ['-DGFLAGS_NOTHREADS=OFF']},
         # Static-safe data/compression libs. flare includes them as
         # "<lib>/<header>" but vcpkg ships at include/ top level, so each needs
         # include_prefix. Versions follow the baseline (these are ABI-stable).
-        # flare includes "zlib/zlib.h"; the kept protobuf-3.4.1 uses
-        # "thirdparty/zlib/zlib.h" -- expose both.
-        'zlib': {'include_prefix': ['zlib', 'thirdparty/zlib']},
+        'zlib': {'include_prefix': 'zlib'},
         'lz4': {'include_prefix': 'lz4'},
         'zstd': {'include_prefix': 'zstd'},
         # vcpkg's snappy forces -fno-rtti unless SNAPPY_WITH_RTTI is set; flare

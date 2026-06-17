@@ -31,7 +31,7 @@ experimental::LazyEval<std::string> ProtoPacketDesc::Describe() const {
     auto status = google::protobuf::util::MessageToJsonString(
         *std::get<0>(message), &result);
     FLARE_CHECK(status.ok(), "Failed to serialize message: {}",
-                status.error_message());
+                status.ToString());  // protobuf 3.21: error_message() -> message()/ToString()
     return result;
   } else {
     FLARE_CHECK_EQ(message.index(), 1);

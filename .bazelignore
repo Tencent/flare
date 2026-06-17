@@ -14,7 +14,6 @@ thirdparty/nghttp2
 thirdparty/openssl
 thirdparty/opentracing-cpp
 thirdparty/protobuf
-thirdparty/protobuf-3.4.1
 thirdparty/snappy
 thirdparty/yaml-cpp
 thirdparty/zlib
