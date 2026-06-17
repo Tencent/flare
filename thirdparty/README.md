@@ -20,6 +20,7 @@
 | xxhash | baseline | `include_prefix='xxhash'` | 迁移时删掉了源码树里残留的整份 upstream（其 `xxhash.h` 经 `thirdparty/` extra_inc 把 vcpkg 的头 shadow 掉了，导致一直在用旧的 in-tree 头） |
 | protobuf | 3.21.12（钉定） | `'protobuf': {'version': '3.21.12'}` | 最后一个不依赖 Abseil 的版本（v22+ 起 Abseil 成为硬依赖）。`proto_library_config` 用 vcpkg 的 protoc + libprotobuf（`vcpkg#protobuf`，生成代码匹配运行时）。需改 flare 源码适配 3.4→3.21 API（`cpp_helpers.h` 改名为 `helpers.h` 且本就未用；删掉与 `rpc_options.cc` 重复的 ext-10003 注册——3.21 重复注册会 fatal；`Status::error_message()`→`ToString()`）；`cc_flare_library` 自定义规则把 `vcpkg#` protoc 解析到 blade 安装路径。详见 #184 |
 | yaml-cpp | baseline（0.9.0） | `linkage='auto'`, `link_all_symbols=True` | 被 `flare/base/monitoring:init`（构建成 `.dylib`）依赖，需要按需动态库（旧 foreign build 也是动态）。`link_all_symbols` 把静态 `.a` whole-archive 进 wrapper 的 `.dylib`，使其真正导出 yaml-cpp 符号（wrapper 自身无 srcs）——这才是之前误判为「ABI 阻塞」的 `convert_to_map` undefined 的真因 |
+| benchmark | 1.7.1（钉定） | `'benchmark': {'version': '1.7.1'}` | 钉到 1.7.1：1.8.0 起把 `benchmark::DoNotOptimize(const T&)` 标记 deprecated，而 flare 的 `*_benchmark.cc` 大量用它，gcc + `-Werror=deprecated-declarations` 会编译失败（clang/macOS 不触发）；1.7.1 是该弃用之前的最后一系列。vcpkg 原生 `include/benchmark/` 布局，无需 `include_prefix` |
 
 **`linkage='auto'`**：静态 `.a` 始终构建；动态库**按需**构建——仅当某个
 `dynamic_link` 二进制真正依赖时（镜像 `cc_library` 的 `generate_dynamic`）。这样静态链接的
@@ -58,7 +59,6 @@ flare 的 foreign build 钉死在特定旧版本（且常带 flare 本地 patch�
 
 | 库 | 本地版本 | vcpkg baseline | 阻塞点 |
 |---|---|---|---|
-| benchmark | 1.5.3 | 1.9.5 | 1.8 起 `benchmark::DoNotOptimize(const T&)` 标记 deprecated，而 flare 的 `*_benchmark.cc` 大量用它；gcc + `-Werror=deprecated-declarations` 会编译失败（clang/macOS 不触发）。需改 flare 源码（改用非 const 重载）或钉到 1.7.x，单独处理 |
 | jsoncpp | 0.10.7 | 1.9.6 | 0.x→1.x 大版本 API 变化（Reader/Writer 弃用、头布局 `jsoncpp/` vs `json/`）；本地有 `no_multi_arch_libdir.patch` |
 | openssl | 1.1.1w | 3.6.3 | 1.1→3.x 大版本，弃用/移除 API 较多，风险高 |
 | nghttp2 | 1.41.0 | 1.69.0 | 仅被 curl 使用，需与 curl/openssl 同进退 |

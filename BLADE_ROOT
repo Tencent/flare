@@ -214,5 +214,10 @@ vcpkg_config(
         # the static .a into the wrapper's .dylib so it actually exports the
         # yaml-cpp symbols the consumer needs (the wrapper has no srcs of its own).
         'yaml-cpp': {'linkage': 'auto', 'link_all_symbols': True},
+        # benchmark: native include/benchmark/ layout (no include_prefix).
+        # Pinned to 1.7.1 -- 1.8.0 deprecated benchmark::DoNotOptimize(const&),
+        # which flare's *_benchmark.cc use, and flare builds with
+        # -Werror=deprecated-declarations (gcc). 1.7.1 predates that.
+        'benchmark': {'version': '1.7.1'},
     },
 )
