@@ -209,7 +209,12 @@ cc_library(
     name = "cpu",
     srcs = ["cpu.cc"],
     hdrs = ["cpu.h"],
-    linkopts = ["-ldl"],
+    # -ldl is a no-op on macOS (dlopen lives in libSystem); gate it out to
+    # avoid ld64 "ignoring duplicate libraries" warnings.
+    linkopts = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["-ldl"],
+    }),
     visibility = [
         "//flare:__subpackages__",
         # '//yadcc/...',  # FIXME: Move `cpu` out to `flare/base`.
@@ -236,7 +241,12 @@ cc_library(
     name = "curl",
     srcs = ["curl.cc"],
     hdrs = ["curl.h"],
-    linkopts = ["-ldl"],
+    # -ldl is a no-op on macOS (dlopen lives in libSystem); gate it out to
+    # avoid ld64 "ignoring duplicate libraries" warnings.
+    linkopts = select({
+        "@platforms//os:macos": [],
+        "//conditions:default": ["-ldl"],
+    }),
     visibility = ["//flare:__subpackages__"],
     deps = [
         ":logging",

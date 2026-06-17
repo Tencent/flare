@@ -130,11 +130,11 @@ cc_library(
     name = "chrono",
     srcs = ["chrono.cc"],
     hdrs = ["chrono.h"],
-    linkopts = [
-        "-lpthread",
-    ] + select({
+    linkopts = select({
+        # On macOS pthread/rt live in libSystem; passing them is a no-op that
+        # only triggers ld64 "ignoring duplicate libraries" warnings.
         "@platforms//os:macos": [],
-        "//conditions:default": ["-lrt"],
+        "//conditions:default": ["-lpthread", "-lrt"],
     }),
     visibility = ["//visibility:public"],
     deps = [":align"],
