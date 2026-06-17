@@ -170,54 +170,45 @@ proto_library_config(
 # to match the previously vendored sources.
 vcpkg_config(
     baseline = '06a7fdd564234908731c59ac46a624f808e87b1c',
-    root = '/Volumes/code/vcpkg',
+    # root is intentionally unset: blade reads $VCPKG_ROOT, else finds `vcpkg` on
+    # PATH (CI relies on the runner's preinstalled vcpkg). Don't hardcode a path.
+    # linkage defaults to 'auto' (static for static-link consumers, shared on
+    # demand for dynamic-link ones), so process-global singletons -- protobuf's
+    # descriptor pool, the gflags/glog/gtest registries -- resolve to one shared
+    # instance across all dylibs with no annotation. Only non-default choices are
+    # called out below; see doc/*/build_rules/vcpkg.md for the linkage rules.
     packages = {
-        # 3.21.12: the last protobuf release before v22 made Abseil a hard
-        # dependency. flare's source predates the descriptor name()->string_view
-        # change (v23+), so it builds against 3.21.
+        # 3.21.12: the last protobuf before v22 made Abseil a hard dependency;
+        # flare predates the descriptor name()->string_view change (v23+).
         'protobuf': {'version': '3.21.12'},
         'fmt': '7.1.3',
-        # gflags/glog are singletons (global flag registry; glog registers flags
-        # like logtostderr in gflags). linkage='auto': the static .a is always
-        # built and the shared lib is built on demand for dynamic_link binaries.
-        # A dynamic_link release exe shares one .dylib (no duplicate
-        # registration); a static build-time tool (the protoc plugins, set
-        # dynamic_link=False) links a self-contained .a with no @rpath dylib to
-        # resolve. link_all_symbols whole-archives that static .a so the flag
-        # registration initializers survive even when unreferenced.
-        'gflags': {'version': '2.2.2', 'linkage': 'auto',
-                   'link_all_symbols': True},
-        # flare includes "glog/logging.h" -- vcpkg's native layout, no remap.
-        # GFLAGS_NOTHREADS=OFF: with a *static* gflags, gflags-config.cmake has a
-        # template bug (it tests an unsubstituted `PACKAGE_NAME@_static` target)
-        # and defaults GFLAGS_NOTHREADS=TRUE, so glog's find_package(gflags) asks
-        # for the nonexistent gflags_nothreads_static. Forcing it OFF picks the
-        # built gflags_static (glog uses Threads anyway).
-        'glog': {'version': '0.7.1', 'linkage': 'auto', 'link_all_symbols': True,
+        # link_all_symbols: the static-link protoc plugins (dynamic_link=False)
+        # whole-archive the .a so gflags/glog's flag-registration static
+        # initializers run even when unreferenced.
+        'gflags': {'version': '2.2.2', 'link_all_symbols': True},
+        # GFLAGS_NOTHREADS=OFF dodges gflags-config.cmake's static-target template
+        # bug (glog's find_package(gflags) would ask for gflags_nothreads_static).
+        'glog': {'version': '0.7.1', 'link_all_symbols': True,
                  'cmake_options': ['-DGFLAGS_NOTHREADS=OFF']},
-        # Static-safe data/compression libs. flare includes them as
-        # "<lib>/<header>" but vcpkg ships at include/ top level, so each needs
-        # include_prefix. Versions follow the baseline (these are ABI-stable).
+        # include_prefix: flare includes these as "<lib>/<header>", but vcpkg
+        # ships their headers at the include/ top level.
         'zlib': {'include_prefix': 'zlib'},
         'lz4': {'include_prefix': 'lz4'},
         'zstd': {'include_prefix': 'zstd'},
-        # vcpkg's snappy forces -fno-rtti unless SNAPPY_WITH_RTTI is set; flare
-        # uses RTTI on snappy::Sink/Source.
+        # snappy also needs RTTI on -- vcpkg forces -fno-rtti, but flare uses RTTI
+        # on snappy::Sink/Source.
         'snappy': {'include_prefix': 'snappy',
                    'cmake_options': ['-DSNAPPY_WITH_RTTI=ON']},
         'xxhash': {'include_prefix': 'xxhash'},
-        # yaml-cpp ships at vcpkg's native include/yaml-cpp/ layout, which
-        # already matches how flare includes it -- no include_prefix.
-        # yaml-cpp is pulled into a dynamic_link lib (flare/base/monitoring:init,
-        # built as a .dylib). linkage='auto' builds the on-demand shared yaml-cpp
-        # (the old foreign build was shared too); link_all_symbols whole-archives
-        # the static .a into the wrapper's .dylib so it actually exports the
-        # yaml-cpp symbols the consumer needs (the wrapper has no srcs of its own).
-        'yaml-cpp': {'linkage': 'auto', 'link_all_symbols': True},
-        # benchmark: native include/benchmark/ layout (no include_prefix).
-        # Pinned to 1.7.1 -- 1.8.0 deprecated benchmark::DoNotOptimize(const&),
-        # which flare's *_benchmark.cc use, and flare builds with
-        # -Werror=deprecated-declarations (gcc). 1.7.1 predates that.
-        'benchmark': {'version': '1.7.1'},
+        # link_all_symbols: consumers need yaml-cpp's symbols whole-archived in.
+        'yaml-cpp': {'link_all_symbols': True},
+        # 1.7.1: 1.8.0 deprecated DoNotOptimize(const&), which flare's
+        # *_benchmark.cc use under gcc -Werror=deprecated-declarations.
+        # linkage='static': google/benchmark has no shared build and needs none
+        # (each *_benchmark exe links it once); the default 'auto' would fail
+        # trying to build it shared.
+        'benchmark': {'version': '1.7.1', 'linkage': 'static'},
+        # vcpkg port name is `gtest`; 1.17.0 matches the previously vendored source.
+        'gtest': {'version': '1.17.0'},
     },
 )
