@@ -79,15 +79,18 @@ jobs:
           ccache-${{ runner.os }}-${{ matrix.cc }}-
     - name: ccache stats (before)
       run: ccache --zero-stats && ccache --show-config
-    - name: Fetch pinned vcpkg baseline
-      # CI runners ship a stale vcpkg clone that lacks the recent baseline
-      # commit pinned in BLADE_ROOT's vcpkg_config, so `vcpkg install` fails
-      # with "baseline ... exists on disk, but not in <commit>". Fetch just
-      # that commit object (GitHub allows fetch-by-SHA) into the runner's tree.
+    - name: Pin vcpkg to the baseline
+      # CI runners ship a stale vcpkg clone whose ports / version DB predate the
+      # baseline pinned in BLADE_ROOT's vcpkg_config. Fetch that commit and check
+      # it out so versions/*.json and ports/ are consistent with the baseline --
+      # otherwise vcpkg resolves a baseline version (e.g. openssl 3.6.3) that the
+      # stale working-tree version DB has no entry for. (The vcpkg tool binary is
+      # untracked, so checkout leaves it in place.)
       shell: bash
       run: |
         VCPKG_DIR="${VCPKG_INSTALLATION_ROOT:-/usr/local/share/vcpkg}"
         git -C "$VCPKG_DIR" fetch --depth 1 origin 06a7fdd564234908731c59ac46a624f808e87b1c
+        git -C "$VCPKG_DIR" checkout -f 06a7fdd564234908731c59ac46a624f808e87b1c
     - name: Build
       run: ./blade build ... -k
     - name: ccache stats (after)
@@ -139,15 +142,18 @@ jobs:
           ccache-${{ runner.os }}-${{ matrix.cc }}-
     - name: ccache stats (before)
       run: ccache --zero-stats && ccache --show-config
-    - name: Fetch pinned vcpkg baseline
-      # CI runners ship a stale vcpkg clone that lacks the recent baseline
-      # commit pinned in BLADE_ROOT's vcpkg_config, so `vcpkg install` fails
-      # with "baseline ... exists on disk, but not in <commit>". Fetch just
-      # that commit object (GitHub allows fetch-by-SHA) into the runner's tree.
+    - name: Pin vcpkg to the baseline
+      # CI runners ship a stale vcpkg clone whose ports / version DB predate the
+      # baseline pinned in BLADE_ROOT's vcpkg_config. Fetch that commit and check
+      # it out so versions/*.json and ports/ are consistent with the baseline --
+      # otherwise vcpkg resolves a baseline version (e.g. openssl 3.6.3) that the
+      # stale working-tree version DB has no entry for. (The vcpkg tool binary is
+      # untracked, so checkout leaves it in place.)
       shell: bash
       run: |
         VCPKG_DIR="${VCPKG_INSTALLATION_ROOT:-/usr/local/share/vcpkg}"
         git -C "$VCPKG_DIR" fetch --depth 1 origin 06a7fdd564234908731c59ac46a624f808e87b1c
+        git -C "$VCPKG_DIR" checkout -f 06a7fdd564234908731c59ac46a624f808e87b1c
     - name: Build
       run: ./blade build ... -k
     - name: ccache stats (after)
@@ -192,15 +198,18 @@ jobs:
           ccache-${{ runner.os }}-
     - name: ccache stats (before)
       run: ccache --zero-stats && ccache --show-config
-    - name: Fetch pinned vcpkg baseline
-      # CI runners ship a stale vcpkg clone that lacks the recent baseline
-      # commit pinned in BLADE_ROOT's vcpkg_config, so `vcpkg install` fails
-      # with "baseline ... exists on disk, but not in <commit>". Fetch just
-      # that commit object (GitHub allows fetch-by-SHA) into the runner's tree.
+    - name: Pin vcpkg to the baseline
+      # CI runners ship a stale vcpkg clone whose ports / version DB predate the
+      # baseline pinned in BLADE_ROOT's vcpkg_config. Fetch that commit and check
+      # it out so versions/*.json and ports/ are consistent with the baseline --
+      # otherwise vcpkg resolves a baseline version (e.g. openssl 3.6.3) that the
+      # stale working-tree version DB has no entry for. (The vcpkg tool binary is
+      # untracked, so checkout leaves it in place.)
       shell: bash
       run: |
         VCPKG_DIR="${VCPKG_INSTALLATION_ROOT:-/usr/local/share/vcpkg}"
         git -C "$VCPKG_DIR" fetch --depth 1 origin 06a7fdd564234908731c59ac46a624f808e87b1c
+        git -C "$VCPKG_DIR" checkout -f 06a7fdd564234908731c59ac46a624f808e87b1c
     - name: Build
       run: ./blade build flare/... -k
     - name: ccache stats (after)

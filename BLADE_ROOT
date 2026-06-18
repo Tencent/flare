@@ -210,5 +210,15 @@ vcpkg_config(
         'benchmark': {'version': '1.7.1', 'linkage': 'static'},
         # vcpkg port name is `gtest`; 1.17.0 matches the previously vendored source.
         'gtest': {'version': '1.17.0'},
+        # The curl cluster (#179). vcpkg has no openssl 1.1.1, so this upgrades to
+        # 3.x; flare's crypto/init code is adapted (io/util/openssl.cc drops the
+        # obsolete 1.0.x init/threading/ENGINE ceremony -- auto-init + thread-safe
+        # since 1.1; base/crypto's low-level MD5/SHA/HMAC compile with
+        # -Wno-deprecated-declarations, still valid until OpenSSL 4.0). All three
+        # use vcpkg's native include/<lib>/ layout (no include_prefix).
+        'openssl': {},
+        'nghttp2': {},
+        # curl: openssl TLS + nghttp2 http2 (zlib auto-detected from the install).
+        'curl': {'features': ['openssl', 'http2']},
     },
 )
