@@ -231,10 +231,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-    - name: Install clang + bazelisk
+    - name: Install clang-17 + bazelisk
+      # Pin clang-17 (not the runner's default clang-18): flare's annotation.h
+      # hand-declares __tsan_* interface symbols that collide with clang-18's
+      # <sanitizer/tsan_interface.h> ("non-static follows static") -- a separate
+      # pre-existing issue that breaks the TSan build. clang-17 is also the
+      # toolchain the fiber-switch fixes (#134/#196) were verified against.
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang
+        sudo apt-get install -y clang-17
+        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 100
+        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 100
         # Download to a temp path, NOT the repo root -- flare tracks a `bazel/`
         # directory, so `-o bazel` here would fail (can't write over a dir).
         curl -fsSL -o "$RUNNER_TEMP/bazelisk" \
