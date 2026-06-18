@@ -244,7 +244,10 @@ cc_test(
     '//flare/testing:echo_service_proto_flare',
     '//flare/testing:endpoint',
     '//flare/rpc:rpc',
-  ]
+  ],
+  # Streaming RPC stress: resource-heavy, flakes (SIGABRT/timeout) under
+  # concurrent CI load. Run alone.
+  exclusive = True,
 )
 
 cc_library(
@@ -297,6 +300,9 @@ cc_test(
     '//flare/testing:echo_service_proto_flare',
     '//flare/rpc:rpc',
   ],
+  # Streaming RPC stress: resource-heavy, flakes (SIGABRT/timeout) under
+  # concurrent CI load. Run alone.
+  exclusive = True,
 )
 
 cc_library(
