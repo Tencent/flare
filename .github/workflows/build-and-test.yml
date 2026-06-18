@@ -231,32 +231,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v6
-    - name: Set up clang-17 + bazelisk
-      # Use the runner's PREINSTALLED clang-17 (ubuntu-24.04 ships clang 16/17/
-      # 18). Do NOT apt-install it -- that intermittently hangs on these runners.
-      # clang-17, not the default clang-18, because flare's annotation.h hand-
-      # declares __tsan_* symbols that collide with clang-18's
-      # <sanitizer/tsan_interface.h> ("non-static follows static"), breaking the
-      # TSan build -- a separate pre-existing issue. clang-17 is also the
-      # toolchain the fiber-switch fixes (#134/#196) were verified against.
+    - name: Set up bazelisk
+      # Use the runner's default clang. annotation.h now includes compiler-rt's
+      # <sanitizer/tsan_interface.h> instead of hand-declaring __tsan_* symbols,
+      # so the TSan build is no longer tied to a specific clang version.
       run: |
-        CC17=""; CXX17=""
-        for pair in "/usr/bin/clang-17 /usr/bin/clang++-17" \
-                    "/usr/lib/llvm-17/bin/clang /usr/lib/llvm-17/bin/clang++"; do
-          set -- $pair
-          if [ -x "$1" ] && [ -x "$2" ]; then CC17="$1"; CXX17="$2"; break; fi
-        done
-        if [ -z "$CC17" ]; then
-          echo "::error::clang-17 not found on runner"; ls -d /usr/bin/clang* /usr/lib/llvm*/bin/clang 2>/dev/null; exit 1
-        fi
-        echo "CC17=$CC17" >> "$GITHUB_ENV"
-        echo "CXX17=$CXX17" >> "$GITHUB_ENV"
-        "$CC17" --version
         # Download bazelisk to a temp path, NOT the repo root -- flare tracks a
         # `bazel/` directory, so `-o bazel` here would fail (can't write a dir).
         curl -fsSL -o "$RUNNER_TEMP/bazelisk" \
           https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64
         sudo install -m 0755 "$RUNNER_TEMP/bazelisk" /usr/local/bin/bazel
+        clang --version
         bazel version | head -1
     - name: Fiber tests under ${{ matrix.san }}
       # A focused set that exercises fiber creation / resume / switch -- enough
@@ -265,8 +250,7 @@ jobs:
       # sync-primitive tests are pathologically slow under TSan on shared 2-4
       # core runners. --test_timeout=300 makes a hang fail fast.
       run: |
-        bazel test --config=${{ matrix.san }} \
-          --repo_env=CC="$CC17" --repo_env=CXX="$CXX17" \
+        bazel test --config=llvm --config=${{ matrix.san }} \
           --test_timeout=300 --keep_going \
           //flare/fiber:future_test \
           //flare/fiber:this_fiber_test \
