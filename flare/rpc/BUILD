@@ -239,7 +239,10 @@ cc_test(
     '//flare/testing:main',
     '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
-  ]
+  ],
+  # Has overload tests that stress the whole server; under concurrent CI load
+  # they crash (SIGSEGV) / time out nondeterministically. Run alone.
+  exclusive = True,
 )
 
 cc_test(
