@@ -240,14 +240,12 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y clang-17
-        sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 100
-        sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 100
         # Download to a temp path, NOT the repo root -- flare tracks a `bazel/`
         # directory, so `-o bazel` here would fail (can't write over a dir).
         curl -fsSL -o "$RUNNER_TEMP/bazelisk" \
           https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64
         sudo install -m 0755 "$RUNNER_TEMP/bazelisk" /usr/local/bin/bazel
-        clang --version
+        /usr/bin/clang-17 --version
         bazel version | head -1
     - name: Fiber tests under ${{ matrix.san }}
       # A focused set that exercises fiber creation / resume / switch -- enough
@@ -256,7 +254,8 @@ jobs:
       # sync-primitive tests are pathologically slow under TSan on shared 2-4
       # core runners. --test_timeout=300 makes a hang fail fast.
       run: |
-        bazel test --config=llvm --config=${{ matrix.san }} \
+        bazel test --config=${{ matrix.san }} \
+          --repo_env=CC=/usr/bin/clang-17 --repo_env=CXX=/usr/bin/clang++-17 \
           --test_timeout=300 --keep_going \
           //flare/fiber:future_test \
           //flare/fiber:this_fiber_test \
