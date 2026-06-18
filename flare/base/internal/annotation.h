@@ -68,38 +68,17 @@ extern "C" {
 }
 #endif  // FLARE_INTERNAL_USE_ASAN
 
-// FIXME: TSan support does not work yet.
 #ifdef FLARE_INTERNAL_USE_TSAN
-extern "C" {
-[[gnu::weak]] void* __tsan_get_current_fiber(void);
-[[gnu::weak]] void* __tsan_create_fiber(unsigned);
-[[gnu::weak]] void __tsan_destroy_fiber(void*);
-[[gnu::weak]] void __tsan_switch_to_fiber(void*, unsigned);
-[[gnu::weak]] void __tsan_set_fiber_name(void*, const char*);
-const unsigned __tsan_switch_to_fiber_no_sync = 1 << 0;
-
-// No special wrapper for these annotations (unlike annotations for fiber) as
-// they're widely supported.
-[[gnu::weak]] void __tsan_mutex_create(void*, unsigned);
-[[gnu::weak]] void __tsan_mutex_destroy(void*, unsigned);
-[[gnu::weak]] void __tsan_mutex_pre_lock(void*, unsigned);
-[[gnu::weak]] void __tsan_mutex_post_lock(void*, unsigned, int);
-[[gnu::weak]] int __tsan_mutex_pre_unlock(void*, unsigned);
-[[gnu::weak]] void __tsan_mutex_post_unlock(void*, unsigned);
-const unsigned __tsan_mutex_linker_init = 1 << 0;
-const unsigned __tsan_mutex_write_reentrant = 1 << 1;
-const unsigned __tsan_mutex_read_reentrant = 1 << 2;
-const unsigned __tsan_mutex_not_static = 1 << 8;
-const unsigned __tsan_mutex_read_lock = 1 << 3;
-const unsigned __tsan_mutex_try_lock = 1 << 4;
-const unsigned __tsan_mutex_try_lock_failed = 1 << 5;
-const unsigned __tsan_mutex_recursive_lock = 1 << 6;
-const unsigned __tsan_mutex_recursive_unlock = 1 << 7;
-
-// Helper for establishing happens-before relationship.
-[[gnu::weak]] void __tsan_acquire(void*);
-[[gnu::weak]] void __tsan_release(void*);
-}
+// Use compiler-rt's canonical declarations directly. This macro is only defined
+// when building under -fsanitize=thread, and any toolchain that provides that
+// flag also ships this header, so it's always available here. We used to hand-
+// declare these __tsan_* symbols, but that clashed with the header ("non-static
+// declaration follows static declaration") whenever it ended up in the same
+// translation unit, breaking the TSan build (Tencent/flare#134). The header
+// provides everything we use: the fiber API (__tsan_create_fiber /
+// __tsan_switch_to_fiber / ... and __tsan_switch_to_fiber_no_sync), the mutex
+// annotations and their flag constants, and __tsan_acquire / __tsan_release.
+#include <sanitizer/tsan_interface.h>
 
 // TODO(luobogao): Annotations for fiber, to replace our own implementation.
 
