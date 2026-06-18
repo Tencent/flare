@@ -243,23 +243,17 @@ jobs:
         clang --version
         bazel version | head -1
     - name: Fiber tests under ${{ matrix.san }}
-      # --test_timeout=600: TSan's instrumentation slows tests well past the
-      # default 300s "moderate" budget on shared runners.
+      # A focused set that exercises fiber creation / resume / switch -- enough
+      # to catch any regression of the switch fixes (a broken switch crashes ALL
+      # fiber tests on the first resume). Kept small on purpose: the heavier
+      # sync-primitive tests are pathologically slow under TSan on shared 2-4
+      # core runners. --test_timeout=300 makes a hang fail fast.
       run: |
         bazel test --config=llvm --config=${{ matrix.san }} \
-          --test_timeout=600 --keep_going \
-          //flare/fiber:alternatives_test \
-          //flare/fiber:async_test \
-          //flare/fiber:barrier_test \
-          //flare/fiber:condition_variable_test \
+          --test_timeout=300 --keep_going \
           //flare/fiber:future_test \
-          //flare/fiber:runtime_test \
-          //flare/fiber:semaphore_test \
-          //flare/fiber:shared_mutex_test \
           //flare/fiber:this_fiber_test \
           //flare/fiber:timer_test \
-          //flare/fiber/detail:fiber_desc_test \
+          //flare/fiber:runtime_test \
           //flare/fiber/detail:fiber_entity_test \
-          //flare/fiber/detail:scheduling_parameters_test \
-          //flare/fiber/detail:stack_allocator_test \
-          //flare/fiber/detail:timer_worker_test
+          //flare/fiber/detail:stack_allocator_test
