@@ -100,6 +100,7 @@ std::pair<const void*, std::size_t> GetMasterFiberStack() noexcept {
 //
 // Do NOT mark this function as `noexcept`. We don't want to force stack being
 // unwound on exception.
+FLARE_INTERNAL_DISABLE_SANITIZER_INSTRUMENTATION
 static void FiberProc(void* context) {
   auto self = reinterpret_cast<FiberEntity*>(context);
   // We're running in `self`'s stack now.
@@ -182,6 +183,7 @@ static void FiberProc(void* context) {
 
 FiberEntity::FiberEntity() { SetRuntimeTypeTo<FiberEntity>(); }
 
+FLARE_INTERNAL_DISABLE_SANITIZER_INSTRUMENTATION
 void FiberEntity::Resume() noexcept {
   auto caller = GetCurrentFiberEntity();
   FLARE_DCHECK_NE(caller, this, "Calling `Resume()` on self is undefined.");
@@ -222,6 +224,7 @@ void FiberEntity::Resume() noexcept {
   }
 }
 
+FLARE_INTERNAL_DISABLE_SANITIZER_INSTRUMENTATION
 void FiberEntity::ResumeOn(Function<void()>&& cb) noexcept {
   auto caller = GetCurrentFiberEntity();
   FLARE_CHECK(!resume_proc,
