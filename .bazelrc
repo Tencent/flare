@@ -44,4 +44,8 @@ build:asan --dynamic_mode=off
 # test` and survives a user-provided __asan_default_options override.
 build:asan --test_env=ASAN_OPTIONS=detect_stack_use_after_return=0
 
+build:tsan --config=san-common --copt=-fsanitize=thread --linkopt=-fsanitize=thread
+# Same shared-linkage ODR concern as ASan (rules_proto).
+build:tsan --dynamic_mode=off
+
 test --test_output=errors

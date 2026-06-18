@@ -214,3 +214,50 @@ jobs:
       run: ./blade build flare/... -k
     - name: ccache stats (after)
       run: ccache --show-stats
+
+  # Fiber tests under ASan/TSan -- regression guard for the fiber-switch
+  # sanitizer fixes (#134 ASan/TSan SEGV, #196 detect_stack_use_after_return).
+  # Uses Bazel + clang, the configuration that surfaced those bugs (flare's
+  # other CI is blade-based). Scoped to a curated set of fiber tests that pass
+  # cleanly under both sanitizers: the full //flare/fiber/... has unrelated
+  # sanitizer issues (curl foreign_cc build under -fsanitize, a few sync-
+  # primitive tests, TSan timeouts) that are out of scope here.
+  sanitizer_fiber:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        san: [asan, tsan]
+
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install clang + bazelisk
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang
+        curl -fsSL -o bazel \
+          https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64
+        sudo install -m 0755 bazel /usr/local/bin/bazel
+        clang --version
+        bazel version | head -1
+    - name: Fiber tests under ${{ matrix.san }}
+      # --test_timeout=600: TSan's instrumentation slows tests well past the
+      # default 300s "moderate" budget on shared runners.
+      run: |
+        bazel test --config=llvm --config=${{ matrix.san }} \
+          --test_timeout=600 --keep_going \
+          //flare/fiber:alternatives_test \
+          //flare/fiber:async_test \
+          //flare/fiber:barrier_test \
+          //flare/fiber:condition_variable_test \
+          //flare/fiber:future_test \
+          //flare/fiber:runtime_test \
+          //flare/fiber:semaphore_test \
+          //flare/fiber:shared_mutex_test \
+          //flare/fiber:this_fiber_test \
+          //flare/fiber:timer_test \
+          //flare/fiber/detail:fiber_desc_test \
+          //flare/fiber/detail:fiber_entity_test \
+          //flare/fiber/detail:scheduling_parameters_test \
+          //flare/fiber/detail:stack_allocator_test \
+          //flare/fiber/detail:timer_worker_test
