@@ -30,6 +30,12 @@
 
 #define FLARE_INTERNAL_NO_SANITIZE_ADDRESS [[clang::no_sanitize("address")]]
 #define FLARE_INTERNAL_NO_SANITIZE_THREAD [[clang::no_sanitize("thread")]]
+// Strips ALL sanitizer instrumentation from a function, including the
+// `__tsan_func_entry`/`__tsan_func_exit` shadow-stack hooks (which plain
+// `no_sanitize` keeps). Needed on the fiber-switch functions: see its use in
+// the `tsan` namespace below.
+#define FLARE_INTERNAL_DISABLE_SANITIZER_INSTRUMENTATION \
+  [[clang::disable_sanitizer_instrumentation]]
 #endif  // __clang__
 
 #if defined(__GNUC__) && !defined(__clang__)
@@ -43,6 +49,12 @@
 
 #define FLARE_INTERNAL_NO_SANITIZE_ADDRESS [[gnu::no_sanitize("address")]]
 #define FLARE_INTERNAL_NO_SANITIZE_THREAD [[gnu::no_sanitize("thread")]]
+
+// GCC has no `disable_sanitizer_instrumentation` attribute (only Clang does),
+// so this expands to nothing. flare's GCC builds are non-sanitized, so it's
+// harmless there; the TSan-with-fibers crash this guards against (#134) is a
+// Clang-only configuration in practice.
+#define FLARE_INTERNAL_DISABLE_SANITIZER_INSTRUMENTATION
 
 #endif  // defined(__GNUC__) && !defined(__clang__)
 
@@ -236,6 +248,17 @@ inline void DestroyFiber(void* fiber) {
 }
 
 // Switch fiber context in TSan.
+//
+// Must carry no TSan func-entry/exit hooks: `__tsan_switch_to_fiber` makes the
+// target fiber's shadow stack active, so an injected `__tsan_func_exit` running
+// after it (on return from this wrapper) would pop the just-activated -- and
+// for a freshly created fiber, empty -- shadow stack, underflowing it. The next
+// `__tsan_func_entry` (e.g. at `FiberProc`) then writes below the stack base
+// and SEGVs (Tencent/flare#134). Plain `no_sanitize` is NOT enough: it disables
+// the data-race checks but keeps the func-entry/exit hooks. `disable_sanitizer_
+// instrumentation` removes those too, so the switch is the last sanitizer event
+// before the stack jump.
+FLARE_INTERNAL_DISABLE_SANITIZER_INSTRUMENTATION
 inline void SwitchToFiber(void* fiber) {
   FLARE_INTERNAL_TSAN_CHECK(__tsan_switch_to_fiber);
   // Do NOT specify `__tsan_switch_to_fiber_no_sync` here, otherwise every
