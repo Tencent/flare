@@ -235,9 +235,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y clang
-        curl -fsSL -o bazel \
+        # Download to a temp path, NOT the repo root -- flare tracks a `bazel/`
+        # directory, so `-o bazel` here would fail (can't write over a dir).
+        curl -fsSL -o "$RUNNER_TEMP/bazelisk" \
           https://github.com/bazelbuild/bazelisk/releases/download/v1.20.0/bazelisk-linux-amd64
-        sudo install -m 0755 bazel /usr/local/bin/bazel
+        sudo install -m 0755 "$RUNNER_TEMP/bazelisk" /usr/local/bin/bazel
         clang --version
         bazel version | head -1
     - name: Fiber tests under ${{ matrix.san }}
