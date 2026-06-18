@@ -37,4 +37,11 @@ build:asan --config=san-common --copt=-fsanitize=address --linkopt=-fsanitize=ad
 # ASAN hits ODR violations with shared linkage due to rules_proto.
 build:asan --dynamic_mode=off
 
+# flare hand-switches pooled fiber stacks, which ASan's fake "use-after-return"
+# stacks (default-on since Clang 11) can't track -- the first fiber resume SEGVs
+# inside __sanitizer_start_switch_fiber (#134). The fiber runtime bakes this in
+# via __asan_default_options(); set it here too so it's explicit for `bazel
+# test` and survives a user-provided __asan_default_options override.
+build:asan --test_env=ASAN_OPTIONS=detect_stack_use_after_return=0
+
 test --test_output=errors

@@ -36,6 +36,22 @@
 
 DECLARE_int32(flare_fiber_stack_size);
 
+#ifdef FLARE_INTERNAL_USE_ASAN
+// flare switches between pooled fiber stacks by hand. ASan's
+// `detect_stack_use_after_return` (on by default since Clang 11) gives each
+// function a separate "fake stack"; that bookkeeping cannot be followed across
+// our manual stack switch, so the first fiber resume crashes with a SEGV inside
+// `__sanitizer_start_switch_fiber` (Tencent/flare#134). Default the option off
+// for any binary that links the fiber runtime. The `ASAN_OPTIONS` environment
+// variable still overrides this, and every other ASan check stays enabled.
+//
+// Defined in this TU (rather than a standalone file) because it is always part
+// of the fiber runtime's link closure, so the linker won't drop it.
+extern "C" const char* __asan_default_options() {
+  return "detect_stack_use_after_return=0";
+}
+#endif
+
 namespace flare::fiber::detail {
 
 // Define thread-local variables declared in `fiber_entity.h`.
