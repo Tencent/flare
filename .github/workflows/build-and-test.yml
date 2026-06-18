@@ -237,9 +237,12 @@ jobs:
       # <sanitizer/tsan_interface.h> ("non-static follows static") -- a separate
       # pre-existing issue that breaks the TSan build. clang-17 is also the
       # toolchain the fiber-switch fixes (#134/#196) were verified against.
+      env:
+        DEBIAN_FRONTEND: noninteractive
+        NEEDRESTART_MODE: a  # don't let needrestart prompt and hang the runner
       run: |
-        sudo apt-get update
-        sudo apt-get install -y clang-17
+        sudo -E apt-get update
+        sudo -E apt-get install -y --no-install-recommends clang-17
         # Download to a temp path, NOT the repo root -- flare tracks a `bazel/`
         # directory, so `-o bazel` here would fail (can't write over a dir).
         curl -fsSL -o "$RUNNER_TEMP/bazelisk" \
