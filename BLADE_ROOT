@@ -148,20 +148,10 @@ proto_library_config(
     protobuf_path='',
     protobuf_incs=[],
     protoc_direct_dependencies=True,
-    well_known_protos=[
-        'google/protobuf/any.proto',
-        'google/protobuf/api.proto',
-        'google/protobuf/compiler/plugin.proto',
-        'google/protobuf/descriptor.proto',
-        'google/protobuf/duration.proto',
-        'google/protobuf/empty.proto',
-        'google/protobuf/field_mask.proto',
-        'google/protobuf/source_context.proto',
-        'google/protobuf/struct.proto',
-        'google/protobuf/timestamp.proto',
-        'google/protobuf/type.proto',
-        'google/protobuf/wrappers.proto',
-    ],
+    # well_known_protos left empty: blade auto-discovers the google/protobuf/*
+    # protos from the vcpkg#protobuf include tree (blade-build#1339), so the list
+    # stays correct across protobuf versions without hand-maintenance here.
+    well_known_protos=[],
 )
 
 # vcpkg-provided third-party libraries (issue blade-build#1236). Hands-on
