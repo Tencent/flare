@@ -22,6 +22,9 @@
 | yaml-cpp | baseline（0.9.0） | `link_all_symbols=True` | 被 `flare/base/monitoring:init`（构建成 `.dylib`）依赖。`link_all_symbols` 把静态 `.a` 整体 whole-archive，确保消费者拿到全部 yaml-cpp 符号 |
 | benchmark | 1.7.1（钉定） | `'benchmark': {'version': '1.7.1', 'linkage': 'static'}` | 钉到 1.7.1：1.8.0 起把 `benchmark::DoNotOptimize(const T&)` 标记 deprecated，而 flare 的 `*_benchmark.cc` 大量用它，gcc + `-Werror=deprecated-declarations` 会编译失败（clang/macOS 不触发）；1.7.1 是该弃用之前的最后一系列。`linkage='static'`：google/benchmark 无共享构建也不需要（每个 `*_benchmark` 可执行文件各链一次），默认 `'auto'` 会因构建不出 `.dylib` 而失败 |
 | gtest | 1.17.0（钉定） | `'gtest': {'version': '1.17.0'}` | vcpkg port 名为 `gtest`；通过 `cc_test_config.gtest_libs / gtest_main_libs` 接到 `//thirdparty/googletest:{gtest,gtest_main,gmock,gmock_main}`。`*_main` 库装在 vcpkg 的 `lib/manual-link/`（blade 已能在该子目录解析）。单例（UnitTest 注册表）由默认 `'auto'` 自动给到单份共享实例 |
+| openssl | baseline（3.x） | `'openssl': {}` | 升级 1.1.1w→3.x（vcpkg 无 1.1.1）。`flare/io/util/openssl.cc` 删掉过时的 1.0.x 初始化/线程锁/ENGINE 仪式（1.1+ 自动初始化且内部线程安全）；`base/crypto/{md5,sha}` 加 `-Wno-deprecated-declarations`（低层 MD5/SHA/HMAC 在 3.x 被弃用但 4.0 前仍可用，未改写成 EVP）。原生 `include/openssl/` 布局。详见 #190 |
+| nghttp2 | baseline | `'nghttp2': {}` | API 稳定的版本提升；仅被 curl 使用。原生 `include/nghttp2/` 布局 |
+| curl | baseline（8.x） | `'curl': {'features': ['openssl', 'http2']}` | API 稳定提升（7→8）。openssl TLS + nghttp2 http2（zlib 自动探测）。macOS 需要的系统 framework（SystemConfiguration/Security/CoreFoundation/CoreServices）由 blade 从 curl 的 pkg-config 自动解析 `-framework`（blade-build #1337）。wrapper 显式依赖同一 vcpkg 装的 openssl/nghttp2/zlib。详见 #190 |
 
 **默认 `linkage='auto'`**（blade 的默认值，对齐 `cc_library`）：静态 `.a` 始终构建；
 动态库**按需**构建——仅当某个 `dynamic_link` 二进制真正依赖时（analyze 阶段设置的
@@ -69,15 +72,10 @@ flare 的 foreign build 钉死在特定旧版本（且常带 flare 本地 patch�
 
 | 库 | 本地版本 | vcpkg baseline | 阻塞点 |
 |---|---|---|---|
-| jsoncpp | 0.10.7 | 1.9.6 | 0.x→1.x 大版本 API 变化（Reader/Writer 弃用、头布局 `jsoncpp/` vs `json/`）；本地有 `no_multi_arch_libdir.patch` |
-| openssl | 1.1.1w | 3.6.3 | 1.1→3.x 大版本，弃用/移除 API 较多，风险高 |
-| nghttp2 | 1.41.0 | 1.69.0 | 仅被 curl 使用，需与 curl/openssl 同进退 |
-| curl | 7.71.0 | 8.20.0 | 传递依赖 openssl + nghttp2，被上面两个阻塞 |
+| jsoncpp | 0.10.7 | 1.9.6 | 0.x→1.x 大版本 API 变化（`Reader`/`Writer` 弃用、头布局 `jsoncpp/` vs `json/`）；本地有 `no_multi_arch_libdir.patch` |
 
-> 这几个并非「技术上不可能」，而是「当前不划算」：要么接受新版本并改适配，要么把
-> 本地 patch 移植成 vcpkg overlay。等有需要再单独评估。
->
-> 升级这些旧版库以解锁迁移的技术债，跟踪于
+> 并非「技术上不可能」，而是需要改适配代码。curl 簇里的 openssl/nghttp2/curl 已按此
+> 路子升级完成（见上方 ✅ 表格与 #190），jsoncpp 是该簇仅剩的一个，跟踪于
 > [Tencent/flare#179](https://github.com/Tencent/flare/issues/179)。
 
 ### 刻意保留 foreign
