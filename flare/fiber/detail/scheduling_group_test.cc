@@ -23,6 +23,7 @@
 #include "gtest/gtest.h"
 
 #include "flare/base/chrono.h"
+#include "flare/base/internal/annotation.h"
 #include "flare/base/random.h"
 #include "flare/base/string.h"
 #include "flare/fiber/detail/fiber_entity.h"
@@ -46,11 +47,19 @@ template <class SG, class... Args>
 }
 
 std::size_t GetMaxFibers() {
+#if defined(FLARE_INTERNAL_USE_ASAN) || defined(FLARE_INTERNAL_USE_TSAN)
+  // Each fiber needs its own (mmap'd) stack; under ASan/TSan a full 128K-fiber
+  // run is both very slow (well past the test timeout) and memory-hungry. A
+  // smaller count still exercises the scheduling paths under instrumentation.
+  constexpr std::size_t kCap = 4096;
+#else
+  constexpr std::size_t kCap = 131072;
+#endif
   std::ifstream ifs("/proc/sys/vm/max_map_count");
   std::string s;
   std::getline(ifs, s);
   return std::min<std::size_t>(TryParse<std::size_t>(s).value_or(65530) / 4,
-                               131072);
+                               kCap);
 }
 
 FiberEntity* CreateFiberEntity(SchedulingGroup* sg, bool system_fiber,
