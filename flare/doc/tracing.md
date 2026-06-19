@@ -5,6 +5,8 @@ Flare内置了对调用追踪逻辑的支持，通过不同的内置或第三方
 
 *调用追踪基于 [OpenTelemetry](https://opentelemetry.io/) 的 C++ trace API（仅 API，provider 负责对接具体的导出/上报实现）。*
 
+> **provider 实现者注意**：[`TracingOpsProvider`](../rpc/tracing/tracing_ops_provider.h) 的接口直接使用了 OpenTelemetry 的 API 类型（如 `nostd::shared_ptr<Span>`、`nostd::string_view`、`AttributeValue` 等）。这些 `nostd::` 类型的底层实现由**编译期配置**决定：默认为内置实现，定义 `OPENTELEMETRY_STL_VERSION`（≥ 对应阈值，flare 为 C++20 即 `2020`）时映射到 `std::`，启用 abseil 时映射到 `absl::`——三者是**互不兼容的不同类型**。因此 provider 必须使用与 flare 相同的 OpenTelemetry 配置进行编译，否则会出现 ABI 不兼容（接口类型不匹配的编译错误，或更隐蔽的链接期/运行期问题）。flare 自身不强制设置该宏，沿用 OpenTelemetry 的默认 `nostd` 实现。
+
 显然，由于*各服务只上报自己的信息*的天性，为了能将整个调用链路串接起来，需要整个调用链条都使用相同的调用追踪平台才能获得有意义的结果。
 
 目前我们内置了对如下平台的支持：
