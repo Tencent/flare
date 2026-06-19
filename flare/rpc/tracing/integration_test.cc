@@ -283,7 +283,9 @@ TEST_F(TracingIntegrationTest, All) {
                                std::pair(kSpanKind, "server"),
                                std::pair("dummy.invocation-status", "0"),
                                std::pair(kTagKey, kTagValue)));
-    ASSERT_THAT(span.logs, ::testing::ElementsAre(std::pair("", kLogValue)));
+    // An empty log key (single-arg `AddTracingLog`) materializes as the default
+    // event name "log" (@sa: `QuickerSpan::FlushBufferedOps`).
+    ASSERT_THAT(span.logs, ::testing::ElementsAre(std::pair("log", kLogValue)));
   }
 }
 

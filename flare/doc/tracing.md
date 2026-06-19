@@ -43,6 +43,8 @@ Flare内置了对调用追踪逻辑的支持，通过不同的内置或第三方
 
 *如果多次使用相同的`key`调用`SetTracingTag(key, value)`，那么只有最后一次调用的`value`会生效，之前的调用会被覆盖。`AddTracingLog(...)`则全都会上报。*
 
+*基于 OpenTelemetry 时，每一条`AddTracingLog(...)`会映射为 span 上的一个独立 event（`key`作为 event 名，`value`放在`value`属性下），这与 opentracing 把多个 field 归并到一条带时间戳的 log record 不同。对于空`key`（单参形式`AddTracingLog(value)`），event 名默认取`"log"`，以免部分后端按 event 名展示时出现空名。*
+
 ### 程序代码修改
 
 如果业务代码遵照了我们的[开发建议](intro-rpc.md)，包括但不限于下列要求，那么**业务代码只需要按照上文描述开启相关开关即可，不需要针对RPC调用追踪开发逻辑**。

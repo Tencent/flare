@@ -132,8 +132,16 @@ void QuickerSpan::FlushBufferedOps() {
       FLARE_CHECK(e.type == Operation::Log);
       // OpenTelemetry has no opentracing-style "log fields on span"; the
       // closest is an event. The flare log key becomes the event name and the
-      // value an attribute.
-      span_->AddEvent(e.GetKey(), {{"value", attr}});
+      // value an attribute. Note each flare log is its own event, unlike
+      // opentracing which grouped multiple fields under one timestamped record.
+      //
+      // flare permits an empty log key (single-arg `AddTracingLog(value)`);
+      // give those a non-empty event name so backends that group / display by
+      // event name don't render a blank one.
+      auto event_name = e.GetKey();
+      span_->AddEvent(
+          event_name.empty() ? otel::nostd::string_view("log") : event_name,
+          {{"value", attr}});
     }
   }
 }

@@ -33,6 +33,12 @@ inline constexpr std::string_view kInvocationStatus = "flare.invocation_status";
 // frameworks called it as "dyeing key", I'm not very satisfied with that name.)
 inline constexpr std::string_view kTrackingId = "flare.tracking_id";
 
+// Set when the framework wants the span force-sampled (e.g. a failed call).
+// OpenTelemetry's sampling flag is immutable once a span starts, so we can't
+// flip a live span; instead we hand this to the provider, which must translate
+// it into whatever its own backend honors as "report this span regardless".
+inline constexpr std::string_view kSamplingPriority = "flare.sampling_priority";
+
 }  // namespace flare::tracing::ext
 
 #endif  // FLARE_RPC_TRACING_FRAMEWORK_TAGS_H_

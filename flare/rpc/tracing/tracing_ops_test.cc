@@ -152,6 +152,12 @@ TEST(TracingOps, Noop) {
 }
 
 TEST(TracingOps, DummyProvider) {
+  // `DummySpan::tags/logs` are `inline static` (the fake span records into
+  // shared state); reset them so the assertions below don't observe leftovers
+  // from any other case.
+  DummySpan::tags.clear();
+  DummySpan::logs.clear();
+
   TracingOps ops(std::make_unique<DummyProvider>());
   auto span = ops.StartSpanWithLazyOptions("my op", [](auto&&) {});
   span.SetStandardTag("peer.ipv4", "127.0.0.1"s);

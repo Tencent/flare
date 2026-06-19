@@ -36,6 +36,7 @@
 #include "flare/base/never_destroyed.h"
 #include "flare/base/string.h"
 #include "flare/rpc/internal/sampler.h"
+#include "flare/rpc/tracing/framework_tags.h"
 #include "flare/rpc/tracing/string_view_interop.h"
 #include "flare/rpc/tracing/tracing_ops_provider.h"
 
@@ -174,6 +175,15 @@ class QuickerSpan {
     using QuickerValue =
         std::variant<bool, std::int32_t, std::uint32_t, std::int64_t,
                      std::uint64_t, std::string, Function<std::string()>>;
+
+    // Callers pass `const char*` (e.g. `full_name().c_str()`) which must select
+    // the `std::string` alternative, not `bool`. Only P0608R3 (C++20) makes the
+    // pointer-to-`bool` narrowing conversion non-viable so overload resolution
+    // picks `std::string`; under C++17 a `const char*` would silently bind to
+    // `bool`. flare is C++20, so assert it rather than rely on it implicitly.
+    static_assert(__cplusplus >= 202002L,
+                  "QuickerValue relies on P0608R3 (C++20) so that a "
+                  "`const char*` value selects `std::string`, not `bool`.");
 
     Operation type;
 
@@ -354,8 +364,13 @@ inline void QuickerSpan::Report() {
     if (forcibly_sampled_) {
       // OpenTelemetry's sampling decision is fixed at span start (immutable
       // trace flags), so we can't flip a live span to "sampled". Record the
-      // intent as an attribute the provider / exporter can honor.
-      span_->SetAttribute("flare.sampling_priority", 1);
+      // intent as a framework tag and let the provider translate it into
+      // whatever its backend honors -- routing it through `SetFrameworkTag`
+      // (rather than a raw `SetAttribute`) keeps the `flare.`-prefixed tag
+      // consistent with every other framework tag, and runs before the
+      // `IsSampled` check below so a provider can act on it.
+      ops_->GetProvider()->SetFrameworkTag(span_.get(),
+                                           ToOtel(ext::kSamplingPriority), 1);
     }
     if (ops_->GetProvider()->IsSampled(*span_)) {
       FlushBufferedOps();  // Flushing buffered ops is done only when sampled.
