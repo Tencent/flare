@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//Volumes/code/vcpkg/ports/opentelemetry-cpp/**)",
-      "Read(//Volumes/code/vcpkg/**)"
-    ]
-  }
-}
