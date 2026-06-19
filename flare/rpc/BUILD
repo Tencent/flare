@@ -134,7 +134,7 @@ cc_library(
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
     '//thirdparty/jsoncpp:jsoncpp',
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
     '//flare/base:logging',
     '//flare/base:ref_ptr',
     '//flare/base:tsc',

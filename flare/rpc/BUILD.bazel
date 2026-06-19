@@ -126,7 +126,7 @@ cc_library(
         "//flare/rpc/tracing",
         "@com_github_gflags_gflags//:gflags",
         "@com_github_jsoncpp//:jsoncpp",
-        "@com_github_opentracing_opentracing_cpp//:opentracing",
+        "@io_opentelemetry_cpp//:api",
     ],
 )
 

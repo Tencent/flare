@@ -97,7 +97,9 @@ message RpcRequestMeta {
   required string method_name = 2;     // `MethodDescriptor::full_name()`.
   optional uint32 request_id = 3;      // For logging purpose.
   optional uint32 timeout = 4;         // Relative time. In milliseconds.
-  optional bytes tracing_context = 5;  // @sa: opentracing::Tracer::Inject(...)
+  // Opaque, provider-serialized span context.
+  // @sa: flare::tracing::TracingOpsProvider::Inject(...)
+  optional bytes tracing_context = 5;
 
   // Bitwise or of `CompressionAlgorithms`, representing acceptable compression
   // algorithms.

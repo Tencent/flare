@@ -16,43 +16,49 @@
 #define FLARE_RPC_TRACING_TRACING_OPS_H_
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
 
-#include "opentracing-cpp/span.h"
-#include "opentracing-cpp/tracer.h"
-#include "opentracing/ext/tags.h"
+#include "opentelemetry/common/attribute_value.h"
+#include "opentelemetry/common/timestamp.h"
+#include "opentelemetry/nostd/shared_ptr.h"
+#include "opentelemetry/nostd/string_view.h"
+#include "opentelemetry/trace/span.h"
+#include "opentelemetry/trace/span_context.h"
 
 #include "flare/base/chrono.h"
+#include "flare/base/function.h"
 #include "flare/base/internal/test_prod.h"
-#include "flare/base/maybe_owning.h"
 #include "flare/base/never_destroyed.h"
 #include "flare/base/string.h"
 #include "flare/rpc/internal/sampler.h"
+#include "flare/rpc/tracing/string_view_interop.h"
 #include "flare/rpc/tracing/tracing_ops_provider.h"
 
 namespace flare::tracing {
 
 namespace detail {
 
-bool IsStandardTag(const opentracing::string_view& tag);
-bool IsFrameworkTag(const opentracing::string_view& tag);
+bool IsStandardTag(otel::nostd::string_view tag);
+bool IsFrameworkTag(otel::nostd::string_view tag);
 
 }  // namespace detail
 
 class TracingOps;
 
-// A wrapper for `opentracing::Span` that is... quicker.
+// A wrapper for `opentelemetry::trace::Span` that is... quicker.
 class QuickerSpan {
  public:
   // The default-constructed one is a "noop" span (i.e., all its methods are
   // effectively do nothing.).
   QuickerSpan() = default;
 
-  explicit QuickerSpan(TracingOps* ops, std::unique_ptr<opentracing::Span> span)
+  explicit QuickerSpan(TracingOps* ops,
+                       otel::nostd::shared_ptr<otel::trace::Span> span)
       : ops_(ops), span_(std::move(span)) {}
 
   ~QuickerSpan() {
@@ -69,24 +75,24 @@ class QuickerSpan {
 
   // Set standard tag on span.
   //
-  // Only tags defined in `opentracing::ext::` should be used here. These tags
-  // are forwarded to `span` without further translation.
+  // Only standard tags (@sa: `detail::IsStandardTag`) should be used here. These
+  // tags are forwarded to `span` without further translation.
   template <class V>
-  void SetStandardTag(const opentracing::string_view&, V&& value);
+  void SetStandardTag(otel::nostd::string_view, V&& value);
 
   // Tags defined by flare framework should be translated by the provider before
   // setting it into span.
   //
   // @sa: `framework_tags.h`
   template <class V>
-  void SetFrameworkTag(const opentracing::string_view&, V&& value);
+  void SetFrameworkTag(otel::nostd::string_view, V&& value);
 
   // User tags are passed through. It's recommended to use a distinct prefix for
   // user tags to avoid name collision.
   template <class V>
   void SetUserTag(std::string key, V&& value);
 
-  // Append a log item to the trace.
+  // Append a log item to the trace. (Materialized as an OpenTelemetry event.)
   void Log(std::string key, std::string value);
 
   // Baggage items, AFAICS, are only sensible for framework's use. As we don't
@@ -97,16 +103,18 @@ class QuickerSpan {
 
   // Flush any tags buffered tags and report it to the provider.
   //
-  // If the provider's `SetTag` is way too slow (e.g., tjg provider is likely
-  // not very performance), it might be beneficial to buffer KV pairs ourself
-  // and add them later when the span is indeed going to be reported.
+  // If the provider's `SetAttribute` is way too slow, it might be beneficial to
+  // buffer KV pairs ourself and add them later when the span is indeed going to
+  // be reported.
   void Report();
 
   // You'll need this to derive your own client-side span.
   //
-  // `nullptr` is returned if `Tracing()` does not hold.
-  const opentracing::SpanContext* SpanContext() const noexcept {
-    return Tracing() ? &span_->context() : nullptr;
+  // `opentelemetry::trace::SpanContext` is a value type. An invalid context
+  // (`SpanContext::GetInvalid()`) is returned if `Tracing()` does not hold.
+  otel::trace::SpanContext GetSpanContext() const noexcept {
+    return Tracing() ? span_->GetContext()
+                     : otel::trace::SpanContext::GetInvalid();
   }
 
   // Serialize span context to byte stream, which is (normally) transmitted to
@@ -159,6 +167,10 @@ class QuickerSpan {
   } log{};
 
   struct BufferedOp {
+    // We keep our own owning variant rather than `opentelemetry::common::
+    // AttributeValue` because the latter is a non-owning view type (it holds a
+    // `nostd::string_view`, not an owning string). We convert to
+    // `AttributeValue` only at flush time (@sa: `FlushBufferedOps`).
     using QuickerValue =
         std::variant<bool, std::int32_t, std::uint32_t, std::int64_t,
                      std::uint64_t, std::string, Function<std::string()>>;
@@ -166,19 +178,18 @@ class QuickerSpan {
     Operation type;
 
     // For user tags or logs, `key`'s lifetime is not guaranteed, so we make a
-    // copy here. Not applicable to non-user tags.
-    //
-    // This is an implementation detail, don't touch it.
-    std::variant<opentracing::string_view, std::string> key;
+    // copy here. Standard/framework tag keys are static literals, so we keep a
+    // (non-owning) view for them.
+    std::variant<otel::nostd::string_view, std::string> key;
     QuickerValue value;
 
     template <class V>
-    BufferedOp(standard_tag_t, const opentracing::string_view& key, V&& value)
+    BufferedOp(standard_tag_t, otel::nostd::string_view key, V&& value)
         : type(Operation::StandardTag),
           key(key),
           value(std::forward<V>(value)) {}
     template <class V>
-    BufferedOp(framework_tag_t, const opentracing::string_view& key, V&& value)
+    BufferedOp(framework_tag_t, otel::nostd::string_view key, V&& value)
         : type(Operation::FrameworkTag),
           key(key),
           value(std::forward<V>(value)) {}
@@ -192,9 +203,9 @@ class QuickerSpan {
       key = std::move(key_str);
     }
 
-    opentracing::string_view GetKey() const noexcept {
+    otel::nostd::string_view GetKey() const noexcept {
       return key.index() == 0 ? std::get<0>(key)
-                              : opentracing::string_view(std::get<1>(key));
+                              : otel::nostd::string_view(std::get<1>(key));
     }
   };
 
@@ -215,7 +226,7 @@ class QuickerSpan {
 
  private:
   TracingOps* ops_;
-  std::unique_ptr<opentracing::Span> span_;
+  otel::nostd::shared_ptr<otel::trace::Span> span_;
   std::vector<BufferedOp> buffered_ops_;
   // FIXME: Thread-safety. (`std::atomic_ref` should come to rescue.) To make
   // the whole class movable, we cannot simply use `std::atomic<T>` here.
@@ -223,19 +234,13 @@ class QuickerSpan {
 };
 
 // This class implements (and hides implementation detail of) all operations
-// required by distributed tracing (given the the concrete implementation
-// conforms to OpenTracing standard.)
+// required by distributed tracing.
 //
-// To be fair, `opentracing-cpp` already implements almost *everything* we need
-// (it even comes with a "noop" tracer which is "reimplemented" here), except
-// that performance is not seriously guaranteed. (The "noop" tracer does state
-// that it comes with minimal perf. overhead, but that's still relatively large
-// compared to implementation here.)
-//
-// Here we "reinvent the wheel" for:
+// We "reinvent the wheel" (rather than exposing `opentelemetry::trace::Tracer`
+// directly) for:
 //
 // - Better performance when distributed tracing is NOT enabled.
-// - Unified interface for supporting non-(opentracing-)standard tags.
+// - Unified interface for supporting framework-specific (non-standard) tags.
 //
 // Note that you need to execute a barrier on DPC to wait for pending DPCs
 // posted by `QuickerSpan::Report()`.
@@ -250,39 +255,41 @@ class TracingOps {
   //
   // DO NOT RELY ON `apply_opts` BEING EVALUATED UNCONDITIONALLY.
   //
-  // It's recommended NOT to apply tags in `apply_opts`, as some
-  // implementation's `SetTag` is slow. By calling `QuickerSpan::SetXxxTag`
-  // instead, the framework can buffer the calls to `SetXxxTag` until it's
-  // absolutely necessary (and eliminate the call completely if possible),
-  // therefore boosting performance. (However, some tracing provider DO require
-  // tags be set in `apply_opts`, consult documentation of provider you use for
-  // details.)
+  // `apply_opts` is invoked as `apply_opts(SpanStartOptions&)` and should set
+  // the parent context / span kind / start-time attributes on it. It's
+  // recommended NOT to apply ordinary tags here (use `QuickerSpan::SetXxxTag`
+  // instead), as some implementation's `SetAttribute` is slow and the framework
+  // can buffer / elide those calls.
   template <class F>
   QuickerSpan StartSpanWithLazyOptions(std::string_view operation_name,
                                        F&& apply_opts) {
     if (Tracing()) {
-      opentracing::StartSpanOptions options = {
-          .start_system_timestamp = ReadSystemClock(),
-          .start_steady_timestamp = ReadSteadyClock()};
-      std::forward<F>(apply_opts)([&](auto&& opt) { opt.Apply(options); });
+      SpanStartOptions options;
+      options.start_system_timestamp =
+          otel::common::SystemTimestamp(ReadSystemClock());
+      options.start_steady_timestamp =
+          otel::common::SteadyTimestamp(ReadSteadyClock());
+      std::forward<F>(apply_opts)(options);
 
-      // OpenTracing uses its own `string_view`, which by the of writing, cannot
-      // be constructed from `std::string_view` implicitly.
-      opentracing::string_view onsv(operation_name.data(),
-                                    operation_name.size());
-      return QuickerSpan{this, provider_->StartSpanWithOptions(onsv, options)};
+      return QuickerSpan{
+          this, provider_->StartSpanWithOptions(
+                    otel::nostd::string_view(operation_name.data(),
+                                             operation_name.size()),
+                    options)};
     }
 
-    return QuickerSpan{nullptr /* Doesn't matter. */, nullptr};
+    return QuickerSpan{nullptr /* Doesn't matter. */,
+                       otel::nostd::shared_ptr<otel::trace::Span>(nullptr)};
   }
 
-  // Deserialize span context from byte stream.
-  opentracing::expected<std::unique_ptr<opentracing::SpanContext>>
-  ParseSpanContextFrom(const std::string& serialized) {
+  // Deserialize span context from byte stream. `std::nullopt` if there's
+  // nothing (parseable) to extract.
+  std::optional<otel::trace::SpanContext> ParseSpanContextFrom(
+      const std::string& serialized) {
     if (Tracing()) {
       return provider_->Extract(serialized);
     }
-    return std::unique_ptr<opentracing::SpanContext>();
+    return std::nullopt;
   }
 
  private:
@@ -303,8 +310,7 @@ TracingOps* GetTracingOps(std::string_view service);
 ////////////////////////////////////////
 
 template <class V>
-void QuickerSpan::SetStandardTag(const opentracing::string_view& key,
-                                 V&& value) {
+void QuickerSpan::SetStandardTag(otel::nostd::string_view key, V&& value) {
   FLARE_DCHECK(detail::IsStandardTag(key));
   if (FLARE_UNLIKELY(Tracing())) {
     buffered_ops_.emplace_back(standard_tag, key, std::forward<V>(value));
@@ -312,8 +318,7 @@ void QuickerSpan::SetStandardTag(const opentracing::string_view& key,
 }
 
 template <class V>
-void QuickerSpan::SetFrameworkTag(const opentracing::string_view& key,
-                                  V&& value) {
+void QuickerSpan::SetFrameworkTag(otel::nostd::string_view key, V&& value) {
   FLARE_DCHECK(detail::IsFrameworkTag(key));
   if (FLARE_UNLIKELY(Tracing())) {
     buffered_ops_.emplace_back(framework_tag, key, std::forward<V>(value));
@@ -322,7 +327,8 @@ void QuickerSpan::SetFrameworkTag(const opentracing::string_view& key,
 
 template <class V>
 void QuickerSpan::SetUserTag(std::string key, V&& value) {
-  FLARE_DCHECK(!detail::IsStandardTag(key) && !detail::IsFrameworkTag(key));
+  FLARE_DCHECK(!detail::IsStandardTag(otel::nostd::string_view(key)) &&
+               !detail::IsFrameworkTag(otel::nostd::string_view(key)));
   if (FLARE_UNLIKELY(Tracing())) {
     buffered_ops_.emplace_back(user_tag, std::move(key),
                                std::forward<V>(value));
@@ -331,13 +337,13 @@ void QuickerSpan::SetUserTag(std::string key, V&& value) {
 
 inline void QuickerSpan::Log(std::string key, std::string value) {
   if (FLARE_UNLIKELY(Tracing())) {
-    buffered_ops_.emplace_back(log, key, std::move(value));
+    buffered_ops_.emplace_back(log, std::move(key), std::move(value));
   }
 }
 
 inline bool QuickerSpan::WriteContextTo(std::string* serialized) {
   if (FLARE_UNLIKELY(Tracing())) {
-    return ops_->provider_->Inject(span_->context(), serialized);
+    return ops_->provider_->Inject(span_->GetContext(), serialized);
   }
   serialized->clear();  // Nothing to inject otherwise.
   return true;
@@ -346,18 +352,19 @@ inline bool QuickerSpan::WriteContextTo(std::string* serialized) {
 inline void QuickerSpan::Report() {
   if (FLARE_UNLIKELY(Tracing())) {
     if (forcibly_sampled_) {
-      // Any sane implementation should treat the trace as sampled afterwards.
-      span_->SetTag(opentracing::ext::sampling_priority, 1);
+      // OpenTelemetry's sampling decision is fixed at span start (immutable
+      // trace flags), so we can't flip a live span to "sampled". Record the
+      // intent as an attribute the provider / exporter can honor.
+      span_->SetAttribute("flare.sampling_priority", 1);
     }
     if (ops_->GetProvider()->IsSampled(*span_)) {
       FlushBufferedOps();  // Flushing buffered ops is done only when sampled.
       ReportViaDpc();
     } else {
-      // If not sampled, finishing the span should be relatively cheap.
-      //
-      // FIXME: `Span`'s destructor unconditionally calls `steady_clock::now()`,
-      // and that hurts performance (@sa: `doc/timestamps.md`.)
-      span_ = nullptr;  // Finishes the span implicitly.
+      // If not sampled, dropping the span should be relatively cheap. The
+      // OpenTelemetry API does not auto-`End()` on destruction, so this neither
+      // exports nor pays for a final timestamp.
+      span_ = nullptr;
     }
   }  // Nothing to do otherwise.
 }

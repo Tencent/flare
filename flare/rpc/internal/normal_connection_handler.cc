@@ -15,11 +15,13 @@
 #include "flare/rpc/internal/normal_connection_handler.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
 #include "gflags/gflags.h"
-#include "opentracing/ext/tags.h"
+#include "opentelemetry/trace/span_context.h"
+#include "opentelemetry/trace/span_metadata.h"
 
 #include "flare/base/deferred.h"
 #include "flare/base/internal/dpc.h"
@@ -641,7 +643,9 @@ void NormalConnectionHandler::InitializeForTracing(
       // start a trace unconditionally (on trace missing, as obvious).
       !serialized_ctx.empty() || FLAGS_flare_rpc_start_new_trace_on_missing) {
     auto&& ops = *tracing::GetTracingOps(ctx_->service_name);
-    std::unique_ptr<opentracing::SpanContext> incoming_ctx;
+    // `SpanContext` is a value type in OpenTelemetry. `std::nullopt` means no
+    // (parseable) incoming context, in which case the span starts a new trace.
+    std::optional<opentelemetry::trace::SpanContext> incoming_ctx;
 
     if (!serialized_ctx.empty()) {  // The caller passed a span context to us.
       if (auto opt = ops.ParseSpanContextFrom(serialized_ctx)) {
@@ -656,28 +660,19 @@ void NormalConnectionHandler::InitializeForTracing(
     // Initialize the tracing context and start a new span.
     tracing_ctx.tracing_ops = &ops;
     tracing_ctx.server_span =
-        // `inspection_result.method` is fully qualified. This complies to
-        // what's suggested by OpenTracing standards:
-        //
-        // > Examples of default operation names:
-        // > ...
-        // > - The concatenated names of an RPC service and method
-        //
-        // @sa:
-        // https://opentracing.io/docs/best-practices/instrumenting-frameworks
-        ops.StartSpanWithLazyOptions(inspection_result.method, [&](auto&& f) {
-          f(opentracing::ChildOf(incoming_ctx ? incoming_ctx.get() : nullptr));
+        // `inspection_result.method` is fully qualified, the conventional
+        // operation name (the concatenated RPC service and method names).
+        ops.StartSpanWithLazyOptions(
+            inspection_result.method, [&](tracing::SpanStartOptions& opts) {
+              opts.parent = incoming_ctx
+                                ? *incoming_ctx
+                                : opentelemetry::trace::SpanContext::GetInvalid();
+              // span kind is a start-time property in OpenTelemetry (not a tag).
+              opts.kind = opentelemetry::trace::SpanKind::kServer;
+            });
 
-          // TJG requires `span_kind` to be set in `start_options`. This is
-          // silly, to say the least.
-          //
-          // Note that setting tag (esp. in TJG's case) is slow.
-          f(opentracing::SetTag(opentracing::ext::span_kind,
-                                opentracing::ext::span_kind_rpc_server));
-        });
-
-    // `incoming_ctx` is going away, I'm not sure if all implementation can
-    // accept this situation (as `server_span` may still referencing it.).
+    // No dangling concern anymore: `StartSpanWithOptions` copies the parent
+    // `SpanContext` (a value type) into the span at start.
   }  // Otherwise left the context untouched, in this case it's treated as if
      // tracing is not enabled.
 }
@@ -690,7 +685,8 @@ void NormalConnectionHandler::FinishTracing(
       service_context.advise_trace_forcibly_sampled) {
     span.AdviseForciblySampled();
   }
-  span.SetFrameworkTag(tracing::ext::kInvocationStatus, service_context.status);
+  span.SetFrameworkTag(tracing::ToOtel(tracing::ext::kInvocationStatus),
+                       service_context.status);
 
   controller->SetTraceForciblySampled(span.IsForciblySampled());
   span.Report();  // Report the span after RPC is completed.

@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "gflags/gflags.h"
-#include "opentracing/ext/tags.h"
+#include "opentelemetry/trace/span_metadata.h"
 
 #include "flare/base/buffer/zero_copy_stream.h"
 #include "flare/base/callback.h"
@@ -776,23 +776,22 @@ tracing::QuickerSpan RpcChannel::StartTracingSpanFor(
   // Start a new span for this RPC.
   auto span =
       rpc::session_context->tracing.tracing_ops->StartSpanWithLazyOptions(
-          // As suggested by OpenTracing standard, we use fully-qualified method
-          // name here.
-          method->full_name(), [&](auto&& f) {
-            f(opentracing::ChildOf(
-                rpc::session_context->tracing.server_span.SpanContext()));
+          // As suggested by tracing conventions, we use the fully-qualified
+          // method name here.
+          method->full_name(), [&](tracing::SpanStartOptions& opts) {
+            // An invalid parent context (server span not tracing) makes this a
+            // root span; the value type is copied into the span at start.
+            opts.parent =
+                rpc::session_context->tracing.server_span.GetSpanContext();
+            opts.kind = opentelemetry::trace::SpanKind::kClient;
           });
 
   // Tags are set separately for better performance.
-  span.SetStandardTag(opentracing::ext::span_kind,
-                      opentracing::ext::span_kind_rpc_client);
-  span.SetStandardTag(opentracing::ext::peer_service,
+  span.SetStandardTag("peer.service",
                       method->service()->full_name().c_str());
-  span.SetStandardTag(peer.Family() == AF_INET
-                          ? opentracing::ext::peer_host_ipv4
-                          : opentracing::ext::peer_host_ipv6,
+  span.SetStandardTag(peer.Family() == AF_INET ? "peer.ipv4" : "peer.ipv6",
                       [peer] { return EndpointGetIp(peer); });
-  span.SetStandardTag(opentracing::ext::peer_port, EndpointGetPort(peer));
+  span.SetStandardTag("peer.port", EndpointGetPort(peer));
   return span;
 }
 
@@ -809,8 +808,9 @@ void RpcChannel::FinishTracingSpanWith(int completion_status,
       rpc::session_context->tracing.server_span.SetForciblySampled();
     }
   }
-  span->SetFrameworkTag(tracing::ext::kInvocationStatus, completion_status);
-  // `opentracing::ext::error` is not set to avoid TJG's poor implementation.
+  span->SetFrameworkTag(tracing::ToOtel(tracing::ext::kInvocationStatus),
+                        completion_status);
+  // An `error` tag / span status is not set to avoid TJG's poor implementation.
   // FIXME: What about other tracing providers then?
   span->Report();
 }

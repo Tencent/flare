@@ -3,7 +3,7 @@
 [分布式调用追踪](https://research.google/pubs/pub36356/)可以通过对服务调用链的跟踪，构建一个从服务请求开始到各个服务交互的全部调用过程的视图。用户可以从中了解到诸如应用调用的时延，网络调用的生命周期，系统的性能瓶颈等等信息。
 Flare内置了对调用追踪逻辑的支持，通过不同的内置或第三方[provider](../rpc/tracing/tracing_ops_provider.h)，可以将RPC调用情况上报至相应的管理平台。
 
-*我们只支持符合[OpenTracing](https://opentracing.io/)规范的调用追踪系统。*
+*调用追踪基于 [OpenTelemetry](https://opentelemetry.io/) 的 C++ trace API（仅 API，provider 负责对接具体的导出/上报实现）。*
 
 显然，由于*各服务只上报自己的信息*的天性，为了能将整个调用链路串接起来，需要整个调用链条都使用相同的调用追踪平台才能获得有意义的结果。
 

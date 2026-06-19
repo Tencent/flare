@@ -31,7 +31,7 @@ cc_library(
     name = "framework_tags",
     hdrs = ["framework_tags.h"],
     deps = [
-        "@com_github_opentracing_opentracing_cpp//:opentracing",
+        "@io_opentelemetry_cpp//:api",
     ],
 )
 
@@ -39,7 +39,7 @@ cc_library(
     name = "string_view_interop",
     hdrs = ["string_view_interop.h"],
     deps = [
-        "@com_github_opentracing_opentracing_cpp//:opentracing",
+        "@io_opentelemetry_cpp//:api",
     ],
 )
 
@@ -56,7 +56,7 @@ cc_library(
         "//flare/base:dependency_registry",
         "//flare/base:function",
         "//flare/base/net:endpoint",
-        "@com_github_opentracing_opentracing_cpp//:opentracing",
+        "@io_opentelemetry_cpp//:api",
     ],
 )
 
@@ -66,10 +66,11 @@ cc_library(
     hdrs = ["tracing_ops.h"],
     visibility = ["//visibility:public"],
     deps = [
+        ":string_view_interop",
         ":tracing_ops_provider",
         "//flare/base:chrono",
         "//flare/base:exposed_var",
-        "//flare/base:maybe_owning",
+        "//flare/base:function",
         "//flare/base:never_destroyed",
         "//flare/base:overloaded",
         "//flare/base:random",
@@ -80,7 +81,7 @@ cc_library(
         "//flare/base/thread:thread_cached",
         "//flare/rpc/internal:sampler",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_opentracing_opentracing_cpp//:opentracing",
+        "@io_opentelemetry_cpp//:api",
     ],
 )
 
@@ -120,6 +121,6 @@ cc_test(
         "//flare/testing:main",
         "//flare/testing:relay_service_proto_flare",
         "@com_github_gflags_gflags//:gflags",
-        "@com_github_opentracing_opentracing_cpp//:opentracing",
+        "@io_opentelemetry_cpp//:api",
     ],
 )

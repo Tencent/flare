@@ -15,24 +15,23 @@
 #ifndef FLARE_RPC_TRACING_FRAMEWORK_TAGS_H_
 #define FLARE_RPC_TRACING_FRAMEWORK_TAGS_H_
 
-#include "opentracing/string_view.h"
+#include <string_view>
 
 namespace flare::tracing::ext {
 
 // Here we defined some tags recognized by Flare framework. `TracingOpsProvider`
 // must translate the tags declared here to names recognized by its own
 // implementation.
-
-// `opentracing::string_view` does not provide a `constexpr` constructor,
-// unfortunately.
+//
+// They share the `flare.` prefix so `detail::IsFrameworkTag` can recognize them
+// (@sa: `tracing_ops.cc`).
 
 // Return value of (remote) method invocation.
-inline static const opentracing::string_view kInvocationStatus =
-    "flare.invocation_status";
+inline constexpr std::string_view kInvocationStatus = "flare.invocation_status";
 
 // If the trace is deemed special, a tracking id is tagged on it. (Some internal
 // frameworks called it as "dyeing key", I'm not very satisfied with that name.)
-inline static const opentracing::string_view kTrackingId = "flare.tracking_id";
+inline constexpr std::string_view kTrackingId = "flare.tracking_id";
 
 }  // namespace flare::tracing::ext
 

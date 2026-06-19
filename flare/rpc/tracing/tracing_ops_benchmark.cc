@@ -15,9 +15,9 @@
 #include "flare/rpc/tracing/tracing_ops.h"
 
 #include "benchmark/benchmark.h"
-#include "opentracing/ext/tags.h"
 
 #include "flare/rpc/tracing/framework_tags.h"
+#include "flare/rpc/tracing/string_view_interop.h"
 
 // Let's make sure the perf. overhead is minimal when tracing is not enabled.
 
@@ -60,9 +60,9 @@ BENCHMARK(Benchmark_TracingOpsParseSpanContext);
 void Benchmark_QuickerSpan(benchmark::State& state) {
   while (state.KeepRunning()) {
     auto span = ops.StartSpanWithLazyOptions(op_name, [](auto opts) {});
-    span.SetStandardTag(opentracing::ext::peer_host_ipv4, remote_peer);
-    span.SetStandardTag(opentracing::ext::peer_port, 12345);
-    span.SetFrameworkTag(ext::kTrackingId, "123");
+    span.SetStandardTag("peer.ipv4", remote_peer);
+    span.SetStandardTag("peer.port", 12345);
+    span.SetFrameworkTag(ToOtel(ext::kTrackingId), "123");
     span.SetUserTag("user.tag1", "name");
     span.Report();
     benchmark::DoNotOptimize(span);

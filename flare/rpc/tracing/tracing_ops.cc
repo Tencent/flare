@@ -16,11 +16,14 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 
 #include "gflags/gflags.h"
-#include "opentracing/ext/tags.h"
+#include "opentelemetry/common/attribute_value.h"
+#include "opentelemetry/nostd/string_view.h"
+#include "opentelemetry/trace/span_metadata.h"  // `EndSpanOptions`
 
 #include "flare/base/exposed_var.h"
 #include "flare/base/internal/cpu.h"
@@ -29,7 +32,9 @@
 #include "flare/base/never_destroyed.h"
 #include "flare/base/overloaded.h"
 #include "flare/base/random.h"
+#include "flare/base/string.h"
 #include "flare/base/thread/thread_cached.h"
+#include "flare/rpc/tracing/string_view_interop.h"
 #include "flare/rpc/tracing/tracing_ops_provider.h"
 
 DEFINE_string(flare_tracing_provider, "",
@@ -62,65 +67,73 @@ std::unique_ptr<TracingOps> MakeTracingOps(
 
 namespace detail {
 
-struct StringViewHash {
-  std::size_t operator()(const opentracing::string_view& s) const noexcept {
-    return std::hash<std::string_view>()(std::string_view(s.data(), s.size()));
-  }
-};
-
-bool IsStandardTag(const opentracing::string_view& tag) {
+bool IsStandardTag(otel::nostd::string_view tag) {
   // TODO(luobogao): We need a better way to enumerate standard tags.
-  static const std::unordered_set<opentracing::string_view, StringViewHash>
-      kStandardTags = {opentracing::ext::span_kind,
-                       opentracing::ext::span_kind_rpc_client,
-                       opentracing::ext::span_kind_rpc_server,
-                       opentracing::ext::error,
-                       opentracing::ext::component,
-                       opentracing::ext::sampling_priority,
-                       opentracing::ext::peer_service,
-                       opentracing::ext::peer_hostname,
-                       opentracing::ext::peer_address,
-                       opentracing::ext::peer_host_ipv4,
-                       opentracing::ext::peer_host_ipv6,
-                       opentracing::ext::peer_port,
-                       opentracing::ext::http_url,
-                       opentracing::ext::http_method,
-                       opentracing::ext::http_status_code,
-                       opentracing::ext::database_instance,
-                       opentracing::ext::database_statement,
-                       opentracing::ext::database_type,
-                       opentracing::ext::database_user,
-                       opentracing::ext::message_bus_destination};
-  return kStandardTags.find(tag) != kStandardTags.end();
+  //
+  // These are the conventional (OpenTracing-era) tag names flare still
+  // recognizes. Note `span.kind` is no longer a tag -- it's carried as
+  // `SpanStartOptions::kind`.
+  static const std::unordered_set<std::string_view> kStandardTags = {
+      "error",
+      "component",
+      "sampling_priority",
+      "peer.service",
+      "peer.hostname",
+      "peer.address",
+      "peer.ipv4",
+      "peer.ipv6",
+      "peer.port",
+      "http.url",
+      "http.method",
+      "http.status_code",
+      "db.instance",
+      "db.statement",
+      "db.type",
+      "db.user",
+      "message_bus.destination",
+  };
+  return kStandardTags.find(ToStd(tag)) != kStandardTags.end();
 }
 
-bool IsFrameworkTag(const opentracing::string_view& tag) {
-  return StartsWith(std::string_view(tag.data(), tag.size()), "flare.");
+bool IsFrameworkTag(otel::nostd::string_view tag) {
+  return StartsWith(ToStd(tag), "flare.");
 }
 
 }  // namespace detail
 
 void QuickerSpan::FlushBufferedOps() {
   for (auto&& e : buffered_ops_) {
-    opentracing::Value translated;
-
-    std::visit(
+    // `AttributeValue` is a non-owning view; `scratch` backs any string it
+    // refers to and must outlive the `Set*`/`AddEvent` call below. (For the
+    // buffered-`std::string` case the storage in `e.value` is itself stable
+    // through this iteration.)
+    std::string scratch;
+    otel::common::AttributeValue attr = std::visit(
         // Functors are evaluated now, otherwise the value is returned as-is.
         Overloaded{
             // Not using `const Function<std::string()>` here, otherwise the
             // catch-all below would take precedence in overload resolution.
-            [&](Function<std::string()>& f) { translated = f(); },
-            [&](std::string_view& sv) { translated = std::string(sv); },
-            [&](auto&& v) { translated = v; }},
+            [&](Function<std::string()>& f) -> otel::common::AttributeValue {
+              scratch = f();
+              return otel::nostd::string_view(scratch.data(), scratch.size());
+            },
+            [&](std::string& s) -> otel::common::AttributeValue {
+              return otel::nostd::string_view(s.data(), s.size());
+            },
+            [&](auto&& v) -> otel::common::AttributeValue { return v; }},
         e.value);
+
     if (e.type == Operation::FrameworkTag) {
-      ops_->provider_->SetFrameworkTag(span_.get(), e.GetKey(), translated);
+      ops_->provider_->SetFrameworkTag(span_.get(), e.GetKey(), attr);
     } else if (e.type == Operation::StandardTag ||
                e.type == Operation::UserTag) {
-      span_->SetTag(e.GetKey(), translated);
+      span_->SetAttribute(e.GetKey(), attr);
     } else {
       FLARE_CHECK(e.type == Operation::Log);
-      span_->Log({std::pair(e.GetKey(), translated)});
+      // OpenTelemetry has no opentracing-style "log fields on span"; the
+      // closest is an event. The flare log key becomes the event name and the
+      // value an attribute.
+      span_->AddEvent(e.GetKey(), {{"value", attr}});
     }
   }
 }
@@ -128,18 +141,17 @@ void QuickerSpan::FlushBufferedOps() {
 void QuickerSpan::ReportViaDpc() {
   auto cb = [span = std::move(span_),
              finished_at = ReadSteadyClock()]() mutable {
-    // No we cannot simply call `opentracing::Span::Finish()` here as by the
+    // No we cannot simply call `Span::End()` with default options here as by the
     // time we're called (asynchronously via DPC), an undetermined time period
-    // has passed. Because `Finish()` internally captures current timestamp as
-    // "finishing timestamp", it's likely wrong. Therefore, here we use the time
-    // point we recorded when `ReportViaDpc()` was called to finish the span.
-    opentracing::FinishSpanOptions options;
-    options.finish_steady_timestamp = finished_at;
-    span->FinishWithOptions(options);
+    // has passed and `End()` would otherwise capture "now" as the finish time.
+    // Use the time point recorded when `ReportViaDpc()` was called instead.
+    otel::trace::EndSpanOptions options;
+    options.end_steady_time = otel::common::SteadyTimestamp(finished_at);
+    span->End(options);
     reported_spans->Add(1);
 
-    // Any sane implementation shouldn't report twice (implicitly via `span`'s
-    // dtor.)
+    // Any sane implementation shouldn't report twice (the API contract is that
+    // a `Span`'s dtor does not implicitly `End()`.)
   };
   internal::QueueDpc(std::move(cb));
 
