@@ -17,19 +17,21 @@
 
 #include <string_view>
 
-#include "opentracing-cpp/span.h"  // FIXME: `opentracing/string_view.h`
+#include "opentelemetry/nostd/string_view.h"
 
-// It's unfortunate that `opentracing-cpp` comes with its own `string_view`, and
-// does not interoperate with `std::`'s well, so we provide some helpers here.
+// `opentelemetry`'s `nostd::string_view` only adopts `std::string_view` when
+// the standard one isn't available; flare always builds with C++17, but `nostd`
+// still doesn't offer a `std::string_view` conversion in either direction.
+// These helpers bridge the two without copying.
 
 namespace flare::tracing {
 
-inline bool operator==(std::string_view s, opentracing::string_view o) {
-  return s == std::string_view(o.data(), o.size());
+inline std::string_view ToStd(opentelemetry::nostd::string_view s) noexcept {
+  return std::string_view(s.data(), s.size());
 }
 
-inline bool operator==(opentracing::string_view o, std::string_view s) {
-  return s == std::string_view(o.data(), o.size());
+inline opentelemetry::nostd::string_view ToOtel(std::string_view s) noexcept {
+  return opentelemetry::nostd::string_view(s.data(), s.size());
 }
 
 }  // namespace flare::tracing

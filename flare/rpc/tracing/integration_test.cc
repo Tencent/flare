@@ -12,23 +12,32 @@
 // License for the specific language governing permissions and limitations under
 // the License.
 
-#include <sstream>
+#include <optional>
 #include <string>
+#include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "gflags/gflags.h"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "opentracing/ext/tags.h"
+#include "opentelemetry/common/attribute_value.h"
+#include "opentelemetry/common/key_value_iterable.h"
+#include "opentelemetry/nostd/shared_ptr.h"
+#include "opentelemetry/nostd/string_view.h"
+#include "opentelemetry/nostd/variant.h"
+#include "opentelemetry/trace/span.h"
+#include "opentelemetry/trace/span_context.h"
+#include "opentelemetry/trace/span_metadata.h"
 
-#include "flare/base/overloaded.h"
 #include "flare/fiber/this_fiber.h"
 #include "flare/rpc/rpc_channel.h"
 #include "flare/rpc/rpc_client_controller.h"
 #include "flare/rpc/rpc_server_controller.h"
 #include "flare/rpc/server.h"
 #include "flare/rpc/tracing/framework_tags.h"
+#include "flare/rpc/tracing/string_view_interop.h"
 #include "flare/rpc/tracing/tracing_ops_provider.h"
 #include "flare/testing/echo_service.flare.pb.h"
 #include "flare/testing/endpoint.h"
@@ -44,18 +53,29 @@ namespace flare::tracing {
 
 namespace {
 
-std::string ToString(const opentracing::Value& v) {
-  std::stringstream ss;
-  opentracing::Value::visit(
-      v, Overloaded{
-             [&](std::nullptr_t) {},
-             [&](const auto& v) -> std::void_t<decltype(ss << v)> { ss << v; },
-             [&](auto&&) {}});
-  return ss.str();
+std::string AttrToString(const otel::common::AttributeValue& v) {
+  return otel::nostd::visit(
+      [](auto&& x) -> std::string {
+        using T = std::decay_t<decltype(x)>;
+        if constexpr (std::is_same_v<T, otel::nostd::string_view>) {
+          return std::string(x.data(), x.size());
+        } else if constexpr (std::is_same_v<T, const char*>) {
+          return std::string(x);
+        } else if constexpr (std::is_same_v<T, bool>) {
+          return x ? "true" : "false";
+        } else if constexpr (std::is_arithmetic_v<T>) {
+          return std::to_string(x);
+        } else {
+          return {};  // `span<>` alternatives, not used here.
+        }
+      },
+      v);
 }
 
-opentracing::SpanContext* null_span_context = nullptr;
-opentracing::Tracer* null_tracer = nullptr;
+// The span kind is a start-time property in OpenTelemetry (not a tag), but the
+// test still wants to observe it, so the dummy provider records it under this
+// key.
+constexpr auto kSpanKind = "span.kind";
 
 }  // namespace
 
@@ -67,46 +87,47 @@ struct MaterializedSpan {
 std::mutex lock;
 std::vector<MaterializedSpan> reported_spans;
 
-class DummySpan : public opentracing::Span {
+// A recording fake span. (OpenTelemetry's bundled noop span discards
+// everything, so it can't be asserted on.)
+class DummySpan : public otel::trace::Span {
  public:
-  void FinishWithOptions(
-      const opentracing::FinishSpanOptions&) noexcept override {
+  void SetAttribute(
+      otel::nostd::string_view key,
+      const otel::common::AttributeValue& value) noexcept override {
+    tags_.push_back({std::string(key.data(), key.size()), AttrToString(value)});
+  }
+
+  void AddEvent(otel::nostd::string_view) noexcept override {}
+  void AddEvent(otel::nostd::string_view,
+                otel::common::SystemTimestamp) noexcept override {}
+  void AddEvent(
+      otel::nostd::string_view name, otel::common::SystemTimestamp,
+      const otel::common::KeyValueIterable& attributes) noexcept override {
+    attributes.ForEachKeyValue(
+        [&](otel::nostd::string_view,
+            otel::common::AttributeValue value) noexcept {
+          logs_.push_back(
+              {std::string(name.data(), name.size()), AttrToString(value)});
+          return true;
+        });
+  }
+
+  void SetStatus(otel::trace::StatusCode,
+                 otel::nostd::string_view) noexcept override {}
+  void UpdateName(otel::nostd::string_view name) noexcept override {
+    op_name_ = std::string(name.data(), name.size());
+  }
+  void End(const otel::trace::EndSpanOptions&) noexcept override {
     MaterializedSpan ms = {.method = op_name_, .tags = tags_, .logs = logs_};
     std::scoped_lock _(lock);
     reported_spans.push_back(ms);
   }
-
-  void SetOperationName(opentracing::string_view name) noexcept override {
-    op_name_ = name;
+  otel::trace::SpanContext GetContext() const noexcept override {
+    return otel::trace::SpanContext::GetInvalid();
   }
+  bool IsRecording() const noexcept override { return true; }
 
-  void SetTag(opentracing::string_view key,
-              const opentracing::Value& value) noexcept override {
-    tags_.push_back(std::pair(key, ToString(value)));
-  }
-
-  // Not used.
-  void SetBaggageItem(opentracing::string_view,
-                      opentracing::string_view) noexcept override {}
-  std::string BaggageItem(opentracing::string_view) const noexcept override {
-    return "";
-  }
-
-  void Log(std::initializer_list<
-           std::pair<opentracing::string_view, opentracing::Value>>
-               vs) noexcept override {
-    for (auto&& [k, v] : vs) {
-      logs_.push_back(std::pair(k, ToString(v)));
-    }
-  }
-
-  const opentracing::SpanContext& context() const noexcept override {
-    return *null_span_context;  // U.B.?
-  }
-
-  const opentracing::Tracer& tracer() const noexcept override {
-    return *null_tracer;  // U.B.?
-  }
+  void set_op_name(std::string name) { op_name_ = std::move(name); }
 
  private:  // Testing purpose.
   std::string op_name_;
@@ -119,38 +140,42 @@ class DummyProvider : public TracingOpsProvider {
   explicit DummyProvider(std::string service)
       : service_name_(std::move(service)) {}
 
-  std::unique_ptr<opentracing::Span> StartSpanWithOptions(
-      opentracing::string_view operation_name,
-      const opentracing::StartSpanOptions& options) const noexcept override {
-    auto result = std::make_unique<DummySpan>();
-    result->SetOperationName(std::string(operation_name));
-    for (auto&& [k, v] : options.tags) {
-      result->SetTag(k, v);
+  otel::nostd::shared_ptr<otel::trace::Span> StartSpanWithOptions(
+      otel::nostd::string_view operation_name,
+      const SpanStartOptions& options) const noexcept override {
+    otel::nostd::shared_ptr<otel::trace::Span> span(new DummySpan());
+    auto* dummy = static_cast<DummySpan*>(span.get());
+    dummy->set_op_name(
+        std::string(operation_name.data(), operation_name.size()));
+    // Record the span kind as a tag for the test to observe.
+    dummy->SetAttribute(
+        kSpanKind,
+        options.kind == otel::trace::SpanKind::kClient ? "client" : "server");
+    for (auto&& [k, v] : options.attributes) {
+      dummy->SetAttribute(k, v);
     }
-    return result;
+    return span;
   }
 
-  void SetFrameworkTag(opentracing::Span* span, opentracing::string_view key,
-                       const opentracing::Value& value) override {
-    if (key == ext::kInvocationStatus) {
-      span->SetTag("dummy.invocation-status",
-                   std::to_string(value.get<std::int64_t>()));
+  void SetFrameworkTag(otel::trace::Span* span, otel::nostd::string_view key,
+                       const otel::common::AttributeValue& value) override {
+    if (ToStd(key) == ext::kInvocationStatus) {
+      span->SetAttribute("dummy.invocation-status", value);
     } else {
       FLARE_CHECK(0);
     }
   }
 
-  bool Inject(const opentracing::SpanContext& sc,
-              std::string* out) const override {
+  bool Inject(const otel::trace::SpanContext&, std::string*) const override {
     return true;
   }
 
-  opentracing::expected<std::unique_ptr<opentracing::SpanContext>> Extract(
-      const std::string& in) const override {
-    return std::unique_ptr<opentracing::SpanContext>();
+  std::optional<otel::trace::SpanContext> Extract(
+      const std::string&) const override {
+    return std::nullopt;
   }
 
-  bool IsSampled(const opentracing::Span&) const noexcept override {
+  bool IsSampled(const otel::trace::Span&) const noexcept override {
     return true;
   }
 
@@ -251,17 +276,16 @@ TEST_F(TracingIntegrationTest, All) {
 
   for (auto&& span : reported_spans) {  // Server spans.
     std::unordered_map tag{span.tags.begin(), span.tags.end()};
-    if (tag[opentracing::ext::span_kind] ==
-        opentracing::ext::span_kind_rpc_client) {
+    if (tag[kSpanKind] == "client") {
       continue;
     }
-    ASSERT_THAT(span.tags,
-                ::testing::UnorderedElementsAre(
-                    std::pair(opentracing::ext::span_kind,
-                              opentracing::ext::span_kind_rpc_server),
-                    std::pair("dummy.invocation-status", "0"),
-                    std::pair(kTagKey, kTagValue)));
-    ASSERT_THAT(span.logs, ::testing::ElementsAre(std::pair("", kLogValue)));
+    ASSERT_THAT(span.tags, ::testing::UnorderedElementsAre(
+                               std::pair(kSpanKind, "server"),
+                               std::pair("dummy.invocation-status", "0"),
+                               std::pair(kTagKey, kTagValue)));
+    // An empty log key (single-arg `AddTracingLog`) materializes as the default
+    // event name "log" (@sa: `QuickerSpan::FlushBufferedOps`).
+    ASSERT_THAT(span.logs, ::testing::ElementsAre(std::pair("log", kLogValue)));
   }
 }
 

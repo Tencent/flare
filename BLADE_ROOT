@@ -210,5 +210,11 @@ vcpkg_config(
         'nghttp2': {},
         # curl: openssl TLS + nghttp2 http2 (zlib auto-detected from the install).
         'curl': {'features': ['openssl', 'http2']},
+        # opentelemetry-cpp API for distributed tracing (replaces the vendored
+        # opentracing-cpp). Default features only -> no exporters, so no
+        # protobuf/grpc pulled in (keeps the abseil-free protobuf 3.21.12 pin
+        # intact). It pulls abseil + nlohmann-json, which coexist fine. flare
+        # consumes only the header-only `opentelemetry_api` target.
+        'opentelemetry-cpp': {},
     },
 )

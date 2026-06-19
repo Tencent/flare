@@ -3,7 +3,9 @@
 [分布式调用追踪](https://research.google/pubs/pub36356/)可以通过对服务调用链的跟踪，构建一个从服务请求开始到各个服务交互的全部调用过程的视图。用户可以从中了解到诸如应用调用的时延，网络调用的生命周期，系统的性能瓶颈等等信息。
 Flare内置了对调用追踪逻辑的支持，通过不同的内置或第三方[provider](../rpc/tracing/tracing_ops_provider.h)，可以将RPC调用情况上报至相应的管理平台。
 
-*我们只支持符合[OpenTracing](https://opentracing.io/)规范的调用追踪系统。*
+*调用追踪基于 [OpenTelemetry](https://opentelemetry.io/) 的 C++ trace API（仅 API，provider 负责对接具体的导出/上报实现）。*
+
+> **provider 实现者注意**：[`TracingOpsProvider`](../rpc/tracing/tracing_ops_provider.h) 的接口直接使用了 OpenTelemetry 的 API 类型（如 `nostd::shared_ptr<Span>`、`nostd::string_view`、`AttributeValue` 等）。这些 `nostd::` 类型的底层实现由**编译期配置**决定：默认为内置实现，定义 `OPENTELEMETRY_STL_VERSION`（≥ 对应阈值，flare 为 C++20 即 `2020`）时映射到 `std::`，启用 abseil 时映射到 `absl::`——三者是**互不兼容的不同类型**。因此 provider 必须使用与 flare 相同的 OpenTelemetry 配置进行编译，否则会出现 ABI 不兼容（接口类型不匹配的编译错误，或更隐蔽的链接期/运行期问题）。flare 自身不强制设置该宏，沿用 OpenTelemetry 的默认 `nostd` 实现。
 
 显然，由于*各服务只上报自己的信息*的天性，为了能将整个调用链路串接起来，需要整个调用链条都使用相同的调用追踪平台才能获得有意义的结果。
 
@@ -40,6 +42,8 @@ Flare内置了对调用追踪逻辑的支持，通过不同的内置或第三方
 *部分追踪平台（如天机阁）会忽略`AddTracingLog(key, value)`时传入的`key`，这种情况下可以将所有的信息写在`value`中，并使用任意字符串作为`key`。*
 
 *如果多次使用相同的`key`调用`SetTracingTag(key, value)`，那么只有最后一次调用的`value`会生效，之前的调用会被覆盖。`AddTracingLog(...)`则全都会上报。*
+
+*基于 OpenTelemetry 时，每一条`AddTracingLog(...)`会映射为 span 上的一个独立 event（`key`作为 event 名，`value`放在`value`属性下），这与 opentracing 把多个 field 归并到一条带时间戳的 log record 不同。对于空`key`（单参形式`AddTracingLog(value)`），event 名默认取`"log"`，以免部分后端按 event 名展示时出现空名。*
 
 ### 程序代码修改
 

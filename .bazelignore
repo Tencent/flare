@@ -11,8 +11,8 @@ thirdparty/jemalloc
 thirdparty/jsoncpp
 thirdparty/lz4
 thirdparty/nghttp2
+thirdparty/opentelemetry-cpp
 thirdparty/openssl
-thirdparty/opentracing-cpp
 thirdparty/protobuf
 thirdparty/snappy
 thirdparty/yaml-cpp

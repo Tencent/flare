@@ -58,12 +58,9 @@ vcpkg `.a` 能链进 `.so`。
   > protobuf 原先也列在这里（钉死 3.4.1），现已升级到 vcpkg 3.21.12 并迁移完成，
   > 见上方 ✅ 表格与 #184。
 
-- **opentracing-cpp**（本地 1.5.1）
-  vcpkg 的 opentracing（baseline 1.6.0）内置的 `variant.hpp` 用了 `std::result_of`，它在
-  C++17 起被弃用、C++20 移除，flare 的现代工具链（Xcode clang）直接编译失败（`no type named
-  'result_of' in namespace 'std'`）。flare 的 foreign build 正是靠本地 `variant.patch` /
-  `cxx17.patch` 修掉这点（bazel 侧也有对应的 `opentracing-cpp-cxx20.patch`）。vcpkg port 不带
-  这些补丁，要走 vcpkg 只能自写带 patch 的 overlay port，成本过高。
+  > opentracing-cpp 原先也列在这里（本地 1.5.1，因 `std::result_of` 需打补丁）。现已弃用
+  > opentracing，迁移到 **opentelemetry-cpp**（vcpkg，仅用 header-only 的 trace API，
+  > `'//thirdparty/opentelemetry-cpp:api'`；不带 SDK/exporter，因此不引入 protobuf/grpc）。
 
 ### 版本钉死——vcpkg 只有差异过大的新版
 

@@ -42,3 +42,6 @@ GTAGS
 # IntelliJ IDEA
 *.iml
 .idea
+
+# Claude Code
+.claude

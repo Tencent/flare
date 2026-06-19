@@ -28,11 +28,11 @@ cc_library(
     '//flare/base:chrono',
     '//flare/base:dependency_registry',
     '//flare/base:function',
-    '//flare/base:maybe_owning',
     '//flare/base:never_destroyed',
     '//flare/base:string',
     '//flare/rpc/internal:sampler',
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//flare/rpc/tracing:string_view_interop',
+    '//thirdparty/opentelemetry-cpp:api',
   ],
   visibility = 'PUBLIC',
 )
@@ -41,7 +41,7 @@ cc_library(
   name = 'framework_tags',
   hdrs = 'framework_tags.h',
   deps = [
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
   ]
 )
 
@@ -49,7 +49,7 @@ cc_library(
   name = 'string_view_interop',
   hdrs = 'string_view_interop.h',
   deps = [
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
   ]
 )
 
@@ -63,7 +63,7 @@ cc_library(
   deps = [
     '//flare/base:dependency_registry',
     '//flare/base:function',
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
     '//flare/base/internal:macro',
   ],
   visibility = 'PUBLIC',
@@ -75,9 +75,10 @@ cc_library(
   srcs = 'tracing_ops.cc',
   deps = [
     ':tracing_ops_provider',
+    ':string_view_interop',
     '//flare/base:chrono',
     '//flare/base:exposed_var',
-    '//flare/base:maybe_owning',
+    '//flare/base:function',
     '//flare/base:never_destroyed',
     '//flare/base:overloaded',
     '//flare/base:random',
@@ -88,7 +89,7 @@ cc_library(
     '//flare/base/thread:thread_cached',
     '//flare/rpc/internal:sampler',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
     '//flare/base/internal:hash_map',
   ],
   visibility = 'PUBLIC',
@@ -103,6 +104,7 @@ cc_test(
     '//flare/rpc/tracing:string_view_interop',
     '//flare/testing:main',
     '//thirdparty/googletest:gmock',
+    '//thirdparty/opentelemetry-cpp:api',
   ]
 )
 
@@ -120,7 +122,6 @@ cc_test(
   srcs = 'integration_test.cc',
   deps = [
     ':tracing',
-    '//flare/base:overloaded',
     '//flare/fiber:fiber',
     '//flare/rpc:rpc',
     '//flare/testing:echo_service_proto_flare',
@@ -129,6 +130,6 @@ cc_test(
     '//flare/testing:relay_service_proto_flare',
     '//thirdparty/gflags:gflags',
     '//thirdparty/googletest:gmock',
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
   ]
 )

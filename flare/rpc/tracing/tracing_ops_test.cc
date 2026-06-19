@@ -14,14 +14,23 @@
 
 #include "flare/rpc/tracing/tracing_ops.h"
 
+#include <optional>
 #include <string>
 #include <thread>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "opentracing/ext/tags.h"
+#include "opentelemetry/common/attribute_value.h"
+#include "opentelemetry/common/key_value_iterable.h"
+#include "opentelemetry/nostd/shared_ptr.h"
+#include "opentelemetry/nostd/string_view.h"
+#include "opentelemetry/nostd/variant.h"
+#include "opentelemetry/trace/span.h"
+#include "opentelemetry/trace/span_context.h"
+#include "opentelemetry/trace/span_metadata.h"
 
 #include "flare/rpc/tracing/framework_tags.h"
 #include "flare/rpc/tracing/string_view_interop.h"
@@ -31,104 +40,135 @@ using namespace std::literals;
 
 namespace flare::tracing {
 
-opentracing::SpanContext* null_span_context = nullptr;
-opentracing::Tracer* null_tracer = nullptr;
+namespace {
 
-class DummySpan : public opentracing::Span {
+// Stringify an `AttributeValue` for assertion purposes.
+std::string AttrToString(const otel::common::AttributeValue& v) {
+  return otel::nostd::visit(
+      [](auto&& x) -> std::string {
+        using T = std::decay_t<decltype(x)>;
+        if constexpr (std::is_same_v<T, otel::nostd::string_view>) {
+          return std::string(x.data(), x.size());
+        } else if constexpr (std::is_same_v<T, const char*>) {
+          return std::string(x);
+        } else if constexpr (std::is_same_v<T, bool>) {
+          return x ? "true" : "false";
+        } else if constexpr (std::is_arithmetic_v<T>) {
+          return std::to_string(x);
+        } else {
+          return {};  // `span<>` alternatives, not used by these tests.
+        }
+      },
+      v);
+}
+
+}  // namespace
+
+// A recording fake span. (OpenTelemetry's bundled noop span discards
+// everything, so it can't be asserted on.)
+class DummySpan : public otel::trace::Span {
  public:
-  void FinishWithOptions(
-      const opentracing::FinishSpanOptions&) noexcept override {}
-
-  void SetOperationName(opentracing::string_view name) noexcept override {
-    op_name = name;
+  void SetAttribute(
+      otel::nostd::string_view key,
+      const otel::common::AttributeValue& value) noexcept override {
+    tags.push_back({std::string(key.data(), key.size()), AttrToString(value)});
   }
 
-  void SetTag(opentracing::string_view key,
-              const opentracing::Value& value) noexcept override {
-    tags.push_back(std::pair(key, value.get<std::string>()));
+  void AddEvent(otel::nostd::string_view) noexcept override {}
+  void AddEvent(otel::nostd::string_view,
+                otel::common::SystemTimestamp) noexcept override {}
+  void AddEvent(
+      otel::nostd::string_view name, otel::common::SystemTimestamp,
+      const otel::common::KeyValueIterable& attributes) noexcept override {
+    attributes.ForEachKeyValue(
+        [&](otel::nostd::string_view,
+            otel::common::AttributeValue value) noexcept {
+          logs.push_back(
+              {std::string(name.data(), name.size()), AttrToString(value)});
+          return true;
+        });
   }
 
-  void SetBaggageItem(opentracing::string_view,
-                      opentracing::string_view) noexcept override {}
-
-  std::string BaggageItem(opentracing::string_view) const noexcept override {
-    return "";
+  void SetStatus(otel::trace::StatusCode,
+                 otel::nostd::string_view) noexcept override {}
+  void UpdateName(otel::nostd::string_view name) noexcept override {
+    op_name = std::string(name.data(), name.size());
   }
-
-  void Log(std::initializer_list<
-           std::pair<opentracing::string_view, opentracing::Value>>) noexcept
-      override {}
-
-  const opentracing::SpanContext& context() const noexcept override {
-    return *null_span_context;  // U.B.?
+  void End(const otel::trace::EndSpanOptions&) noexcept override {}
+  otel::trace::SpanContext GetContext() const noexcept override {
+    return otel::trace::SpanContext::GetInvalid();
   }
-
-  const opentracing::Tracer& tracer() const noexcept override {
-    return *null_tracer;  // U.B.?
-  }
+  bool IsRecording() const noexcept override { return true; }
 
  public:  // Testing purpose.
   std::string op_name;
   inline static std::vector<std::pair<std::string, std::string>> tags;
+  inline static std::vector<std::pair<std::string, std::string>> logs;
 };
 
 class DummyProvider : public TracingOpsProvider {
  public:
-  std::unique_ptr<opentracing::Span> StartSpanWithOptions(
-      opentracing::string_view operation_name,
-      const opentracing::StartSpanOptions& options) const noexcept override {
-    auto result = std::make_unique<DummySpan>();
-    result->SetOperationName(operation_name);
-    return result;
+  otel::nostd::shared_ptr<otel::trace::Span> StartSpanWithOptions(
+      otel::nostd::string_view operation_name,
+      const SpanStartOptions&) const noexcept override {
+    otel::nostd::shared_ptr<otel::trace::Span> span(new DummySpan());
+    static_cast<DummySpan*>(span.get())->op_name =
+        std::string(operation_name.data(), operation_name.size());
+    return span;
   }
 
-  void SetFrameworkTag(opentracing::Span* span, opentracing::string_view key,
-                       const opentracing::Value& value) override {
-    if (key == ext::kTrackingId) {
-      span->SetTag("dummy.tracking-id", value);
+  void SetFrameworkTag(otel::trace::Span* span, otel::nostd::string_view key,
+                       const otel::common::AttributeValue& value) override {
+    if (ToStd(key) == ext::kTrackingId) {
+      span->SetAttribute("dummy.tracking-id", value);
     } else {
       FLARE_CHECK(0);
     }
   }
 
-  bool Inject(const opentracing::SpanContext& sc,
-              std::string* out) const override {
+  bool Inject(const otel::trace::SpanContext&, std::string*) const override {
     return true;
   }
 
-  opentracing::expected<std::unique_ptr<opentracing::SpanContext>> Extract(
-      const std::string& in) const override {
-    return std::unique_ptr<opentracing::SpanContext>();
+  std::optional<otel::trace::SpanContext> Extract(
+      const std::string&) const override {
+    return std::nullopt;
   }
 
-  bool IsSampled(const opentracing::Span&) const noexcept override {
+  bool IsSampled(const otel::trace::Span&) const noexcept override {
     return true;
   }
 };
 
 TEST(TracingOps, Noop) {
   TracingOps ops(nullptr);
-  auto span = ops.StartSpanWithLazyOptions("my op", [](auto start_opts) {});
-  ASSERT_EQ(nullptr, span.span_);
-  span.SetStandardTag(opentracing::ext::peer_host_ipv4, "127.0.0.1"s);
-  span.SetFrameworkTag(ext::kTrackingId, "tracking-id"s);
+  auto span = ops.StartSpanWithLazyOptions("my op", [](auto&&) {});
+  ASSERT_FALSE(span.span_);
+  span.SetStandardTag("peer.ipv4", "127.0.0.1"s);
+  span.SetFrameworkTag(ToOtel(ext::kTrackingId), "tracking-id"s);
   span.SetUserTag("user-tag", "value"s);
   span.Report();
   // Nothing should happen.
 }
 
 TEST(TracingOps, DummyProvider) {
+  // `DummySpan::tags/logs` are `inline static` (the fake span records into
+  // shared state); reset them so the assertions below don't observe leftovers
+  // from any other case.
+  DummySpan::tags.clear();
+  DummySpan::logs.clear();
+
   TracingOps ops(std::make_unique<DummyProvider>());
-  auto span = ops.StartSpanWithLazyOptions("my op", [](auto start_opts) {});
-  span.SetStandardTag(opentracing::ext::peer_host_ipv4, "127.0.0.1"s);
-  span.SetFrameworkTag(ext::kTrackingId, "tracking-id"s);
+  auto span = ops.StartSpanWithLazyOptions("my op", [](auto&&) {});
+  span.SetStandardTag("peer.ipv4", "127.0.0.1"s);
+  span.SetFrameworkTag(ToOtel(ext::kTrackingId), "tracking-id"s);
   span.SetUserTag("user-tag", "value"s);
   auto p = dynamic_cast<DummySpan*>(span.span_.get());
   ASSERT_EQ("my op", p->op_name);
   span.Report();
   ASSERT_THAT(DummySpan::tags,
               ::testing::ElementsAre(
-                  std::pair(opentracing::ext::peer_host_ipv4, "127.0.0.1"),
+                  std::pair("peer.ipv4", "127.0.0.1"),
                   std::pair("dummy.tracking-id", "tracking-id"),  // Translated.
                   std::pair("user-tag", "value")));
 

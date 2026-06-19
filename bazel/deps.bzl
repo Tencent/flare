@@ -149,17 +149,21 @@ def flare_dependencies():
             sha256 = "62b2b1acee40c4de5a4913e27a4b4194813cf2b7815b73febec7ae53054646ca",
         )
 
-    if not native.existing_rule("com_github_opentracing_opentracing_cpp"):
+    if not native.existing_rule("io_opentelemetry_cpp"):
         http_archive(
-            name = "com_github_opentracing_opentracing_cpp",
-            build_file = Label("//bazel:opentracing-cpp.BUILD"),
-            # opentracing-cpp 1.5.1 bundles a variant impl using std::result_of,
-            # which C++20 removed. Replace with std::invoke_result.
-            patches = [Label("//bazel:opentracing-cpp-cxx20.patch")],
-            patch_args = ["-p1"],
-            urls = ["https://github.com/opentracing/opentracing-cpp/archive/refs/tags/v1.5.1.zip"],
-            strip_prefix = "opentracing-cpp-1.5.1",
-            sha256 = "7a007a4cd987fb86ce05eeec8fe9e9f2052988c835bb6c738ec00bc167750f81",
+            name = "io_opentelemetry_cpp",
+            build_file = Label("//bazel:opentelemetry-cpp.BUILD"),
+            # The archive ships its own (SDK-wide, abseil/grpc-pulling) Bazel
+            # packages. We only want the header-only API, so drop every nested
+            # BUILD file -- this collapses the archive into a single package
+            # rooted at our build_file, letting it glob `api/include/**`.
+            patch_cmds = [
+                "find . -mindepth 2 -name BUILD -delete",
+                "find . -mindepth 2 -name BUILD.bazel -delete",
+            ],
+            urls = ["https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.27.0.zip"],
+            strip_prefix = "opentelemetry-cpp-1.27.0",
+            sha256 = "4a382e8bfa70c83e3d4b7bc806e383ea01a18b13e4c0ab67b466aac65044bad4",
         )
 
     if not native.existing_rule("com_github_olafvdspek_ctemplate"):

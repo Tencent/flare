@@ -519,7 +519,7 @@ cc_library(
     '//flare/rpc/internal:stream_call_gate',
     '//flare/rpc/tracing:tracing',
     '//thirdparty/gflags:gflags',
-    '//thirdparty/opentracing-cpp:opentracing',
+    '//thirdparty/opentelemetry-cpp:api',
     ':rpc_meta_proto',
     '//flare/base/internal:annotation',
     '//flare/base:object_pool',

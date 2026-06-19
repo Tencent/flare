@@ -24,5 +24,4 @@ thirdparty/blade/cmake-3.31.6-linux-x86_64.tar.gz filter=lfs diff=lfs merge=lfs 
 thirdparty/yaml-cpp/yaml-cpp-yaml-cpp-0.6.3.tar.gz filter=lfs diff=lfs merge=lfs -text
 thirdparty/blade/blade.zip filter=lfs diff=lfs merge=lfs -text
 thirdparty/openssl/openssl-1.0.2u.tar.gz filter=lfs diff=lfs merge=lfs -text
-thirdparty/opentracing-cpp/opentracing-cpp-1.5.1.tar.gz filter=lfs diff=lfs merge=lfs -text
 thirdparty/zstd/zstd-1.4.5.tar.gz filter=lfs diff=lfs merge=lfs -text

@@ -141,8 +141,8 @@ END OF TERMS AND CONDITIONS
 
 Open Source Software Licensed under the Apache version 2.0 License and Other Licenses of the Third-Party Components therein:
 --------------------------------------------------------------------
-1. opentracing-cpp
-Copyright The OpenTracing Authors
+1. opentelemetry-cpp
+Copyright The OpenTelemetry Authors
 
 A copy of Apache version 2.0 is included in this file.
 
