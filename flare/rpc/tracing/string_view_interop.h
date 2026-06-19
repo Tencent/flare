@@ -19,10 +19,10 @@
 
 #include "opentelemetry/nostd/string_view.h"
 
-// `opentelemetry`'s `nostd::string_view` only adopts `std::string_view` when the
-// standard one isn't available; flare always builds with C++17, but `nostd`
-// still doesn't offer a `std::string_view` conversion in either direction. These
-// helpers bridge the two without copying.
+// `opentelemetry`'s `nostd::string_view` only adopts `std::string_view` when
+// the standard one isn't available; flare always builds with C++17, but `nostd`
+// still doesn't offer a `std::string_view` conversion in either direction.
+// These helpers bridge the two without copying.
 
 namespace flare::tracing {
 

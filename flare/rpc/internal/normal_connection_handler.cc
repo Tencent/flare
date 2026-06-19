@@ -664,10 +664,12 @@ void NormalConnectionHandler::InitializeForTracing(
         // operation name (the concatenated RPC service and method names).
         ops.StartSpanWithLazyOptions(
             inspection_result.method, [&](tracing::SpanStartOptions& opts) {
-              opts.parent = incoming_ctx
-                                ? *incoming_ctx
-                                : opentelemetry::trace::SpanContext::GetInvalid();
-              // span kind is a start-time property in OpenTelemetry (not a tag).
+              opts.parent =
+                  incoming_ctx
+                      ? *incoming_ctx
+                      : opentelemetry::trace::SpanContext::GetInvalid();
+              // span kind is a start-time property in OpenTelemetry (not a
+              // tag).
               opts.kind = opentelemetry::trace::SpanKind::kServer;
             });
 

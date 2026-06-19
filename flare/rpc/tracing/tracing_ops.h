@@ -75,8 +75,8 @@ class QuickerSpan {
 
   // Set standard tag on span.
   //
-  // Only standard tags (@sa: `detail::IsStandardTag`) should be used here. These
-  // tags are forwarded to `span` without further translation.
+  // Only standard tags (@sa: `detail::IsStandardTag`) should be used here.
+  // These tags are forwarded to `span` without further translation.
   template <class V>
   void SetStandardTag(otel::nostd::string_view, V&& value);
 
@@ -271,11 +271,11 @@ class TracingOps {
           otel::common::SteadyTimestamp(ReadSteadyClock());
       std::forward<F>(apply_opts)(options);
 
-      return QuickerSpan{
-          this, provider_->StartSpanWithOptions(
-                    otel::nostd::string_view(operation_name.data(),
-                                             operation_name.size()),
-                    options)};
+      return QuickerSpan{this,
+                         provider_->StartSpanWithOptions(
+                             otel::nostd::string_view(operation_name.data(),
+                                                      operation_name.size()),
+                             options)};
     }
 
     return QuickerSpan{nullptr /* Doesn't matter. */,

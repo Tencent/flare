@@ -91,19 +91,18 @@ std::vector<MaterializedSpan> reported_spans;
 // everything, so it can't be asserted on.)
 class DummySpan : public otel::trace::Span {
  public:
-  void SetAttribute(otel::nostd::string_view key,
-                    const otel::common::AttributeValue& value) noexcept
-      override {
-    tags_.push_back(
-        {std::string(key.data(), key.size()), AttrToString(value)});
+  void SetAttribute(
+      otel::nostd::string_view key,
+      const otel::common::AttributeValue& value) noexcept override {
+    tags_.push_back({std::string(key.data(), key.size()), AttrToString(value)});
   }
 
   void AddEvent(otel::nostd::string_view) noexcept override {}
   void AddEvent(otel::nostd::string_view,
                 otel::common::SystemTimestamp) noexcept override {}
-  void AddEvent(otel::nostd::string_view name, otel::common::SystemTimestamp,
-                const otel::common::KeyValueIterable& attributes) noexcept
-      override {
+  void AddEvent(
+      otel::nostd::string_view name, otel::common::SystemTimestamp,
+      const otel::common::KeyValueIterable& attributes) noexcept override {
     attributes.ForEachKeyValue(
         [&](otel::nostd::string_view,
             otel::common::AttributeValue value) noexcept {
@@ -150,8 +149,8 @@ class DummyProvider : public TracingOpsProvider {
         std::string(operation_name.data(), operation_name.size()));
     // Record the span kind as a tag for the test to observe.
     dummy->SetAttribute(
-        kSpanKind, options.kind == otel::trace::SpanKind::kClient ? "client"
-                                                                  : "server");
+        kSpanKind,
+        options.kind == otel::trace::SpanKind::kClient ? "client" : "server");
     for (auto&& [k, v] : options.attributes) {
       dummy->SetAttribute(k, v);
     }
@@ -280,11 +279,10 @@ TEST_F(TracingIntegrationTest, All) {
     if (tag[kSpanKind] == "client") {
       continue;
     }
-    ASSERT_THAT(span.tags,
-                ::testing::UnorderedElementsAre(
-                    std::pair(kSpanKind, "server"),
-                    std::pair("dummy.invocation-status", "0"),
-                    std::pair(kTagKey, kTagValue)));
+    ASSERT_THAT(span.tags, ::testing::UnorderedElementsAre(
+                               std::pair(kSpanKind, "server"),
+                               std::pair("dummy.invocation-status", "0"),
+                               std::pair(kTagKey, kTagValue)));
     ASSERT_THAT(span.logs, ::testing::ElementsAre(std::pair("", kLogValue)));
   }
 }

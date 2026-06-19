@@ -141,10 +141,11 @@ void QuickerSpan::FlushBufferedOps() {
 void QuickerSpan::ReportViaDpc() {
   auto cb = [span = std::move(span_),
              finished_at = ReadSteadyClock()]() mutable {
-    // No we cannot simply call `Span::End()` with default options here as by the
-    // time we're called (asynchronously via DPC), an undetermined time period
-    // has passed and `End()` would otherwise capture "now" as the finish time.
-    // Use the time point recorded when `ReportViaDpc()` was called instead.
+    // No we cannot simply call `Span::End()` with default options here as by
+    // the time we're called (asynchronously via DPC), an undetermined time
+    // period has passed and `End()` would otherwise capture "now" as the finish
+    // time. Use the time point recorded when `ReportViaDpc()` was called
+    // instead.
     otel::trace::EndSpanOptions options;
     options.end_steady_time = otel::common::SteadyTimestamp(finished_at);
     span->End(options);

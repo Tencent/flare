@@ -68,18 +68,18 @@ std::string AttrToString(const otel::common::AttributeValue& v) {
 // everything, so it can't be asserted on.)
 class DummySpan : public otel::trace::Span {
  public:
-  void SetAttribute(otel::nostd::string_view key,
-                    const otel::common::AttributeValue& value) noexcept
-      override {
+  void SetAttribute(
+      otel::nostd::string_view key,
+      const otel::common::AttributeValue& value) noexcept override {
     tags.push_back({std::string(key.data(), key.size()), AttrToString(value)});
   }
 
   void AddEvent(otel::nostd::string_view) noexcept override {}
   void AddEvent(otel::nostd::string_view,
                 otel::common::SystemTimestamp) noexcept override {}
-  void AddEvent(otel::nostd::string_view name, otel::common::SystemTimestamp,
-                const otel::common::KeyValueIterable& attributes) noexcept
-      override {
+  void AddEvent(
+      otel::nostd::string_view name, otel::common::SystemTimestamp,
+      const otel::common::KeyValueIterable& attributes) noexcept override {
     attributes.ForEachKeyValue(
         [&](otel::nostd::string_view,
             otel::common::AttributeValue value) noexcept {

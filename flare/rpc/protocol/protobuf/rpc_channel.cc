@@ -787,8 +787,7 @@ tracing::QuickerSpan RpcChannel::StartTracingSpanFor(
           });
 
   // Tags are set separately for better performance.
-  span.SetStandardTag("peer.service",
-                      method->service()->full_name().c_str());
+  span.SetStandardTag("peer.service", method->service()->full_name().c_str());
   span.SetStandardTag(peer.Family() == AF_INET ? "peer.ipv4" : "peer.ipv6",
                       [peer] { return EndpointGetIp(peer); });
   span.SetStandardTag("peer.port", EndpointGetPort(peer));
