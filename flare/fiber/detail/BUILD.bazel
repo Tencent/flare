@@ -197,6 +197,7 @@ cc_test(
 cc_test(
     name = "waitable_test",
     srcs = ["waitable_test.cc"],
+    tags = ["exclusive"],  # heavy; matches blade BUILD's exclusive=True
     deps = [
         ":fiber_impl",
         "//flare/base:random",
