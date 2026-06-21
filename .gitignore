@@ -1,9 +1,10 @@
 # Blade
 /blade-bin
-/build32_debug/
-/build32_release/
-/build64_debug/
-/build64_release/
+# Build output dirs: build_<profile>[_<variant>] (current default) plus the
+# legacy build{32,64}_* names.
+/build_*/
+/build32_*/
+/build64_*/
 /build.ninja
 /.Building.lock
 /.blade.test.stamp
