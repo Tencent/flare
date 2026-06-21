@@ -76,6 +76,15 @@ struct FiberIdTraits {
 // Returns: stack bottom (lowest address) and limit of current pthread (i.e.
 // master fiber's stack).
 std::pair<const void*, std::size_t> GetMasterFiberStack() noexcept {
+#if defined(__APPLE__)
+  // macOS has no `pthread_getattr_np`. `pthread_get_stackaddr_np` returns the
+  // high end of the stack (it grows down), so the bottom (lowest address) is
+  // `stackaddr - stacksize`.
+  std::size_t limit = pthread_get_stacksize_np(pthread_self());
+  void* stack =
+      reinterpret_cast<char*>(pthread_get_stackaddr_np(pthread_self())) - limit;
+  return {stack, limit};
+#else
   pthread_attr_t self_attr;
   FLARE_PCHECK(pthread_getattr_np(pthread_self(), &self_attr) == 0);
   ScopedDeferred _(
@@ -85,6 +94,7 @@ std::pair<const void*, std::size_t> GetMasterFiberStack() noexcept {
   std::size_t limit;
   FLARE_PCHECK(pthread_attr_getstack(&self_attr, &stack, &limit) == 0);
   return {stack, limit};
+#endif
 }
 
 #endif
