@@ -72,6 +72,17 @@ class ErrorMessageFactory : public MessageFactory {
 
 class SleepyEchoService : public StreamService {
  public:
+  // While `release` is non-null and still false, `FastCall` holds its
+  // concurrency slot (rather than sleeping a fixed duration), bumping
+  // `admitted` on entry. This lets the overload tests pin exactly
+  // `max_concurrent_requests` calls in flight (waiting until `admitted` hits
+  // the cap), then release them, while the rest are dropped -- deterministic
+  // regardless of runner speed (a fixed sleep flakes when slots free
+  // mid-submit).
+  SleepyEchoService(std::atomic<std::size_t>* admitted = nullptr,
+                    std::atomic<bool>* release = nullptr)
+      : admitted_(admitted), release_(release) {}
+
   const experimental::Uuid& GetUuid() const noexcept override {
     static constexpr experimental::Uuid kUuid(
         "A810E368-9990-49FF-A1C1-F75D58E4C5B5");
@@ -90,7 +101,16 @@ class SleepyEchoService : public StreamService {
       std::unique_ptr<Message>* message,
       const FunctionView<std::size_t(const Message&)>& writer,
       Context* context) override {
-    this_fiber::SleepFor(2s);
+    if (release_) {
+      if (admitted_) {
+        admitted_->fetch_add(1, std::memory_order_release);
+      }
+      while (!release_->load(std::memory_order_acquire)) {
+        this_fiber::SleepFor(1ms);
+      }
+    } else {
+      this_fiber::SleepFor(2s);
+    }
     writer(EchoMessage((*message)->GetCorrelationId()));
     return ProcessingStatus::Processed;
   }
@@ -102,6 +122,10 @@ class SleepyEchoService : public StreamService {
   }
   void Stop() override {}
   void Join() override {}
+
+ private:
+  std::atomic<std::size_t>* admitted_;
+  std::atomic<bool>* release_;
 };
 
 class EchoService : public StreamService {
@@ -201,7 +225,10 @@ TEST(Server, OverloadTest) {
   Server server{Server::Options{.max_concurrent_requests = 100}};
 
   server.AddProtocol(&std::make_unique<EchoProtocol>);
-  server.AddNativeService(std::make_unique<SleepyEchoService>());
+  std::atomic<std::size_t> admitted = 0;
+  std::atomic<bool> release = false;
+  server.AddNativeService(
+      std::make_unique<SleepyEchoService>(&admitted, &release));
   server.ListenOn(ep);
   server.Start();
 
@@ -212,18 +239,36 @@ TEST(Server, OverloadTest) {
   CHECK(gate->Healthy());
   std::atomic<std::size_t> succeeded = 0;
   std::atomic<std::size_t> done_count = 0;
-  for (int i = 0; i != 1000; ++i) {
-    auto call_args = object_pool::Get<StreamCallGate::FastCallArgs>();
-    call_args->completion = [&](auto, auto&& p, auto) {
-      succeeded += !!p;
-      ++done_count;
-    };
-    gate->FastCall(EchoMessage(), std::move(call_args), ReadSteadyClock() + 3s);
+  auto fire = [&](int n, std::chrono::nanoseconds timeout) {
+    for (int i = 0; i != n; ++i) {
+      auto call_args = object_pool::Get<StreamCallGate::FastCallArgs>();
+      call_args->completion = [&](auto, auto&& p, auto) {
+        succeeded += !!p;
+        ++done_count;
+      };
+      gate->FastCall(EchoMessage(), std::move(call_args),
+                     ReadSteadyClock() + timeout);
+    }
+  };
+  // Fill the 100-slot cap with held calls (a long deadline, so they survive
+  // until released); wait until the cap is full; then flood the rest with a
+  // short deadline -- the cap is full, so they are all dropped. Once those have
+  // drained, release the held calls: exactly the cap's worth succeed, no extra
+  // slips into a freed slot, and nothing times out -- deterministic on any
+  // runner (a fixed handler sleep flakes when slots free mid-submit).
+  fire(100, 60s);
+  while (admitted.load() < 100) {
+    this_fiber::SleepFor(1ms);
   }
-  while (done_count != 1000) {
+  fire(1000 - 100, 1s);
+  while (done_count.load() < 1000 - 100) {
+    this_fiber::SleepFor(1ms);
   }
-  // Others are dropped.
-  ASSERT_EQ(100, succeeded.load());
+  release.store(true, std::memory_order_release);
+  while (done_count.load() < 1000) {
+    this_fiber::SleepFor(1ms);
+  }
+  EXPECT_EQ(100, succeeded.load());
   gate->Stop();
   gate->Join();
 
@@ -236,7 +281,10 @@ TEST(Server, OverloadTestNoCreateSpecialMessage) {
   Server server{Server::Options{.max_concurrent_requests = 100}};
 
   server.AddProtocol([] { return std::make_unique<EchoProtocol>(true); });
-  server.AddNativeService(std::make_unique<SleepyEchoService>());
+  std::atomic<std::size_t> admitted = 0;
+  std::atomic<bool> release = false;
+  server.AddNativeService(
+      std::make_unique<SleepyEchoService>(&admitted, &release));
   server.ListenOn(ep);
   server.Start();
 
@@ -247,18 +295,36 @@ TEST(Server, OverloadTestNoCreateSpecialMessage) {
   CHECK(gate->Healthy());
   std::atomic<std::size_t> succeeded = 0;
   std::atomic<std::size_t> done_count = 0;
-  for (int i = 0; i != 10000; ++i) {
-    auto call_args = object_pool::Get<StreamCallGate::FastCallArgs>();
-    call_args->completion = [&](auto, auto&& p, auto) {
-      succeeded += !!p;
-      ++done_count;
-    };
-    gate->FastCall(EchoMessage(), std::move(call_args), ReadSteadyClock() + 3s);
+  auto fire = [&](int n, std::chrono::nanoseconds timeout) {
+    for (int i = 0; i != n; ++i) {
+      auto call_args = object_pool::Get<StreamCallGate::FastCallArgs>();
+      call_args->completion = [&](auto, auto&& p, auto) {
+        succeeded += !!p;
+        ++done_count;
+      };
+      gate->FastCall(EchoMessage(), std::move(call_args),
+                     ReadSteadyClock() + timeout);
+    }
+  };
+  // Fill the 100-slot cap with held calls (a long deadline, so they survive
+  // until released); wait until the cap is full; then flood the rest with a
+  // short deadline -- the cap is full, so they are all dropped. Once those have
+  // drained, release the held calls: exactly the cap's worth succeed, no extra
+  // slips into a freed slot, and nothing times out -- deterministic on any
+  // runner (a fixed handler sleep flakes when slots free mid-submit).
+  fire(100, 60s);
+  while (admitted.load() < 100) {
+    this_fiber::SleepFor(1ms);
   }
-  while (done_count != 10000) {
+  fire(10000 - 100, 1s);
+  while (done_count.load() < 10000 - 100) {
+    this_fiber::SleepFor(1ms);
   }
-  // Others are dropped.
-  ASSERT_EQ(100, succeeded.load());
+  release.store(true, std::memory_order_release);
+  while (done_count.load() < 10000) {
+    this_fiber::SleepFor(1ms);
+  }
+  EXPECT_EQ(100, succeeded.load());
   gate->Stop();
   gate->Join();
 
