@@ -111,7 +111,17 @@ struct GlobalPoolDescriptor {
 };
 
 // Thread-local object cache.
-struct alignas(hardware_destructive_interference_size) LocalPoolDescriptor {
+//
+// This used to be `alignas(hardware_destructive_interference_size)` to keep the
+// hot `objects` head off neighbouring cache lines, but the only instances live
+// in thread-local storage (see `GetLocalPoolDescriptor`), and TLS does not
+// honour over-alignment (> max_align_t) on several platforms (notably darwin)
+// -- so the object was placed misaligned and every member access was UB (caught
+// by UBSan), while the intended isolation never actually happened. Dropping the
+// over-alignment removes the UB at no real cost (the placement was never
+// aligned anyway). Proper cross-thread isolation here would need a different
+// mechanism.
+struct LocalPoolDescriptor {
   // See comments on `FixedVector` for the reason why `std::vector<...>` is not
   // used here.
   FixedVector objects;
