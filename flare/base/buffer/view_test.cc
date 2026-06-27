@@ -26,6 +26,11 @@ using namespace std::literals;
 
 namespace flare {
 
+// ~1 MiB spans many buffer blocks (so the search tests still exercise the
+// cross-block path) while staying fast even when every access is instrumented
+// by a sanitizer.
+constexpr std::size_t kLargeBufferSize = 1024 * 1024;
+
 NoncontiguousBuffer MakeAToZBuffer() {
   NoncontiguousBufferBuilder nbb;
 
@@ -65,7 +70,7 @@ TEST(ForwardView, Basic) {
 }
 
 TEST(ForwardView, Search) {
-  auto buffer = CreateBufferSlow(std::string(10485760, 'a'));
+  auto buffer = CreateBufferSlow(std::string(kLargeBufferSize, 'a'));
   NoncontiguousBufferForwardView view(buffer);
   constexpr auto kFound = "aaaaaaaaaaaaaaaaaaaaaaaaaaa"sv,
                  kNotFound = "aaaaaaaaaaaaaaaaaaaaab"sv;
@@ -109,7 +114,7 @@ TEST(RandomView, Search0) {
 }
 
 TEST(RandomView, Search1) {
-  auto buffer = CreateBufferSlow(std::string(10485760, 'a'));
+  auto buffer = CreateBufferSlow(std::string(kLargeBufferSize, 'a'));
   NoncontiguousBufferRandomView view(buffer);
   constexpr auto kFound = "aaaaaaaaaaaaaaaaaaaaaaaaaaa"sv,
                  kNotFound = "aaaaaaaaaaaaaaaaaaaaab"sv;

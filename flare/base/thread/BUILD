@@ -177,5 +177,6 @@ cc_test(
   deps = [
     ':spinlock',
     ':latch',
+    '//flare/base/internal:annotation',
   ]
 )

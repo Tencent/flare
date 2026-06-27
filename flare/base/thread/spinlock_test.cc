@@ -18,16 +18,28 @@
 
 #include "gtest/gtest.h"
 
+#include "flare/base/internal/annotation.h"
 #include "flare/base/thread/latch.h"
 
 namespace flare {
 
 std::uint64_t counter{};
 
+#if defined(FLARE_INTERNAL_USE_ASAN) || defined(FLARE_INTERNAL_USE_TSAN)
+// Under ASan/TSan the spin loop is instrumented, and with 100-way contention
+// each contended acquire spins an unbounded (instrumented) number of times --
+// the original 100 x 100k run takes many minutes, well past the test timeout.
+// The cost is dominated by thread count, so cut both threads and iterations;
+// this still exercises mutual exclusion under contention.
+constexpr auto T = 8;
+constexpr auto N = 2000;
+#else
+constexpr auto T = 100;
+constexpr auto N = 100000;
+#endif
+
 TEST(Spinlock, All) {
-  constexpr auto T = 100;
-  constexpr auto N = 100000;
-  std::thread ts[100];
+  std::thread ts[T];
   Latch latch(1);
   Spinlock splk;
 

@@ -16,7 +16,9 @@
 
 #include <atomic>
 #include <chrono>
+#include <iostream>
 #include <memory>
+#include <mutex>
 #include <thread>
 
 #include "gtest/gtest.h"
@@ -50,6 +52,11 @@ void RunTest() {
     l.wait();
     t.join();
   }
+  // `Torture` runs this on 10 threads at once; `std::cout` is not safe for
+  // concurrent formatted output (the threads race the stream buffer), so
+  // serialize this one line.
+  static std::mutex cout_mutex;
+  std::scoped_lock lk(cout_mutex);
   std::cout << local_count << " " << remote_count << std::endl;
 }
 
