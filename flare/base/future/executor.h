@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include <memory>
+#include <queue>
 #include <utility>
 
 #include "flare/base/function.h"
@@ -136,12 +137,50 @@ class Executor {
   std::unique_ptr<ConcreteExecutor> impl_;
 };
 
-// An "inline" executor just invokes the jobs posted to it immediately.
+// An "inline" executor invokes the jobs posted to it immediately, on the
+// posting thread.
 //
-// Be careful not to overflow the stack if you're calling `Execute` in `job`.
+// A long `Future` continuation chain on an inline executor recurses one frame
+// per link (SetBoxed -> Execute -> action -> SetBoxed -> ...) and would
+// overflow the stack -- observable around ~10k links, and sooner under
+// AddressSanitizer, which inflates frame sizes (see FutureV2Test.Chaining).
+//
+// We keep the historical *re-entrant* (synchronous, nested) execution -- some
+// callers, notably streaming RPC, rely on a completion running its continuation
+// before control returns -- but only up to a bounded depth. Past
+// `kMaxInlineDepth` re-entrant levels, a job is queued instead of recursed and
+// drained by the outermost frame (a trampoline), so the stack stays bounded
+// while an unbounded chain still completes. Realistic chains never reach the
+// limit and behave exactly as before; only a pathologically deep chain trades
+// the deepest nesting for deferral (order within a linear chain is unchanged).
+//
+// State is `thread_local`; an inline job is assumed not to suspend a fiber
+// mid-execution (these continuations run synchronously).
 class InlineExecutor {
  public:
-  void Execute(Function<void()> job) { job(); }  // Too simple, sometimes naive.
+  void Execute(Function<void()> job) {
+    // Deep enough to cover any realistic re-entrant nesting (so semantics are
+    // unchanged in practice), shallow enough to keep stack use bounded even
+    // with ASan's inflated frames.
+    constexpr int kMaxInlineDepth = 128;
+    thread_local int depth = 0;
+    thread_local std::queue<Function<void()>> pending;
+
+    if (depth >= kMaxInlineDepth) {
+      pending.push(std::move(job));  // too deep -- defer to the drain below
+      return;
+    }
+    ++depth;
+    job();  // re-entrant: a nested Execute recurses (until the depth limit)
+    --depth;
+    if (depth == 0) {  // outermost frame: drain anything that was deferred
+      while (!pending.empty()) {
+        auto next = std::move(pending.front());
+        pending.pop();
+        next();  // runs at depth 0; may recurse up to the limit again
+      }
+    }
+  }
 };
 
 namespace detail {
