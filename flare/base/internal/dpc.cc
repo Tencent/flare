@@ -96,7 +96,7 @@ class JobQueue : public RefCounted<JobQueue> {
         last_bookkeeping_.store(now, std::memory_order_relaxed);
 
         // Reset periodically, as the thread may be migrated by the system.
-        node_id_ = numa::GetCurrentNode();
+        node_id_.store(numa::GetCurrentNode(), std::memory_order_relaxed);
       }
     });
 
@@ -143,7 +143,9 @@ class JobQueue : public RefCounted<JobQueue> {
 
   void Release() noexcept { acquired_.store(false, std::memory_order_release); }
 
-  int GetNode() const noexcept { return node_id_; }
+  int GetNode() const noexcept {
+    return node_id_.load(std::memory_order_relaxed);
+  }
 
  private:
   struct Node;
@@ -179,8 +181,10 @@ class JobQueue : public RefCounted<JobQueue> {
     Function<void()> cb;
   };
 
-  // Reset periodically.
-  int node_id_{numa::GetCurrentNode()};
+  // Reset periodically. Read by the flusher (`GetNode()`) while the owner
+  // thread updates it; a stale read only picks a less-ideal NUMA queue, so a
+  // relaxed atomic (race-free, no ordering needed) is enough.
+  std::atomic<int> node_id_{numa::GetCurrentNode()};
 
   // Last time we freed not-freed-yet nodes.
   std::atomic<std::chrono::steady_clock::duration> last_bookkeeping_{};
