@@ -185,6 +185,7 @@ cc_test(
     deps = [
         ":latch",
         ":spinlock",
+        "//flare/base/internal:annotation",
         "@com_google_googletest//:gtest_main",
     ],
 )
