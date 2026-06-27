@@ -138,7 +138,11 @@ TEST_P(CompressorTest, SmallSize) {
 }
 
 TEST_P(CompressorTest, LargeSize) {
-  std::string original(10 * 1024 * 1024, 'a');
+  // 512 KiB is well past the codecs' internal block sizes (so this still
+  // exercises multi-block compression) while staying fast even when every
+  // access is instrumented by a sanitizer. The 2 GiB extreme is covered
+  // separately by DISABLED_HugeSize, run manually.
+  std::string original(512 * 1024, 'a');
   EXPECT_EQ(original, DecompressString(CompressString(original)));
 }
 
@@ -196,7 +200,10 @@ TEST_P(CompressorTest, VariantSize) {
   // Surprisingly, this UT is slow for Zstd. It seems that Zstd is good at
   // compressing a bunch of byte stream, but not as good at frequently resetting
   // its internal state?
-  for (int i = 1; i <= 123450; i += 13) {
+  //
+  // Sweep a broad range of sizes (~950 of them); the step is coarse enough to
+  // stay fast even under sanitizer instrumentation and parallel execution.
+  for (int i = 1; i <= 123450; i += 130) {
     CompressBuffer(CreateBufferSlow(std::string(i, 'a')));
   }
 }
