@@ -118,20 +118,30 @@ def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
     # blade.cc_toolchain.tool() decided at config time.
     cc = blade.cc_toolchain.tool('cc') or 'cc'
     cxx = blade.cc_toolchain.tool('cxx') or 'c++'
+    # Pin the archiver too. blade.cc_toolchain.tool('ar') is the bare name `ar`,
+    # so an autotools package falls back to whatever `ar`/`ranlib` is first in
+    # PATH. On macOS a stray GNU/LLVM `ar` (e.g. from Homebrew binutils) there
+    # produces a GNU-format archive -- with `/` and `//` index members -- that
+    # Apple's ld then rejects at link time ("archive member '/' not a mach-o
+    # file"). Force the system BSD ar/ranlib, which emit a `__.SYMDEF` archive
+    # ld accepts. Off macOS, GNU archives are fine, so honor the toolchain ar.
+    ar = '/usr/bin/ar' if is_darwin else (blade.cc_toolchain.tool('ar') or 'ar')
+    ranlib = '/usr/bin/ranlib' if is_darwin else 'ranlib'
     configure = ('cd $OUT_DIR/%s && '
                  'LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH '
                  '%s'
-                 'CC=%s CXX=%s '
+                 'CC=%s CXX=%s AR=%s RANLIB=%s '
                  'LDFLAGS="$LDFLAGS %s" '
-                 './%s --prefix=%s %s' % (
+                 './%s --prefix=%s %s AR=%s RANLIB=%s' % (
                      source_dir,
                      lib_path_env,
                      dyld_path,
-                     cc, cxx,
+                     cc, cxx, ar, ranlib,
                      rpath_flags,
                      configure_file_name,
                      full_install_dir,
-                     configure_options))
+                     configure_options,
+                     ar, ranlib))
     if with_packages:
         for pkg in with_packages:
             pkg = pkg[1:]  # remove prefix ':'
