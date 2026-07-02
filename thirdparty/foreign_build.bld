@@ -107,10 +107,10 @@ def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
     lib_path_env = ':'.join(ld_library_path)
     # Build rpath flags so that runtime library checks (e.g. curl's configure)
     # can find the just-built shared libs without LD_LIBRARY_PATH.
-    rpath_flags = ' '.join('-Wl,-rpath,' + p for p in ld_library_path)
+    rpath_flags = ' '.join(['-Wl,-rpath,' + p for p in ld_library_path])
     is_darwin = blade.cc_toolchain.target_os == 'darwin'
-    dyld_path = ('DYLD_LIBRARY_PATH=%s:$DYLD_LIBRARY_PATH '
-                 'DYLD_FALLBACK_LIBRARY_PATH=%s:$DYLD_FALLBACK_LIBRARY_PATH ' % (
+    dyld_path = (('DYLD_LIBRARY_PATH=%s:$DYLD_LIBRARY_PATH ' +
+                  'DYLD_FALLBACK_LIBRARY_PATH=%s:$DYLD_FALLBACK_LIBRARY_PATH ') % (
                      lib_path_env, lib_path_env)) if is_darwin else ''
     # Pass CC/CXX explicitly from the resolved toolchain rather than letting
     # autoconf pick from $CC/$CXX or its own detection. Matches the cmake
@@ -127,12 +127,12 @@ def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
     # ld accepts. Off macOS, GNU archives are fine, so honor the toolchain ar.
     ar = '/usr/bin/ar' if is_darwin else (blade.cc_toolchain.tool('ar') or 'ar')
     ranlib = '/usr/bin/ranlib' if is_darwin else 'ranlib'
-    configure = ('cd $OUT_DIR/%s && '
-                 'LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH '
-                 '%s'
-                 'CC=%s CXX=%s AR=%s RANLIB=%s '
-                 'LDFLAGS="$LDFLAGS %s" '
-                 './%s --prefix=%s %s AR=%s RANLIB=%s' % (
+    configure = ('cd $OUT_DIR/%s && ' +
+                 'LD_LIBRARY_PATH=%s:$LD_LIBRARY_PATH ' +
+                 '%s' +
+                 'CC=%s CXX=%s AR=%s RANLIB=%s ' +
+                 'LDFLAGS="$LDFLAGS %s" ' +
+                 './%s --prefix=%s %s AR=%s RANLIB=%s') % (
                      source_dir,
                      lib_path_env,
                      dyld_path,
@@ -141,7 +141,7 @@ def _configure(name, package_name, source_dir, install_dir, with_packages, deps,
                      configure_file_name,
                      full_install_dir,
                      configure_options,
-                     ar, ranlib))
+                     ar, ranlib)
     if with_packages:
         for pkg in with_packages:
             pkg = pkg[1:]  # remove prefix ':'
@@ -308,9 +308,9 @@ def _cmake_generate(name, package_name, source_dir, install_dir, deps, options):
     # Align cmake to the compiler's default to avoid linker warnings.
     cmd = ' && '.join([
         'rm -fr {build_dir}', 'mkdir -p {build_dir}', 'cd {build_dir}',
-        'CXX={cxx} CC={cc} cmake {options}'
-        ' $$(if [ "$$(uname)" = "Darwin" ]; then'
-        ' echo "-DCMAKE_OSX_DEPLOYMENT_TARGET=$$(sw_vers -productVersion | cut -d. -f1).0";'
+        'CXX={cxx} CC={cc} cmake {options}' +
+        ' $$(if [ "$$(uname)" = "Darwin" ]; then' +
+        ' echo "-DCMAKE_OSX_DEPLOYMENT_TARGET=$$(sw_vers -productVersion | cut -d. -f1).0";' +
         ' fi) ../{source_dir}'
     ]).format(build_dir=build_dir, options=cmake_options,
               source_dir=source_dir, cc=cc, cxx=cxx)
@@ -405,10 +405,13 @@ def cmake_cc_library(name,
                      install_dir='',
                      include_dir='include',
                      strip_include_prefix='',
+                     deps=[],
+                     with_packages=[],
                      verbose=False):
     target_build = name + '_build'
     cmake_build(name=target_build,
-                package_name=package_name,
+                package_name=name,
+                source_package=source_package,
                 source_dir=source_dir,
                 deps=deps,
                 lib_names=[name],
