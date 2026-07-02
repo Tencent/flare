@@ -33,8 +33,8 @@ def _make_protoc_cmd(srcs, deps):
                                           'protobuf_incs')
     plugin = 'flare/rpc/protocol/protobuf/plugin/v2_plugin'
     # FIXME: Use `direct_dependencies` to check missing deps.
-    cmd = ('%s --proto_path=. %s -I=`dirname $SRCS` '
-           '--plugin=protoc-gen-flare_rpc=$BUILD_DIR/%s '
+    cmd = ('%s --proto_path=. %s -I=`dirname $SRCS` ' +
+           '--plugin=protoc-gen-flare_rpc=$BUILD_DIR/%s ' +
            '--flare_rpc_out=$BUILD_DIR $SRCS') % (protoc, ' '.join(
                ['-I=%s' % x for x in protobuf_incs]), plugin)
     return cmd
@@ -46,16 +46,15 @@ def cc_flare_library(name, srcs, deps, visibility=None, keep_deps=None):
     In order to access Protocol Buffers messages (`xxx.pb.*`), you should
     specify the correpsonding `proto_library` target in `deps`."""
 
-    if deps is None:
+    if deps == None:
         deps = []
     elif isinstance(deps, str):
         deps = [deps]
 
     src_prefix = ''
     if isinstance(srcs, list):
-        assert len(
-            srcs
-        ) == 1, '`cc_flare_library` can only accept a single `.proto` file.'
+        if len(srcs) != 1:
+            fail('`cc_flare_library` can only accept a single `.proto` file.')
         src_prefix = srcs[0]
     else:
         src_prefix = srcs
