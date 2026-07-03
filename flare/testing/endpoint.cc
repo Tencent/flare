@@ -27,9 +27,13 @@ bool IsPortAvaliable(uint16_t port, int type) {
   if (sock.Get() < 0) {
     return false;
   }
-  int reuse_flag = 1;
-  FLARE_PCHECK(setsockopt(sock.Get(), SOL_SOCKET, SO_REUSEADDR, &reuse_flag,
-                          sizeof(reuse_flag)) == 0);
+  // Deliberately do NOT set SO_REUSEADDR here. This is an availability probe,
+  // so it must see the port exactly as a fresh server bind would. With
+  // SO_REUSEADDR the probe can bind 0.0.0.0:port even while a concurrent test's
+  // server already holds 127.0.0.1:port, falsely reporting the port free and
+  // causing the caller's real bind to fail with EADDRINUSE under parallel test
+  // execution. Without it, an occupied port is correctly rejected and the
+  // caller retries another random port.
   auto ep = EndpointFromIpv4("0.0.0.0", port);
   return bind(sock.Get(), ep.Get(), ep.Length()) == 0;
 }
