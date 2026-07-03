@@ -110,8 +110,8 @@ std::atomic<std::uint64_t> next_callback_id = 1;
 // (and other globals) can call `DeleteThreadOutOfDutyCallback` during static
 // destruction, which locks this ThreadLocal's internal mutex. If `tls_queues`
 // were a plain static it might already be destroyed by then -> `std::mutex::
-// lock()` throws EINVAL ("mutex lock failed") at exit. Never destroying it keeps
-// that lock valid for the whole process lifetime.
+// lock()` throws EINVAL ("mutex lock failed") at exit. Never destroying it
+// keeps that lock valid for the whole process lifetime.
 NeverDestroyed<ThreadLocal<ThreadLocalQueue>> tls_queues;
 
 GlobalQueue* GetGlobalQueue() {
