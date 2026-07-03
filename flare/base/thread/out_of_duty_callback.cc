@@ -106,7 +106,13 @@ struct GlobalQueue {
 
 std::atomic<std::uint64_t> next_callback_id = 1;
 
-ThreadLocal<ThreadLocalQueue> tls_queues;
+// Leaked on purpose (like `GetGlobalQueue` below): a static `MonitoredTimer`
+// (and other globals) can call `DeleteThreadOutOfDutyCallback` during static
+// destruction, which locks this ThreadLocal's internal mutex. If `tls_queues`
+// were a plain static it might already be destroyed by then -> `std::mutex::
+// lock()` throws EINVAL ("mutex lock failed") at exit. Never destroying it
+// keeps that lock valid for the whole process lifetime.
+NeverDestroyed<ThreadLocal<ThreadLocalQueue>> tls_queues;
 
 GlobalQueue* GetGlobalQueue() {
   static NeverDestroyed<GlobalQueue> queue;
@@ -157,7 +163,7 @@ void DeleteThreadOutOfDutyCallback(std::uint64_t handle) {
   }
 
   // And then sweep thread-locally cached queues.
-  tls_queues.ForEach([&](ThreadLocalQueue* queue) {
+  tls_queues->ForEach([&](ThreadLocalQueue* queue) {
     std::scoped_lock _(*queue->lock.really_slow_side());
     queue->callbacks.EraseIf([&](auto&& e) { return e.id == handle; });
   });
@@ -169,7 +175,7 @@ void DeleteThreadOutOfDutyCallback(std::uint64_t handle) {
 
 void NotifyThreadOutOfDutyCallbacks() {
   auto now = ReadCoarseSteadyClock();
-  auto&& tls_queue = tls_queues.Get();
+  auto&& tls_queue = tls_queues->Get();
   auto&& global_queue = GetGlobalQueue();
 
   std::scoped_lock _(*tls_queue->lock.blessed_side());
